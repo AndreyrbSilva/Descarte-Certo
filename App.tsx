@@ -1,10 +1,6 @@
 import "./src/lib/globals.css";
-import { Text, View } from "react-native";
+import { AppNavigator } from "./src/app/index";
 
 export default function App() {
-  return (
-    <View className="flex-1 items-center justify-center bg-white">
-      <Text className="text-2xl font-bold text-primary">DescarteCerto 🌱</Text>
-    </View>
-  );
+  return <AppNavigator />;
 }
