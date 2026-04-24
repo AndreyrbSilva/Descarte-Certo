@@ -54,7 +54,7 @@ export function RegisterScreen() {
       >
         {/* HEADER */}
         <Animated.View style={[styles.header, { opacity: anim.headerOpacity }]}>
-          <TouchableOpacity style={styles.backBtn} onPress={() => navigation.goBack()}>
+          <TouchableOpacity style={styles.backBtn} onPress={() => navigation.navigate("Login")}>
             <Text style={styles.backArrow}>←</Text>
           </TouchableOpacity>
           <View style={styles.headerContent}>

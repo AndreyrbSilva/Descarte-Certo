@@ -63,4 +63,21 @@ export const styles = StyleSheet.create({
   dividerText:  { fontSize: 13 },
   registerBtn:  { borderWidth: 1.5, borderRadius: 14, paddingVertical: 15, alignItems: "center" },
   registerBtnText: { fontSize: 15, fontWeight: "700", letterSpacing: 0.5 },
+  successBanner: {
+    marginTop: 14,
+    paddingVertical: 10,
+    paddingHorizontal: 14,
+    backgroundColor: "#dcfce7",
+    borderRadius: 10,
+    borderLeftWidth: 4,
+    borderLeftColor: "#22c55e",
+    flexDirection: "row",
+    alignItems: "center",
+  },
+  successBannerText: {
+    color: "#15803d",
+    fontSize: 13,
+    fontWeight: "600",
+    flexShrink: 1,
+  },
 });

@@ -1,11 +1,11 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import * as NavigationBar from "expo-navigation-bar";
 import {
   View, Text, TextInput, TouchableOpacity,
   Animated, Dimensions, KeyboardAvoidingView,
   Platform, ScrollView, Switch,
 } from "react-native";
-import { useNavigation } from "@react-navigation/native";
+import { useNavigation, useRoute } from "@react-navigation/native";
 
 import { GREEN }               from "../../constants/theme";
 import { IconHash, IconLock, IconEye } from "../../components/icons";
@@ -15,6 +15,36 @@ import { styles }              from "./loginStyles";
 
 export function LoginScreen() {
   const navigation = useNavigation<any>();
+  const route      = useRoute<any>();
+  const fromRegister = route.params?.registered === true;
+
+  const bannerOpacity = useRef(new Animated.Value(0)).current;
+  const [showBanner, setShowBanner] = useState(false);
+
+  useEffect(() => {
+    if (!fromRegister) return;
+
+    setShowBanner(true);
+
+    // Fade in
+    Animated.timing(bannerOpacity, {
+      toValue: 1,
+      duration: 400,
+      useNativeDriver: true,
+    }).start();
+
+    // Após 4s, fade out e remove
+    const timer = setTimeout(() => {
+      Animated.timing(bannerOpacity, {
+        toValue: 0,
+        duration: 500,
+        useNativeDriver: true,
+      }).start(() => setShowBanner(false));
+    }, 4000);
+
+    return () => clearTimeout(timer);
+  }, [fromRegister]);
+
   const colors     = useThemeColors();
   const anim       = useLoginAnimations();
 
@@ -141,6 +171,15 @@ export function LoginScreen() {
           <TouchableOpacity style={styles.loginBtn} onPress={() => navigation.replace("Home")} activeOpacity={0.85}>
             <Text style={styles.loginBtnText}>ENTRAR</Text>
           </TouchableOpacity>
+
+          {/* Banner de cadastro concluído */}
+          {showBanner && (
+            <Animated.View style={[styles.successBanner, { opacity: bannerOpacity }]}>
+              <Text style={styles.successBannerText}>
+                ✓ Cadastro realizado! Entre com suas credenciais.
+              </Text>
+            </Animated.View>
+          )}
 
           {/* Divider */}
           <View style={styles.divider}>
