@@ -8,7 +8,7 @@ import {
 import { useNavigation } from "@react-navigation/native";
 
 import { GREEN }               from "../../constants/theme";
-import { IconMail, IconLock, IconEye } from "../../components/icons";
+import { IconHash, IconLock, IconEye } from "../../components/icons";
 import { useLoginAnimations }  from "../../hooks/useLoginAnimations";
 import { useThemeColors }      from "../../hooks/useThemeColors";
 import { styles }              from "./loginStyles";
@@ -79,7 +79,7 @@ export function LoginScreen() {
               backgroundColor: colors.inputBg,
               borderColor: emailFocus ? GREEN : colors.inputBorder,
             }]}>
-              <IconMail color={emailFocus ? GREEN : colors.iconColor} />
+              <IconHash color={emailFocus ? GREEN : colors.iconColor} />
               <TextInput
                 style={[styles.input, { color: colors.textColor }]}
                 placeholder="Ex: 1234"
