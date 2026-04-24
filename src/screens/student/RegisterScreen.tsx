@@ -9,7 +9,7 @@ import {
 import { useNavigation, useRoute } from "@react-navigation/native";
 
 import { GREEN }                  from "../../constants/theme";
-import { IconMail, IconLock, IconUser, IconHash, IconBook } from "../../components/icons";
+import { IconMail, IconLock, IconUser, IconHash, IconBook, IconEye } from "../../components/icons";
 import { useRegisterAnimations }  from "../../hooks/useRegisterAnimations";
 import { useRegisterColors }      from "../../hooks/useRegisterColors";
 import { styles }                 from "./registerStyles";
@@ -146,10 +146,14 @@ export function RegisterScreen() {
                 onFocus={() => setSenhaFocus(true)}
                 onBlur={() => setSenhaFocus(false)}
               />
-              <TouchableOpacity onPress={() => setShowPass(!showPass)} hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}>
-                <Text style={{ color: senhaFocus ? GREEN : colors.iconColor, fontSize: 12 }}>
-                  {showPass ? "OCULTAR" : "MOSTRAR"}
-                </Text>
+              <TouchableOpacity
+                onPress={() => setShowPass(!showPass)}
+                hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+              >
+                <IconEye
+                  color={senhaFocus ? GREEN : colors.iconColor}
+                  off={!showPass}
+                />
               </TouchableOpacity>
             </View>
           </View>
