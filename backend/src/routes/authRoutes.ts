@@ -3,5 +3,17 @@ import { register, login } from "../controllers/authController";
 
 export async function authRoutes(app: FastifyInstance) {
   app.post("/auth/register", register);
-  app.post("/auth/login", login);
+
+  // 5 tentativas/min por IP
+  app.post("/auth/login", {
+    config: {
+      rateLimit: {
+        max: 5,
+        timeWindow: "1 minute",
+        errorResponseBuilder: () => ({
+          error: "Muitas tentativas de login. Aguarde 1 minuto e tente novamente.",
+        }),
+      },
+    },
+  }, login);
 }

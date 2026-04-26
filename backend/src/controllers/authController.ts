@@ -7,10 +7,9 @@ import { prisma } from "../lib/prisma";
 const JWT_SECRET = process.env.JWT_SECRET ?? "changeme";
 
 function normalizeTurma(raw: string): string {
-  // Remove espaços e º, pega só o dígito e a letra
   const clean = raw.replace(/[º\s]/g, "");
   const match  = clean.match(/^(\d)([A-Za-z])$/);
-  if (!match) return raw; // deixa passar pro Zod rejeitar
+  if (!match) return raw;
   return `${match[1]}${match[2].toUpperCase()}`;
 }
 
@@ -20,7 +19,7 @@ function isPasswordMedium(pass: string): boolean {
   const hasNumber = /[0-9]/.test(pass);
   const hasSpecial= /[^A-Za-z0-9]/.test(pass);
   const score = (hasUpper ? 1 : 0) + (hasNumber ? 1 : 0) + (hasSpecial ? 1 : 0);
-  return score >= 1; // mínimo médio = 6 chars + pelo menos 1 critério extra
+  return score >= 1;
 }
 
 const registerSchema = z.object({
