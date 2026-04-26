@@ -33,7 +33,7 @@ export function LoginScreen() {
     try {
       setLoading(true);
       setError("");
-      await loginUser({ matricula, password });
+      await loginUser({ matricula, password, rememberMe });
       navigation.replace("Home");
     } catch (err: any) {
       const msg = err.response?.data?.error ?? "Erro ao entrar. Tente novamente.";
@@ -182,7 +182,7 @@ export function LoginScreen() {
                   style={styles.switch}
                 />
               </Animated.View>
-              <Text style={[styles.rememberText, { color: colors.labelColor }]}>Lembrar-me</Text>
+              <Text style={[styles.rememberText, { color: colors.labelColor }]}>Me manter conectado</Text>
             </View>
             <TouchableOpacity>
               <Text style={styles.forgotText}>Esqueci a senha</Text>

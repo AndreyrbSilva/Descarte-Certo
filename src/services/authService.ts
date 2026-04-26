@@ -1,4 +1,5 @@
 import * as SecureStore from "expo-secure-store";
+import { useAuthStore } from "../store/useAuthStore";
 import { api } from "./api";
 
 export async function registerUser(data: {
@@ -15,13 +16,21 @@ export async function registerUser(data: {
 export async function loginUser(data: {
   matricula: string;
   password: string;
+  rememberMe: boolean;
 }) {
   const response = await api.post("/auth/login", data);
   const { token, user } = response.data;
-  await SecureStore.setItemAsync("token", token);
+
+  if (data.rememberMe) {
+    await SecureStore.setItemAsync("token", token);
+    await SecureStore.setItemAsync("user", JSON.stringify(user));
+  }
+  useAuthStore.getState().setAuth(user, token);
   return { token, user };
 }
 
 export async function logout() {
   await SecureStore.deleteItemAsync("token");
+  await SecureStore.deleteItemAsync("user");
+  useAuthStore.getState().clearAuth();
 }

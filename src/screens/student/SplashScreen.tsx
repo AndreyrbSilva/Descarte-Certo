@@ -6,16 +6,34 @@ import { useNavigation } from "@react-navigation/native";
 import { useSplashAnimations } from "../../hooks/useSplashAnimations";
 import { useSplashColors }     from "../../hooks/useSplashColors";
 import { styles }              from "./splashStyles";
+import * as SecureStore from "expo-secure-store";
+import { useAuthStore }  from "../../store/useAuthStore";
 
 export function SplashScreen() {
   const navigation = useNavigation<any>();
   const colors     = useSplashColors();
-  const anim       = useSplashAnimations(() => navigation.replace("Login"));
 
   useEffect(() => {
     NavigationBar.setBackgroundColorAsync(colors.bgColor);
     NavigationBar.setButtonStyleAsync("dark");
   }, []);
+
+  const setAuth = useAuthStore((s) => s.setAuth);
+
+  async function checkSession() {
+    const token = await SecureStore.getItemAsync("token");
+    const userRaw = await SecureStore.getItemAsync("user");
+
+    if (token && userRaw) {
+      const user = JSON.parse(userRaw);
+      useAuthStore.getState().setAuth(user, token);
+      navigation.replace("Home");
+    } else {
+      navigation.replace("Login");
+    }
+  }
+
+  const anim = useSplashAnimations(() => checkSession());
 
   return (
     <Animated.View style={[styles.root, { backgroundColor: colors.bgColor, opacity: anim.screenOpacity }]}>

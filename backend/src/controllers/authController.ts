@@ -30,7 +30,9 @@ export async function register(req: FastifyRequest, reply: FastifyReply) {
 export async function login(req: FastifyRequest, reply: FastifyReply) {
   const { matricula, password } = req.body as any;
 
-  const user = await prisma.user.findUnique({ where: { matricula } });
+  const user = await prisma.user.findFirst({
+    where: { matricula: { endsWith: matricula } },
+  });
 
   if (!user) {
     return reply.status(401).send({ error: "Matrícula ou senha inválidos." });
