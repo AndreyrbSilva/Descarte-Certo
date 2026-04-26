@@ -30,7 +30,13 @@ export async function loginUser(data: {
 }
 
 export async function logout() {
+  try {
+    await api.post("/auth/logout");
+  } catch {
+    // ignora erro de rede ou token inválido,importante é limpar localmente
+  }
   await SecureStore.deleteItemAsync("token");
   await SecureStore.deleteItemAsync("user");
   useAuthStore.getState().clearAuth();
 }
+

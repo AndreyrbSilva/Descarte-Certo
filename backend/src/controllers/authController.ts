@@ -4,6 +4,7 @@ import jwt from "jsonwebtoken";
 import { z } from "zod";
 import { prisma } from "../lib/prisma";
 import { encrypt, decrypt } from "../lib/crypto";
+import { blacklistToken, isBlacklisted } from "../lib/blacklist";
 
 const JWT_SECRET = process.env.JWT_SECRET ?? "changeme";
 
@@ -109,4 +110,28 @@ export async function login(req: FastifyRequest, reply: FastifyReply) {
   );
 
   return reply.send({ token, user: { id: user.id, name: user.name, email: user.email } });
+}
+
+export async function logout(req: FastifyRequest, reply: FastifyReply) {
+  const authHeader = req.headers.authorization;
+
+  if (!authHeader?.startsWith("Bearer ")) {
+    return reply.status(401).send({ error: "Token não fornecido." });
+  }
+
+  const token = authHeader.split(" ")[1];
+
+  try {
+    jwt.verify(token, JWT_SECRET);
+  } catch {
+    return reply.send({ message: "Logout realizado com sucesso." });
+  }
+
+  const blocked = await isBlacklisted(token);
+  if (blocked) {
+    return reply.status(401).send({ error: "Sessão encerrada. Faça login novamente." });
+  }
+
+  await blacklistToken(token);
+  return reply.send({ message: "Logout realizado com sucesso." });
 }
