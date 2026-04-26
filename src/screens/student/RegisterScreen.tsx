@@ -1,6 +1,5 @@
 import { registerUser } from "../../services/authService";
-import { useState } from "react";
-import { useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import * as NavigationBar from "expo-navigation-bar";
 import {
   View, Text, TextInput, TouchableOpacity,
@@ -14,6 +13,29 @@ import { IconMail, IconLock, IconUser, IconHash, IconBook, IconEye } from "../..
 import { useRegisterAnimations }  from "../../hooks/useRegisterAnimations";
 import { useRegisterColors }      from "../../hooks/useRegisterColors";
 import { styles }                 from "./registerStyles";
+
+type PasswordLevel = {
+  level: number;
+  label: string;
+  emoji: string;
+  color: string;
+};
+
+function getPasswordStrength(pass: string): PasswordLevel {
+  if (pass.length === 0) return { level: 0, label: "",              emoji: "",   color: "transparent" };
+  if (pass.length < 4)   return { level: 1, label: "Fraquinha...",  emoji: "😴", color: "#ef4444" };
+
+  let score = 0;
+  if (pass.length >= 6)           score++;
+  if (/[A-Z]/.test(pass))        score++;
+  if (/[0-9]/.test(pass))        score++;
+  if (/[^A-Za-z0-9]/.test(pass)) score++;
+
+  if (score <= 1) return { level: 2, label: "Tá fraca ainda!", emoji: "😬", color: "#f97316" };
+  if (score === 2) return { level: 3, label: "Ficando boa!",   emoji: "😊", color: "#eab308" };
+  if (score === 3) return { level: 4, label: "Muito boa!",     emoji: "💪", color: "#22c55e" };
+  return              { level: 5, label: "Impossível!",     emoji: "🔥", color: "#8b5cf6" };
+}
 
 export function RegisterScreen() {
   const navigation = useNavigation<any>();
@@ -33,12 +55,37 @@ export function RegisterScreen() {
   const [emailFocus,     setEmailFocus]     = useState(false);
   const [senhaFocus,     setSenhaFocus]     = useState(false);
   const [turmaFocus,     setTurmaFocus]     = useState(false);
-  const [loading, setLoading] = useState(false);
-  const [error, setError]     = useState("");
+  const [loading,        setLoading]        = useState(false);
+  const [error,          setError]          = useState("");
+
+  const barAnim  = useRef(new Animated.Value(0)).current;
+  const strength = getPasswordStrength(senha);
+
+  useEffect(() => {
+    Animated.spring(barAnim, {
+      toValue: strength.level / 5,
+      tension: 80,
+      friction: 8,
+      useNativeDriver: false,
+    }).start();
+  }, [senha]);
+
+  useEffect(() => {
+    NavigationBar.setBackgroundColorAsync("#22c55e");
+    NavigationBar.setButtonStyleAsync("light");
+  }, []);
+
+  const isPasswordWeak = senha.length > 0 && strength.level < 3;
+  const registered     = route.params?.registered;
 
   async function handleRegister() {
     if (!nome || !matricula || !email || !senha || !turma) {
       setError("Preencha todos os campos.");
+      return;
+    }
+
+    if (strength.level < 3) {
+      setError("Sua senha tá fraquinha! Tente deixar ela mais forte 💪");
       return;
     }
 
@@ -54,14 +101,6 @@ export function RegisterScreen() {
       setLoading(false);
     }
   }
-
-  useEffect(() => {
-    NavigationBar.setBackgroundColorAsync("#22c55e");
-    NavigationBar.setButtonStyleAsync("light");
-  }, []);
-
-  // Mensagem de sucesso vinda da RegisterSuccessScreen
-  const registered = route.params?.registered;
 
   return (
     <KeyboardAvoidingView
@@ -91,7 +130,6 @@ export function RegisterScreen() {
           opacity: anim.cardOpacity,
           transform: [{ translateY: anim.cardAnim }],
         }]}>
-
           <Text style={[styles.cardTitle,    { color: colors.textColor }]}>Cadastro</Text>
           <Text style={[styles.cardSubtitle, { color: colors.subTextColor }]}>
             {registered
@@ -172,12 +210,32 @@ export function RegisterScreen() {
                 onPress={() => setShowPass(!showPass)}
                 hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
               >
-                <IconEye
-                  color={senhaFocus ? GREEN : colors.iconColor}
-                  off={!showPass}
-                />
+                <IconEye color={senhaFocus ? GREEN : colors.iconColor} off={!showPass} />
               </TouchableOpacity>
             </View>
+
+            {/* Barra de força */}
+            {senha.length > 0 && (
+              <View style={{ marginTop: 10 }}>
+                <View style={styles.strengthTrack}>
+                  <Animated.View style={[styles.strengthBar, {
+                    width: barAnim.interpolate({
+                      inputRange:  [0, 1],
+                      outputRange: ["0%", "100%"],
+                    }),
+                    backgroundColor: strength.color,
+                  }]} />
+                </View>
+                <View style={styles.strengthRow}>
+                  <Text style={[styles.strengthLabel, { color: strength.color }]}>
+                    {strength.emoji}  {strength.label}
+                  </Text>
+                  {isPasswordWeak && (
+                    <Text style={styles.strengthHint}>mínimo: média</Text>
+                  )}
+                </View>
+              </View>
+            )}
           </View>
 
           {/* Turma */}

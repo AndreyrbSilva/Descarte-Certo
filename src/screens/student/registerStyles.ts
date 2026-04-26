@@ -75,4 +75,28 @@ export const styles = StyleSheet.create({
   loginRow:    { flexDirection: "row", justifyContent: "center", marginTop: 24, gap: 4 },
   loginText:   { fontSize: 13 },
   loginLink:   { fontSize: 13, fontWeight: "700", color: GREEN },
+  strengthTrack: {
+    height: 6,
+    backgroundColor: "#555",
+    borderRadius: 3,
+    overflow: "hidden",
+  },
+  strengthBar: {
+    height: "100%",
+    borderRadius: 3,
+  },
+  strengthRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    marginTop: 6,
+  },
+  strengthLabel: {
+    fontSize: 12,
+    fontWeight: "700",
+  },
+  strengthHint: {
+    fontSize: 11,
+    color: "#94a3b8",
+  },
 });
