@@ -4,6 +4,7 @@ import { SplashScreen } from "../screens/student/SplashScreen";
 import { LoginScreen } from "../screens/student/LoginScreen";
 import { RegisterScreen } from "../screens/student/RegisterScreen";
 import { RegisterSuccessScreen } from "../screens/student/RegisterSuccessScreen";
+import { HomeScreen } from "../screens/student/HomeScreen";
 
 const Stack = createNativeStackNavigator();
 
@@ -20,11 +21,16 @@ export function AppNavigator() {
         <Stack.Screen
           name="Register"
           component={RegisterScreen}
-          options={{ animation: "slide_from_bottom" }}  // <- entra suave por baixo
+          options={{ animation: "slide_from_bottom" }}
         />
         <Stack.Screen
           name="RegisterSuccess"
           component={RegisterSuccessScreen}
+          options={{ animation: "fade" }}
+        />
+        <Stack.Screen 
+          name="Home"
+          component={HomeScreen} 
           options={{ animation: "fade" }}
         />
       </Stack.Navigator>

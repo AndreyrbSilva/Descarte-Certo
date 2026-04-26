@@ -1,3 +1,4 @@
+import { registerUser } from "../../services/authService";
 import { useState } from "react";
 import { useEffect } from "react";
 import * as NavigationBar from "expo-navigation-bar";
@@ -32,6 +33,27 @@ export function RegisterScreen() {
   const [emailFocus,     setEmailFocus]     = useState(false);
   const [senhaFocus,     setSenhaFocus]     = useState(false);
   const [turmaFocus,     setTurmaFocus]     = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [error, setError]     = useState("");
+
+  async function handleRegister() {
+    if (!nome || !matricula || !email || !senha || !turma) {
+      setError("Preencha todos os campos.");
+      return;
+    }
+
+    try {
+      setLoading(true);
+      setError("");
+      await registerUser({ name: nome, matricula, email, password: senha, turma });
+      navigation.replace("RegisterSuccess");
+    } catch (err: any) {
+      const msg = err.response?.data?.error ?? "Erro ao criar conta. Tente novamente.";
+      setError(msg);
+    } finally {
+      setLoading(false);
+    }
+  }
 
   useEffect(() => {
     NavigationBar.setBackgroundColorAsync("#22c55e");
@@ -175,13 +197,23 @@ export function RegisterScreen() {
             </View>
           </View>
 
+          {/* Erro */}
+          {error !== "" && (
+            <Text style={{ color: "red", textAlign: "center", marginBottom: 8 }}>
+              {error}
+            </Text>
+          )}
+
           {/* Botão */}
           <TouchableOpacity
-            style={styles.registerBtn}
-            onPress={() => navigation.replace("RegisterSuccess")}
+            style={[styles.registerBtn, loading && { opacity: 0.7 }]}
+            onPress={handleRegister}
+            disabled={loading}
             activeOpacity={0.85}
           >
-            <Text style={styles.registerBtnText}>CRIAR CONTA</Text>
+            <Text style={styles.registerBtnText}>
+              {loading ? "CRIANDO..." : "CRIAR CONTA"}
+            </Text>
           </TouchableOpacity>
 
           {/* Link pro login */}

@@ -1,3 +1,4 @@
+import { loginUser } from "../../services/authService";
 import { useState, useEffect, useRef } from "react";
 import * as NavigationBar from "expo-navigation-bar";
 import {
@@ -20,6 +21,27 @@ export function LoginScreen() {
 
   const bannerOpacity = useRef(new Animated.Value(0)).current;
   const [showBanner, setShowBanner] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [error, setError]     = useState("");
+
+  async function handleLogin() {
+    if (!matricula || !password) {
+      setError("Preencha todos os campos.");
+      return;
+    }
+
+    try {
+      setLoading(true);
+      setError("");
+      await loginUser({ matricula, password });
+      navigation.replace("Home");
+    } catch (err: any) {
+      const msg = err.response?.data?.error ?? "Erro ao entrar. Tente novamente.";
+      setError(msg);
+    } finally {
+      setLoading(false);
+    }
+  }
 
   useEffect(() => {
     if (!fromRegister) return;
@@ -167,9 +189,23 @@ export function LoginScreen() {
             </TouchableOpacity>
           </View>
 
-          {/* Botão entrar */}
-          <TouchableOpacity style={styles.loginBtn} onPress={() => navigation.replace("Home")} activeOpacity={0.85}>
-            <Text style={styles.loginBtnText}>ENTRAR</Text>
+          {/* Erro */}
+          {error !== "" && (
+            <Text style={{ color: "red", textAlign: "center", marginBottom: 8 }}>
+              {error}
+            </Text>
+          )}
+
+          {/* Botão */}
+          <TouchableOpacity
+            style={[styles.loginBtn, loading && { opacity: 0.7 }]}
+            onPress={handleLogin}
+            disabled={loading}
+            activeOpacity={0.85}
+          >
+            <Text style={styles.loginBtnText}>
+              {loading ? "ENTRANDO..." : "ENTRAR"}
+            </Text>
           </TouchableOpacity>
 
           {/* Banner de cadastro concluído */}
