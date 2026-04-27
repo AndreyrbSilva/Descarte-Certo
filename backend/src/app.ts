@@ -2,6 +2,7 @@ import Fastify from "fastify";
 import cors from "@fastify/cors";
 import rateLimit from "@fastify/rate-limit";
 import { authRoutes } from "./routes/authRoutes";
+import { scanRoutes } from "./routes/scanRoutes";
 
 export const app = Fastify({ logger: true });
 
@@ -18,5 +19,6 @@ app.register(rateLimit, {
 });
 
 app.register(authRoutes);
+app.register(scanRoutes);
 
 app.get("/health", async () => ({ status: "ok" }));
