@@ -40,6 +40,7 @@ const CATEGORY_LABEL: Record<string, string> = {
   papel:    "Papel",
   metal:    "Metal",
   organico: "Orgânico",
+  vidro:    "Vidro",
 };
 
 function formatDate(iso: string) {

@@ -1,8 +1,8 @@
 import { api } from "./api";
 
-export type ScanCategory = "plastico" | "papel" | "metal" | "organico";
+export type ScanCategory = "plastico" | "papel" | "metal" | "organico" | "vidro";
 
-const SIMULATE_CATEGORIES: ScanCategory[] = ["plastico", "papel", "metal", "organico"];
+const SIMULATE_CATEGORIES: ScanCategory[] = ["plastico", "papel", "metal", "organico", "vidro"];
 
 export async function submitScan(imageUri?: string) {
   const category = SIMULATE_CATEGORIES[

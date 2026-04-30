@@ -17,6 +17,7 @@ const CATEGORY_LABEL: Record<string, string> = {
   papel:    "Papel 📄",
   metal:    "Metal 🥫",
   organico: "Orgânico 🍃",
+  vidro:    "Vidro 🫙",
 };
 
 const CATEGORY_TIP: Record<string, string> = {
@@ -24,6 +25,7 @@ const CATEGORY_TIP: Record<string, string> = {
   papel:    "Uma tonelada de papel reciclado salva 20 árvores!",
   metal:    "O alumínio pode ser reciclado infinitas vezes sem perder qualidade!",
   organico: "Lixo orgânico pode virar adubo e ajudar a natureza a crescer!",
+  vidro:    "O vidro pode ser reciclado infinitas vezes sem perder qualidade!",
 };
 
 const CATEGORY_BIN: Record<string, { color: string; label: string }> = {
@@ -31,6 +33,7 @@ const CATEGORY_BIN: Record<string, { color: string; label: string }> = {
   papel:    { color: "#3b82f6", label: "Lixeira Azul" },
   metal:    { color: "#eab308", label: "Lixeira Amarela" },
   organico: { color: "#92400e", label: "Lixeira Marrom" },
+  vidro:    { color: "#22c55e", label: "Lixeira Verde" },
 };
 
 export function ScanResultScreen() {

@@ -12,11 +12,12 @@ const POINTS_MAP: Record<string, number> = {
   papel:    10,
   metal:    10,
   organico: 10,
+  vidro:    10,
 };
 
 const scanSchema = z.object({
   category: z.enum(
-    ["plastico", "papel", "metal", "organico"],
+    ["plastico", "papel", "metal", "organico", "vidro"],
     { errorMap: () => ({ message: "Categoria inválida." }) }
   ),
   imageUrl: z.string().url("URL de imagem inválida.").optional(),
