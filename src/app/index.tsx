@@ -5,6 +5,8 @@ import { LoginScreen } from "../screens/student/LoginScreen";
 import { RegisterScreen } from "../screens/student/RegisterScreen";
 import { RegisterSuccessScreen } from "../screens/student/RegisterSuccessScreen";
 import { HomeScreen } from "../screens/student/HomeScreen";
+import { ScannerScreen }    from "../screens/student/ScannerScreen";
+import { ScanResultScreen } from "../screens/student/ScanResultScreen";
 
 const Stack = createNativeStackNavigator();
 
@@ -32,6 +34,24 @@ export function AppNavigator() {
           name="Home"
           component={HomeScreen} 
           options={{ animation: "fade" }}
+        />
+        <Stack.Screen
+          name="Scanner"
+          component={ScannerScreen}
+          options={{ 
+            animation: "slide_from_right", 
+            animationDuration: 250,
+            gestureEnabled: false 
+          }}
+        />
+        <Stack.Screen
+          name="ScanResult"
+          component={ScanResultScreen}
+          options={{ 
+            animation: "slide_from_right", 
+            animationDuration: 250,
+            gestureEnabled: false 
+          }}
         />
       </Stack.Navigator>
     </NavigationContainer>

@@ -11,3 +11,6 @@ export { IconTarget }  from "./IconTarget";
 export { IconBulb }    from "./IconBulb";
 export { IconRecycle } from "./IconRecycle";
 export { IconLogout }  from "./IconLogout";
+export { IconFlash } from "./IconFlash";
+export { IconFlip }  from "./IconFlip";
+export { IconCheck } from "./IconCheck";

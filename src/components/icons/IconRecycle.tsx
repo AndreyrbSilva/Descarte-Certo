@@ -1,47 +1,20 @@
-import { View, StyleSheet } from "react-native";
+import Svg, { G, Path } from "react-native-svg";
 
-export function IconRecycle({ color, size = 20 }: { color: string; size?: number }) {
-  const s = size / 20;
+export function IconRecycle({ size = 24, color = "#007f3f" }) {
   return (
-    <View style={[styles.wrap, { width: size, height: size }]}>
-      {/* Seta 1 - cima */}
-      <View style={[styles.arrow, {
-        width: 6 * s, height: 6 * s,
-        borderTopWidth: 2,
-        borderRightWidth: 2,
-        borderColor: color,
-        borderTopRightRadius: 2 * s,
-        top: 1 * s,
-        left: 7 * s,
-        transform: [{ rotate: "45deg" }],
-      }]} />
-      {/* Seta 2 - baixo esquerda */}
-      <View style={[styles.arrow, {
-        width: 6 * s, height: 6 * s,
-        borderTopWidth: 2,
-        borderRightWidth: 2,
-        borderColor: color,
-        borderTopRightRadius: 2 * s,
-        bottom: 1 * s,
-        left: 1 * s,
-        transform: [{ rotate: "165deg" }],
-      }]} />
-      {/* Seta 3 - baixo direita */}
-      <View style={[styles.arrow, {
-        width: 6 * s, height: 6 * s,
-        borderTopWidth: 2,
-        borderRightWidth: 2,
-        borderColor: color,
-        borderTopRightRadius: 2 * s,
-        bottom: 1 * s,
-        right: 1 * s,
-        transform: [{ rotate: "285deg" }],
-      }]} />
-    </View>
+    <Svg width={size} height={size} viewBox="0 0 81 80">
+      <G
+        fill={color}
+        fillRule="evenodd"
+        transform="translate(.25 0) scale(0.96875 0.98751) translate(1.7043 1.2975)"
+      >
+        <Path d="m54.962 37.281 17.138-10.262 7.678 14.835c1.855 8.105-8.309 11.079-16.47 10.596l-8.346-15.169z" />
+        <Path d="m51.067 47.877-9.013 15.95 9.013 16.173.223-6.469h8.235c3.005.26 6.899-1.711 8.346-4.573l10.572-19.408c-3.487 3.458-7.971 4.35-13.131 4.35h-13.911l-.334-6.023z" />
+        <Path d="m30.928 28.212-17.269-10.037 9.213-13.93c6.17-5.5589 13.698 1.904 17.237 9.29l-9.181 14.677z" />
+        <Path d="m42.062 26.482 18.288.157 9.732-15.749-5.751 2.945-3.997-7.2167c-1.231-2.7593-4.84-5.216-8.04-5.0942l-22.06.156c4.708 1.3773 7.663 4.8732 10.168 9.3959l6.752 12.19-5.092 3.216z" />
+        <Path d="m.44401 27.381 5.3508 4.101-5.036 9.464c-2.5181 4.365 1.8077 8.616 4.5639 10.096 2.7133 1.457 6.9243 1.63 10.859 1.577l7.082-11.357 5.35 2.839-9.285-16.878-18.885.158z" />
+        <Path d="m1.2309 49.307 11.488 20.821c2.309 2.892 6.663 3.576 11.174 3.471h12.118v-19.718l-22.977-.158c-3.5671.211-8.2359-.525-11.803-4.416z" />
+      </G>
+    </Svg>
   );
 }
-
-const styles = StyleSheet.create({
-  wrap:  { alignItems: "center", justifyContent: "center" },
-  arrow: { position: "absolute" },
-});
