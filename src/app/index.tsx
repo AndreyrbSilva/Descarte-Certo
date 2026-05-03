@@ -7,6 +7,7 @@ import { RegisterSuccessScreen } from "../screens/student/RegisterSuccessScreen"
 import { HomeScreen } from "../screens/student/HomeScreen";
 import { ScannerScreen }    from "../screens/student/ScannerScreen";
 import { ScanResultScreen } from "../screens/student/ScanResultScreen";
+import { ProfileScreen } from "../screens/student/ProfileScreen";
 
 const Stack = createNativeStackNavigator();
 
@@ -52,6 +53,11 @@ export function AppNavigator() {
             animationDuration: 250,
             gestureEnabled: false 
           }}
+        />
+        <Stack.Screen
+          name="Profile"
+          component={ProfileScreen}
+          options={{ animation: "fade", animationDuration: 250 }}
         />
       </Stack.Navigator>
     </NavigationContainer>

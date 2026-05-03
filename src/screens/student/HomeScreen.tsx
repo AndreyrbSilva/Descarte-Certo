@@ -13,7 +13,7 @@ import { useHomeColors }  from "../../hooks/useHomeColors";
 import { styles }         from "./homeStyles";
 import {
   IconTrophy, IconTrend, IconCamera,
-  IconTarget, IconBulb, IconRecycle, IconLogout,
+  IconTarget, IconBulb, IconRecycle, IconLogout, IconUser
 } from "../../components/icons";
 
 const GREEN      = "#22c55e";
@@ -153,6 +153,9 @@ export function HomeScreen() {
             <Text style={styles.headerHello}>Olá,</Text>
             <Text style={styles.headerName}>{firstName}! 👋</Text>
           </View>
+          <TouchableOpacity onPress={() => navigation.navigate("Profile")} style={[styles.logoutBtn, { marginRight: 8 }]}>
+            <IconUser color="#fff" size={18} />
+          </TouchableOpacity>
           <TouchableOpacity
             style={[styles.logoutBtn, { backgroundColor: colors.logoutBg }]}
             onPress={() => setShowLogoutModal(true)}
