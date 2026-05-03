@@ -248,7 +248,10 @@ export function ProfileScreen() {
     <View style={[styles.root, { backgroundColor: colors.bg }]}>
       <StatusBar barStyle="light-content" backgroundColor={GREEN} />
 
-      <ScrollView contentContainerStyle={styles.scroll} showsVerticalScrollIndicator={false}>
+      <ScrollView
+        contentContainerStyle={[styles.scroll, { paddingBottom: 90 }]}
+        showsVerticalScrollIndicator={false}
+      >
 
         <Animated.View style={[styles.header, { backgroundColor: GREEN, opacity: headerAnim }]}>
           <TouchableOpacity onPress={handlePickPhoto} activeOpacity={0.85} disabled={uploadingPhoto}>

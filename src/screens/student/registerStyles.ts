@@ -22,10 +22,12 @@ export const styles = StyleSheet.create({
     justifyContent: "center",
   },
   backArrow: {
-    fontSize: 22,
+    fontSize: 30,
     color: "#ffffff",
     fontWeight: "300",
+    marginTop: -10,
   },
+
   headerTitle: {
     fontSize: 22,
     fontWeight: "800",

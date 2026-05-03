@@ -1,11 +1,11 @@
-import { View, StyleSheet } from "react-native";
+import { Animated, StyleSheet } from "react-native";
 
-export function IconHome({ color, size = 20 }: { color: string; size?: number }) {
+export function IconHome({ color, size = 20 }: { color: Animated.AnimatedInterpolation<string> | string; size?: number }) {
   return (
-    <View style={[styles.wrap, { width: size, height: size }]}>
-      <View style={[styles.roof, { borderBottomColor: color }]} />
-      <View style={[styles.door, { borderColor: color }]} />
-    </View>
+    <Animated.View style={[styles.wrap, { width: size, height: size }]}>
+      <Animated.View style={[styles.roof, { borderBottomColor: color as any }]} />
+      <Animated.View style={[styles.door, { borderColor: color as any }]} />
+    </Animated.View>
   );
 }
 
@@ -15,7 +15,6 @@ const styles = StyleSheet.create({
     width: 0, height: 0,
     borderLeftWidth: 10, borderRightWidth: 10, borderBottomWidth: 8,
     borderLeftColor: "transparent", borderRightColor: "transparent",
-    marginBottom: 0,
   },
   door: {
     width: 14, height: 9,

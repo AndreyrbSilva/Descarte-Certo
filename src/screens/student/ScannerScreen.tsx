@@ -150,14 +150,14 @@ export function ScannerScreen() {
 
           {/* topo */}
           <View style={styles.topBar}>
-            <TouchableOpacity style={styles.backBtn} onPress={() => navigation.replace("Home")}>
-                <Text style={{ color: "#fff", fontSize: 18, includeFontPadding: false, textAlignVertical: "center" }}>←</Text>
+            <TouchableOpacity style={styles.backBtn} onPress={() => navigation.replace("Tabs")}>
+                <Text style={{ color: "#fff", fontSize: 30, includeFontPadding: false, textAlignVertical: "center", marginTop: -7 }}>←</Text>
             </TouchableOpacity>
             <View style={{ alignItems: "center" }}>
               <Text style={styles.topTitle}>Escanear Lixo</Text>
               <Text style={styles.topSub}>Aponte para o resíduo</Text>
             </View>
-            <View style={{ width: 40 }} />
+            <View style={{ width: 50 }} />
           </View>
 
           {/* frame de mira */}

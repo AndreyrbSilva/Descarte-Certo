@@ -1,18 +1,18 @@
-import { View, StyleSheet } from "react-native";
+import { Animated, StyleSheet } from "react-native";
 
-export function IconUser({ color }: { color: string }) {
+export function IconUser({ color, size = 20 }: { color: Animated.AnimatedInterpolation<string> | string; size?: number }) {
   return (
-    <View style={styles.wrap}>
-      <View style={[styles.head, { borderColor: color }]} />
-      <View style={[styles.body, { borderColor: color }]} />
-    </View>
+    <Animated.View style={[styles.wrap, { width: size, height: size }]}>
+      <Animated.View style={[styles.head, { borderColor: color as any }]} />
+      <Animated.View style={[styles.body, { borderColor: color as any }]} />
+    </Animated.View>
   );
 }
 
 const styles = StyleSheet.create({
   wrap: {
     width: 20, height: 20,
-    alignItems: "center", justifyContent: "center", marginRight: 10,
+    alignItems: "center", justifyContent: "center",
   },
   head: {
     width: 10, height: 10,
