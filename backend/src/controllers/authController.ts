@@ -51,6 +51,10 @@ const loginSchema = z.object({
   password: z.string().min(1, "Senha é obrigatória."),
 });
 
+const avatarSchema = z.object({
+  avatarUrl: z.string().url("URL inválida."),
+});
+
 export async function register(req: FastifyRequest, reply: FastifyReply) {
   const parsed = registerSchema.safeParse(req.body);
   if (!parsed.success) {
@@ -87,7 +91,6 @@ export async function login(req: FastifyRequest, reply: FastifyReply) {
 
   const { matricula, password } = parsed.data;
 
-  // Busca pelo sufixo descriptografando
   const allUsers = await prisma.user.findMany();
   const user = allUsers.find((u) => {
     try { return decrypt(u.matricula).endsWith(matricula); }
@@ -109,7 +112,16 @@ export async function login(req: FastifyRequest, reply: FastifyReply) {
     { expiresIn: "7d" }
   );
 
-  return reply.send({ token, user: { id: user.id, name: user.name, email: user.email } });
+  return reply.send({
+    token,
+    user: {
+      id:        user.id,
+      name:      user.name,
+      email:     user.email,
+      turma:     user.turma,
+      avatarUrl: user.avatarUrl,
+    },
+  });
 }
 
 export async function logout(req: FastifyRequest, reply: FastifyReply) {
@@ -134,4 +146,20 @@ export async function logout(req: FastifyRequest, reply: FastifyReply) {
 
   await blacklistToken(token);
   return reply.send({ message: "Logout realizado com sucesso." });
+}
+
+export async function updateAvatar(req: FastifyRequest, reply: FastifyReply) {
+  const userId = (req as any).userId;
+
+  const parsed = avatarSchema.safeParse(req.body);
+  if (!parsed.success) {
+    return reply.status(400).send({ error: parsed.error.issues[0]?.message ?? "Dados inválidos." });
+  }
+
+  const user = await prisma.user.update({
+    where: { id: userId },
+    data:  { avatarUrl: parsed.data.avatarUrl },
+  });
+
+  return reply.send({ avatarUrl: user.avatarUrl });
 }

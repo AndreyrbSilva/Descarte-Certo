@@ -21,14 +21,17 @@ export function SplashScreen() {
   const setAuth = useAuthStore((s) => s.setAuth);
 
   async function checkSession() {
-    const token = await SecureStore.getItemAsync("token");
-    const userRaw = await SecureStore.getItemAsync("user");
+    const token      = await SecureStore.getItemAsync("token");
+    const userRaw    = await SecureStore.getItemAsync("user");
+    const rememberMe = await SecureStore.getItemAsync("rememberMe");
 
-    if (token && userRaw) {
+    if (token && userRaw && rememberMe === "true") {
       const user = JSON.parse(userRaw);
       useAuthStore.getState().setAuth(user, token);
       navigation.replace("Home");
     } else {
+      await SecureStore.deleteItemAsync("token");
+      await SecureStore.deleteItemAsync("user");
       navigation.replace("Login");
     }
   }

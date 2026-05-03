@@ -1,10 +1,10 @@
 import { FastifyInstance } from "fastify";
-import { register, login, logout } from "../controllers/authController";
+import { register, login, logout, updateAvatar } from "../controllers/authController";
+import { verifyToken } from "../middlewares/authMiddleware";
 
 export async function authRoutes(app: FastifyInstance) {
   app.post("/auth/register", register);
 
-  // 5 tentativas/min por IP
   app.post("/auth/login", {
     config: {
       rateLimit: {
@@ -18,4 +18,6 @@ export async function authRoutes(app: FastifyInstance) {
   }, login);
 
   app.post("/auth/logout", logout);
+
+  app.patch("/auth/avatar", { preHandler: verifyToken }, updateAvatar);
 }
