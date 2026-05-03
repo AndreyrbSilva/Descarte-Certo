@@ -14,3 +14,6 @@ export { IconLogout }  from "./IconLogout";
 export { IconFlash } from "./IconFlash";
 export { IconFlip }  from "./IconFlip";
 export { IconCheck } from "./IconCheck";
+export { IconConfig} from "./IconConfig";
+export { IconRanking } from "./IconRanking";
+export { IconHome } from "./IconHome";

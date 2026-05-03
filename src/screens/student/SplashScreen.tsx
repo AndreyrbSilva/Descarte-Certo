@@ -28,7 +28,7 @@ export function SplashScreen() {
     if (token && userRaw && rememberMe === "true") {
       const user = JSON.parse(userRaw);
       useAuthStore.getState().setAuth(user, token);
-      navigation.replace("Home");
+      navigation.replace("Tabs");
     } else {
       await SecureStore.deleteItemAsync("token");
       await SecureStore.deleteItemAsync("user");
