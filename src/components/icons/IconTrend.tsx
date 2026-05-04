@@ -1,53 +1,20 @@
-import { View, StyleSheet } from "react-native";
+import Svg, { Path } from "react-native-svg";
 
-export function IconTrend({ color, size = 20 }: { color: string; size?: number }) {
-  const s = size / 20;
+export function IconTrend({ color = "#000", size = 24 }: { color?: string; size?: number }) {
   return (
-    <View style={[styles.wrap, { width: size, height: size }]}>
-      {/* Linha do gráfico - 3 segmentos em diagonal ascendente */}
-      <View style={[styles.seg, {
-        width: 5 * s, height: 1.5,
-        backgroundColor: color,
-        bottom: 5 * s, left: 1 * s,
-        transform: [{ rotate: "-30deg" }],
-      }]} />
-      <View style={[styles.seg, {
-        width: 5 * s, height: 1.5,
-        backgroundColor: color,
-        bottom: 8 * s, left: 6 * s,
-        transform: [{ rotate: "-30deg" }],
-      }]} />
-      <View style={[styles.seg, {
-        width: 5 * s, height: 1.5,
-        backgroundColor: color,
-        bottom: 11 * s, left: 11 * s,
-        transform: [{ rotate: "-30deg" }],
-      }]} />
-      {/* Seta no topo */}
-      <View style={[styles.arrowH, {
-        width: 4 * s, height: 1.5,
-        backgroundColor: color,
-        top: 2 * s, right: 1 * s,
-      }]} />
-      <View style={[styles.arrowV, {
-        width: 1.5, height: 4 * s,
-        backgroundColor: color,
-        top: 2 * s, right: 1 * s,
-      }]} />
-      {/* Eixo X */}
-      <View style={[styles.axis, {
-        width: 16 * s, height: 1.5,
-        backgroundColor: color,
-        bottom: 2 * s, left: 1 * s,
-      }]} />
-    </View>
+    <Svg
+      width={size}
+      height={size}
+      viewBox="0 0 24 24"
+      fill="none"
+    >
+      <Path
+        d="M21 7L14.4142 13.5858C13.6332 14.3668 12.3668 14.3668 11.5858 13.5858L10.4142 12.4142C9.63316 11.6332 8.36683 11.6332 7.58579 12.4142L3 17M21 7H15M21 7V13"
+        stroke={color}
+        strokeWidth={1.5}
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    </Svg>
   );
 }
-
-const styles = StyleSheet.create({
-  wrap:   { position: "relative", justifyContent: "center", alignItems: "center" },
-  seg:    { position: "absolute" },
-  arrowH: { position: "absolute" },
-  arrowV: { position: "absolute" },
-  axis:   { position: "absolute" },
-});

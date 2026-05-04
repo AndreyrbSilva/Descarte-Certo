@@ -133,6 +133,7 @@ export function ProfileScreen() {
   const user       = useAuthStore((s) => s.user);
   const avatarUrl  = useAuthStore((s) => s.user?.avatarUrl ?? null);
   const colors     = useProfileColors();
+  const borderColor = colors.dividerColor;
 
   const [photoUri,       setPhotoUri]       = useState<string | null>(avatarUrl);
   const [uploadingPhoto, setUploadingPhoto] = useState(false);
@@ -248,20 +249,37 @@ export function ProfileScreen() {
     <View style={[styles.root, { backgroundColor: colors.bg }]}>
       <StatusBar barStyle="light-content" backgroundColor={GREEN} />
 
-      <ScrollView contentContainerStyle={styles.scroll} showsVerticalScrollIndicator={false}>
+      <ScrollView
+        contentContainerStyle={[styles.scroll, { paddingBottom: 90 }]}
+        showsVerticalScrollIndicator={false}
+      >
 
         <Animated.View style={[styles.header, { backgroundColor: GREEN, opacity: headerAnim }]}>
           <TouchableOpacity onPress={handlePickPhoto} activeOpacity={0.85} disabled={uploadingPhoto}>
-            <View style={[styles.avatarWrap, { backgroundColor: ORANGE }]}>
-              {photoUri
-                ? <Image source={{ uri: photoUri }} style={styles.avatarImg} />
-                : <Text style={styles.avatarText}>{initial}</Text>
-              }
-              {uploadingPhoto && (
-                <View style={styles.avatarOverlay}>
-                  <ActivityIndicator color="#fff" size="small" />
-                </View>
-              )}
+            <View
+              style={{
+                width: 96,
+                height: 96,
+                borderRadius: 48,
+                borderWidth: 3,
+                borderColor: borderColor,
+                alignItems: "center",
+                marginBottom: 12,
+                justifyContent: "center",
+              }}
+            >
+              <View style={[styles.avatarWrap, { backgroundColor: ORANGE }]}>
+                {photoUri
+                  ? <Image source={{ uri: photoUri }} style={styles.avatarImg} />
+                  : <Text style={styles.avatarText}>{initial}</Text>
+                }
+
+                {uploadingPhoto && (
+                  <View style={styles.avatarOverlay}>
+                    <ActivityIndicator color="#fff" size="small" />
+                  </View>
+                )}
+              </View>
             </View>
             <View style={styles.cameraIcon}>
               <IconCamera color="#fff" size={14} />

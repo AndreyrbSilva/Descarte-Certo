@@ -24,7 +24,7 @@ export const styles = StyleSheet.create({
   topSub:     { fontSize: 12, color: "rgba(255,255,255,0.6)", marginTop: 2 },
 
   backBtn: {
-    width: 40, height: 40, borderRadius: 20,
+    width: 50, height: 50, borderRadius: 30,
     backgroundColor: "#ffffff20",
     alignItems: "center", justifyContent: "center",
   },

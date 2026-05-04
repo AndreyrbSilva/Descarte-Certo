@@ -172,7 +172,7 @@ export function ScanResultScreen() {
 
           <TouchableOpacity
             style={styles.btnPrimary}
-            onPress={() => navigation.replace("Scanner")}
+            onPress={() => navigation.navigate("Tabs", { screen: "Scanner" })}
             activeOpacity={0.85}
           >
             <Text style={styles.btnPrimaryText}>ESCANEAR MAIS</Text>
@@ -180,7 +180,7 @@ export function ScanResultScreen() {
 
           <TouchableOpacity
             style={[styles.btnSecondary, { borderColor: colors.dividerColor }]}
-            onPress={() => navigation.replace("Home")}
+            onPress={() => navigation.navigate("Tabs", { screen: "Home" })}
             activeOpacity={0.7}
           >
             <Text style={[styles.btnSecondaryText, { color: colors.textColor }]}>

@@ -34,7 +34,7 @@ export function LoginScreen() {
       setLoading(true);
       setError("");
       await loginUser({ matricula, password, rememberMe });
-      navigation.replace("Home");
+      navigation.replace("Tabs");
     } catch (err: any) {
       const msg = err.response?.data?.error ?? "Erro ao entrar. Tente novamente.";
       setError(msg);
