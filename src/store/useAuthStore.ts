@@ -9,19 +9,27 @@ interface User {
 }
 
 interface AuthState {
-  user:      User | null;
-  token:     string | null;
-  setAuth:   (user: User, token: string) => void;
-  setAvatar: (url: string) => void;
-  clearAuth: () => void;
+  user:         User | null;
+  token:        string | null;
+  streak:       number;
+  leveledUp:    boolean;
+  setAuth:      (user: User, token: string) => void;
+  setAvatar:    (url: string) => void;
+  setStreak:    (streak: number) => void;
+  setLeveledUp: (v: boolean) => void;
+  clearAuth:    () => void;
 }
 
 export const useAuthStore = create<AuthState>((set) => ({
-  user:      null,
-  token:     null,
-  setAuth:   (user, token) => set({ user, token }),
-  setAvatar: (url) => set((state) => ({
+  user:         null,
+  token:        null,
+  streak:       0,
+  leveledUp:    false,
+  setAuth:      (user, token) => set({ user, token }),
+  setAvatar:    (url) => set((state) => ({
     user: state.user ? { ...state.user, avatarUrl: url } : null,
   })),
-  clearAuth: () => set({ user: null, token: null }),
+  setStreak:    (streak) => set({ streak }),
+  setLeveledUp: (v) => set({ leveledUp: v }),
+  clearAuth:    () => set({ user: null, token: null, streak: 0, leveledUp: false }),
 }));

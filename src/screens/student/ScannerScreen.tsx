@@ -12,6 +12,7 @@ import { submitScan }        from "../../services/scanService";
 import { useScannerColors }  from "../../hooks/useScannerColors";
 import { styles, FRAME_SIZE } from "./scannerStyles";
 import { IconFlash, IconFlip, IconCheck } from "../../components/icons";
+import { useAuthStore } from "../../store/useAuthStore";
 
 const GREEN = "#22c55e";
 
@@ -22,6 +23,7 @@ export function ScannerScreen() {
   const [facing,   setFacing]  = useState<CameraType>("back");
   const [flash,    setFlash]   = useState(false);
   const [loading,  setLoading] = useState(false);
+  const previousStreak = useAuthStore((s) => s.streak);
 
   const cameraRef = useRef<CameraView>(null);
   const scanAnim  = useRef(new Animated.Value(0)).current;
@@ -109,7 +111,7 @@ export function ScannerScreen() {
       );
 
       const result = await submitScan(cropped.uri);
-      navigation.replace("ScanResult", { result, photoUri: cropped.uri });
+      navigation.replace("ScanResult", { result, photoUri: cropped.uri, previousStreak });
     } catch (err: any) {
       const msg = err.response?.data?.error ?? "Erro ao escanear. Tente novamente.";
       navigation.replace("ScanResult", { error: msg });
