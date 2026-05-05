@@ -6,13 +6,14 @@ import * as NavigationBar from "expo-navigation-bar";
 import { useNavigation } from "@react-navigation/native";
 import { useColorScheme } from "react-native";
 
-import { useAuthStore }  from "../../store/useAuthStore";
-import { fetchHomeData } from "../../services/homeService";
-import { useHomeColors } from "../../hooks/useHomeColors";
-import { styles }        from "./homeStyles";
+import { useAuthStore }     from "../../store/useAuthStore";
+import { fetchHomeData }    from "../../services/homeService";
+import { useHomeColors }    from "../../hooks/useHomeColors";
+import { getStreakColors }  from "../../hooks/streakColors";
+import { styles }           from "./homeStyles";
 import {
   IconTrophy, IconTrend, IconCamera,
-  IconTarget, IconBulb, IconRecycle, IconRanking, IconStar,
+  IconTarget, IconBulb, IconRecycle, IconRanking, IconStar, IconFlame,
 } from "../../components/icons";
 
 const GREEN  = "#22c55e";
@@ -39,6 +40,12 @@ const CATEGORY_COLOR: Record<string, string> = {
   metal: "#eab308", organico: "#92400e", vidro: GREEN,
 };
 
+function streakLabel(streak: number): string {
+  if (streak === 0) return "Comece sua sequência";
+  if (streak === 1) return "1 dia seguido";
+  return `${streak} dias seguidos`;
+}
+
 function formatDate(iso: string) {
   return new Date(iso).toLocaleDateString("pt-BR");
 }
@@ -55,12 +62,14 @@ export function HomeScreen() {
   const user       = useAuthStore((s) => s.user);
   const colors     = useHomeColors();
   const dark       = useColorScheme() === "dark";
+
   const [totalPoints,   setTotalPoints]   = useState(0);
   const [displayPoints, setDisplayPoints] = useState(0);
   const [schoolRank,    setSchoolRank]    = useState<number | null>(null);
   const [turmaRank,     setTurmaRank]     = useState<number | null>(null);
   const [lastScan,      setLastScan]      = useState<LastScan>(null);
   const [fact,          setFact]          = useState("");
+  const [streak,        setStreak]        = useState(0);
 
   const headerOpacity = useRef(new Animated.Value(0)).current;
   const card1Opacity  = useRef(new Animated.Value(0)).current;
@@ -76,8 +85,10 @@ export function HomeScreen() {
   const card5Opacity  = useRef(new Animated.Value(0)).current;
   const card5Y        = useRef(new Animated.Value(30)).current;
   const pulse         = useRef(new Animated.Value(1)).current;
-  const avatarUrl = useAuthStore((s) => s.user?.avatarUrl ?? null);
-  const borderColor = dark ? "#334155" : "#cbd5e1";
+  const flamePop      = useRef(new Animated.Value(1)).current;
+
+  const avatarUrl    = useAuthStore((s) => s.user?.avatarUrl ?? null);
+  const flameColors  = getStreakColors(streak);
 
   useEffect(() => {
     NavigationBar.setBackgroundColorAsync(colors.bg);
@@ -113,10 +124,18 @@ export function HomeScreen() {
       setSchoolRank(data.schoolRank);
       setTurmaRank(data.turmaRank);
       setLastScan(data.lastScan);
+      setStreak(data.streak);
 
-      let val  = 0;
-      const step  = Math.ceil(data.totalPoints / 40);
-      const timer = setInterval(() => {
+      if (data.streak > 0) {
+        Animated.sequence([
+          Animated.timing(flamePop, { toValue: 1.4, duration: 200, useNativeDriver: true }),
+          Animated.spring(flamePop,  { toValue: 1,   useNativeDriver: true }),
+        ]).start();
+      }
+
+      let val        = 0;
+      const step     = Math.ceil(data.totalPoints / 40);
+      const timer    = setInterval(() => {
         val += step;
         if (val >= data.totalPoints) {
           setDisplayPoints(data.totalPoints);
@@ -143,18 +162,11 @@ export function HomeScreen() {
         {/* HEADER */}
         <Animated.View style={[styles.header, { opacity: headerOpacity }]}>
           <TouchableOpacity onPress={() => navigation.navigate("Profile")} activeOpacity={0.8}>
-            <View
-              style={{
-                width: 52,
-                height: 52,
-                borderRadius: 26,
-                borderWidth: 3,
-                borderColor: colors.dividerColor,
-                alignItems: "center",
-                justifyContent: "center",
-                marginRight: 12,
-              }}
-            >
+            <View style={{
+              width: 52, height: 52, borderRadius: 26,
+              borderWidth: 3, borderColor: colors.dividerColor,
+              alignItems: "center", justifyContent: "center", marginRight: 12,
+            }}>
               {avatarUrl ? (
                 <Image source={{ uri: avatarUrl }} style={styles.avatar} />
               ) : (
@@ -165,12 +177,8 @@ export function HomeScreen() {
             </View>
           </TouchableOpacity>
           <View style={styles.headerInfo}>
-            <Text style={[styles.headerHello, { color: colors.subTextColor }]}>
-              {greeting},
-            </Text>
-            <Text style={[styles.headerName, { color: colors.textColor }]}>
-              {firstName}! 👋
-            </Text>
+            <Text style={[styles.headerHello, { color: colors.subTextColor }]}>{greeting},</Text>
+            <Text style={[styles.headerName,  { color: colors.textColor }]}>{firstName}! 👋</Text>
           </View>
         </Animated.View>
 
@@ -196,16 +204,23 @@ export function HomeScreen() {
             </View>
             <View style={styles.pointsNumBlock}>
               <Text style={[styles.pointsNumber, { color: GREEN }]}>{displayPoints}</Text>
-              <Text style={[styles.pointsLabel, { color: colors.subTextColor }]}>pontos</Text>
+              <Text style={[styles.pointsLabel,  { color: colors.subTextColor }]}>pontos</Text>
             </View>
           </View>
 
           <View style={[styles.divider, { backgroundColor: colors.dividerColor }]} />
 
           <View style={styles.rankingLinkRow}>
-            <IconTrend color={ORANGE} size={16} />
+            <Animated.View style={{ transform: [{ scale: flamePop }] }}>
+              <IconFlame
+                outer={flameColors.outer}
+                innerStart={flameColors.innerStart}
+                innerEnd={flameColors.innerEnd}
+                size={16}
+              />
+            </Animated.View>
             <Text style={[styles.rankingLinkText, { color: colors.subTextColor }]}>
-              {totalPoints === 0 ? "Nenhum ponto ainda" : "Arrasando! 🔥"}
+              {streakLabel(streak)}
             </Text>
             <TouchableOpacity
               onPress={() => navigation.navigate("Ranking")}
@@ -245,7 +260,7 @@ export function HomeScreen() {
             </View>
             <View style={{ flex: 1 }}>
               <Text style={[styles.missionLabel, { color: colors.subTextColor }]}>Missão do dia</Text>
-              <Text style={[styles.missionText, { color: colors.textColor }]}>
+              <Text style={[styles.missionText,  { color: colors.textColor }]}>
                 Escaneie pelo menos 1 item de cada categoria
               </Text>
             </View>
@@ -277,7 +292,7 @@ export function HomeScreen() {
               <IconTrend color={ORANGE} size={16} />
             </View>
             <Text style={[styles.rankItemLabel, { color: colors.subTextColor }]}>Sua turma</Text>
-            <Text style={[styles.rankItemNum, { color: ORANGE }]}>
+            <Text style={[styles.rankItemNum,   { color: ORANGE }]}>
               {turmaRank ? `#${turmaRank}` : "--"}
             </Text>
           </View>
@@ -289,17 +304,14 @@ export function HomeScreen() {
               <IconTrophy color={BLUE} size={16} />
             </View>
             <Text style={[styles.rankItemLabel, { color: colors.subTextColor }]}>Escola inteira</Text>
-            <Text style={[styles.rankItemNum, { color: BLUE }]}>
+            <Text style={[styles.rankItemNum,   { color: BLUE }]}>
               {schoolRank ? `#${schoolRank}` : "--"}
             </Text>
           </View>
 
           <View style={[styles.divider, { backgroundColor: colors.dividerColor }]} />
 
-          <TouchableOpacity
-            style={styles.rankingLink}
-            onPress={() => navigation.navigate("Ranking")}
-          >
+          <TouchableOpacity style={styles.rankingLink} onPress={() => navigation.navigate("Ranking")}>
             <Text style={[styles.rankingLinkBtn, { color: GREEN }]}>Ver detalhes </Text>
             <Text style={{ color: GREEN, fontSize: 12 }}>›</Text>
           </TouchableOpacity>
@@ -313,12 +325,12 @@ export function HomeScreen() {
           overflow: "hidden",
         }]}>
           <View style={styles.factContent}>
-            <View style={[styles.missionIconWrap]}>
+            <View style={styles.missionIconWrap}>
               <IconBulb color={colors.factIcon} size={40} />
             </View>
             <View style={{ flex: 1 }}>
               <Text style={[styles.factTitle, { color: colors.factSubText }]}>Você sabia?</Text>
-              <Text style={[styles.factText, { color: colors.factSubText }]}>{fact}</Text>
+              <Text style={[styles.factText,  { color: colors.factSubText }]}>{fact}</Text>
             </View>
           </View>
           <Image
@@ -334,18 +346,13 @@ export function HomeScreen() {
           opacity: card5Opacity,
           transform: [{ translateY: card5Y }],
         }]}>
-          <Text style={[styles.lastTitle, { color: colors.subTextColor, marginBottom: 0 }]}>Último escaneamento</Text>
-          <View
-            style={[
-              styles.divider,
-              { backgroundColor: colors.dividerColor, marginBottom: 12, marginTop: 6 },
-            ]}
-          />
+          <Text style={[styles.lastTitle, { color: colors.subTextColor, marginBottom: 0 }]}>
+            Último escaneamento
+          </Text>
+          <View style={[styles.divider, { backgroundColor: colors.dividerColor, marginBottom: 12, marginTop: 6 }]} />
           {lastScan ? (
             <View style={styles.lastRow}>
-              <View style={[styles.lastIconWrap, {
-                backgroundColor: CATEGORY_COLOR[lastScan.category] + "22",
-              }]}>
+              <View style={[styles.lastIconWrap, { backgroundColor: CATEGORY_COLOR[lastScan.category] + "22" }]}>
                 <IconRecycle color={CATEGORY_COLOR[lastScan.category]} size={20} />
               </View>
               <View style={{ flex: 1 }}>
