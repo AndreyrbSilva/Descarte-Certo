@@ -1,9 +1,16 @@
-import { View, StyleSheet } from "react-native";
+import { View, StyleSheet, ViewStyle, StyleProp } from "react-native";
 
-export function IconCamera({ color, size = 20 }: { color: string; size?: number }) {
+interface IconCameraProps {
+  color: string;
+  size?: number;
+  style?: StyleProp<ViewStyle>;
+}
+
+export function IconCamera({ color, size = 20, style }: IconCameraProps) {
   const s = size / 20;
+  
   return (
-    <View style={[styles.wrap, { width: size, height: size }]}>
+    <View style={[styles.wrap, { width: size, height: size }, style]}>
       {/* Corpo da câmera */}
       <View style={[styles.body, {
         width: 16 * s, height: 11 * s,
@@ -12,6 +19,7 @@ export function IconCamera({ color, size = 20 }: { color: string; size?: number 
         borderColor: color,
         bottom: 1 * s,
       }]} />
+      
       {/* Lente */}
       <View style={[styles.lens, {
         width: 6 * s, height: 6 * s,
@@ -20,6 +28,7 @@ export function IconCamera({ color, size = 20 }: { color: string; size?: number 
         borderColor: color,
         bottom: 3.5 * s,
       }]} />
+      
       {/* Flash / topo */}
       <View style={[styles.bump, {
         width: 5 * s, height: 2.5 * s,

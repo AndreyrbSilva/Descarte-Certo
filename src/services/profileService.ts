@@ -44,3 +44,16 @@ export async function uploadAvatar(localUri: string): Promise<string> {
 
   return data.publicUrl;
 }
+
+export async function fetchPublicProfile(userId: string) {
+  const res = await api.get(`/profile/${userId}`);
+  return {
+    user:        res.data.user,
+    totalPoints: res.data.totalPoints,
+    totalScans:  res.data.totalScans,
+    scans:       res.data.scans,
+    schoolRank:  res.data.schoolRank,
+    turmaRank:   res.data.turmaRank,
+    streak:      res.data.streak,
+  };
+}

@@ -18,3 +18,6 @@ export { IconConfig} from "./IconConfig";
 export { IconRanking } from "./IconRanking";
 export { IconHome } from "./IconHome";
 export { IconStar } from "./IconStar";
+export { IconFlame } from "./IconFlame";
+export { IconCrown } from "./IconCrown";
+export { IconMedal } from "./IconMedal";

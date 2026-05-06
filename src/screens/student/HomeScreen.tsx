@@ -1,18 +1,22 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, useCallback } from "react";
 import {
-  View, Text, ScrollView, TouchableOpacity, Animated, StatusBar, Image,
+  View, Text, ScrollView, TouchableOpacity,
+  Animated, StatusBar, Image, StyleSheet,
 } from "react-native";
-import * as NavigationBar from "expo-navigation-bar";
-import { useNavigation } from "@react-navigation/native";
-import { useColorScheme } from "react-native";
+import * as NavigationBar      from "expo-navigation-bar";
+import { useNavigation }       from "@react-navigation/native";
+import { useFocusEffect }      from "@react-navigation/native";
+import { useColorScheme }      from "react-native";
+import { StreakSheetModal } from "../../components/modals/StreakSheetModal";
 
-import { useAuthStore }  from "../../store/useAuthStore";
-import { fetchHomeData } from "../../services/homeService";
-import { useHomeColors } from "../../hooks/useHomeColors";
-import { styles }        from "./homeStyles";
+import { useAuthStore }    from "../../store/useAuthStore";
+import { fetchHomeData }   from "../../services/homeService";
+import { useHomeColors }   from "../../hooks/useHomeColors";
+import { getStreakColors } from "../../hooks/streakColors";
+import { styles }          from "./homeStyles";
 import {
   IconTrophy, IconTrend, IconCamera,
-  IconTarget, IconBulb, IconRecycle, IconRanking, IconStar,
+  IconTarget, IconBulb, IconRecycle, IconRanking, IconStar, IconFlame,
 } from "../../components/icons";
 
 const GREEN  = "#22c55e";
@@ -39,6 +43,12 @@ const CATEGORY_COLOR: Record<string, string> = {
   metal: "#eab308", organico: "#92400e", vidro: GREEN,
 };
 
+function streakLabel(streak: number): string {
+  if (streak === 0) return "Comece sua sequência";
+  if (streak === 1) return "1 dia seguido";
+  return `${streak} dias seguidos`;
+}
+
 function formatDate(iso: string) {
   return new Date(iso).toLocaleDateString("pt-BR");
 }
@@ -51,38 +61,49 @@ function getGreeting(): string {
 }
 
 export function HomeScreen() {
-  const navigation = useNavigation<any>();
-  const user       = useAuthStore((s) => s.user);
-  const colors     = useHomeColors();
-  const dark       = useColorScheme() === "dark";
+  const navigation   = useNavigation<any>();
+  const user         = useAuthStore((s) => s.user);
+  const colors       = useHomeColors();
+  const dark         = useColorScheme() === "dark";
+  const streak       = useAuthStore((s) => s.streak);
+  const setStreak    = useAuthStore((s) => s.setStreak);
+  const leveledUp    = useAuthStore((s) => s.leveledUp);
+  const setLeveledUp = useAuthStore((s) => s.setLeveledUp);
+
   const [totalPoints,   setTotalPoints]   = useState(0);
   const [displayPoints, setDisplayPoints] = useState(0);
   const [schoolRank,    setSchoolRank]    = useState<number | null>(null);
   const [turmaRank,     setTurmaRank]     = useState<number | null>(null);
   const [lastScan,      setLastScan]      = useState<LastScan>(null);
   const [fact,          setFact]          = useState("");
+  const [showOverlay,   setShowOverlay]   = useState(false);
+  const [streakSheetVisible, setStreakSheetVisible] = useState(false);
 
-  const headerOpacity = useRef(new Animated.Value(0)).current;
-  const card1Opacity  = useRef(new Animated.Value(0)).current;
-  const card1Y        = useRef(new Animated.Value(30)).current;
-  const card2Opacity  = useRef(new Animated.Value(0)).current;
-  const card2Y        = useRef(new Animated.Value(30)).current;
-  const btnOpacity    = useRef(new Animated.Value(0)).current;
-  const btnY          = useRef(new Animated.Value(30)).current;
-  const card3Opacity  = useRef(new Animated.Value(0)).current;
-  const card3Y        = useRef(new Animated.Value(30)).current;
-  const card4Opacity  = useRef(new Animated.Value(0)).current;
-  const card4Y        = useRef(new Animated.Value(30)).current;
-  const card5Opacity  = useRef(new Animated.Value(0)).current;
-  const card5Y        = useRef(new Animated.Value(30)).current;
-  const pulse         = useRef(new Animated.Value(1)).current;
-  const avatarUrl = useAuthStore((s) => s.user?.avatarUrl ?? null);
-  const borderColor = dark ? "#334155" : "#cbd5e1";
+  const headerOpacity  = useRef(new Animated.Value(0)).current;
+  const card1Opacity   = useRef(new Animated.Value(0)).current;
+  const card1Y         = useRef(new Animated.Value(30)).current;
+  const card2Opacity   = useRef(new Animated.Value(0)).current;
+  const card2Y         = useRef(new Animated.Value(30)).current;
+  const btnOpacity     = useRef(new Animated.Value(0)).current;
+  const btnY           = useRef(new Animated.Value(30)).current;
+  const card3Opacity   = useRef(new Animated.Value(0)).current;
+  const card3Y         = useRef(new Animated.Value(30)).current;
+  const card4Opacity   = useRef(new Animated.Value(0)).current;
+  const card4Y         = useRef(new Animated.Value(30)).current;
+  const card5Opacity   = useRef(new Animated.Value(0)).current;
+  const card5Y         = useRef(new Animated.Value(30)).current;
+  const pulse          = useRef(new Animated.Value(1)).current;
+  const flamePop       = useRef(new Animated.Value(1)).current;
+  const overlayOpacity = useRef(new Animated.Value(0)).current;
+  const cardScale      = useRef(new Animated.Value(0.7)).current;
+  const flameScale     = useRef(new Animated.Value(0.5)).current;
+
+  const avatarUrl   = useAuthStore((s) => s.user?.avatarUrl ?? null);
+  const flameColors = getStreakColors(streak);
 
   useEffect(() => {
     NavigationBar.setBackgroundColorAsync(colors.bg);
     NavigationBar.setButtonStyleAsync("dark");
-
     setFact(FACTS[Math.floor(Math.random() * FACTS.length)]);
 
     const slide = (o: Animated.Value, y: Animated.Value) =>
@@ -113,8 +134,16 @@ export function HomeScreen() {
       setSchoolRank(data.schoolRank);
       setTurmaRank(data.turmaRank);
       setLastScan(data.lastScan);
+      setStreak(data.streak);
 
-      let val  = 0;
+      if (data.streak > 0) {
+        Animated.sequence([
+          Animated.timing(flamePop, { toValue: 1.4, duration: 200, useNativeDriver: true }),
+          Animated.spring(flamePop, { toValue: 1,   useNativeDriver: true }),
+        ]).start();
+      }
+
+      let val    = 0;
       const step  = Math.ceil(data.totalPoints / 40);
       const timer = setInterval(() => {
         val += step;
@@ -127,6 +156,32 @@ export function HomeScreen() {
       }, 30);
     });
   }, []);
+
+  // detecta level up ao voltar pra tela
+  useFocusEffect(
+    useCallback(() => {
+      if (!leveledUp) return;
+      setLeveledUp(false);
+      setShowOverlay(true);
+
+      overlayOpacity.setValue(0);
+      cardScale.setValue(0.7);
+      flameScale.setValue(0.5);
+
+      Animated.sequence([
+        Animated.parallel([
+          Animated.timing(overlayOpacity, { toValue: 1,   duration: 300, useNativeDriver: true }),
+          Animated.spring(cardScale,      { toValue: 1,   tension: 100, friction: 7, useNativeDriver: true }),
+          Animated.spring(flameScale,     { toValue: 1,   tension: 80,  friction: 5, useNativeDriver: true }),
+        ]),
+        Animated.delay(3000),
+        Animated.parallel([
+          Animated.timing(overlayOpacity, { toValue: 0,   duration: 400, useNativeDriver: true }),
+          Animated.timing(cardScale,      { toValue: 0.8, duration: 400, useNativeDriver: true }),
+        ]),
+      ]).start(() => setShowOverlay(false));
+    }, [leveledUp])
+  );
 
   const firstName = user?.name?.split(" ")[0] ?? "Aluno";
   const initial   = firstName[0].toUpperCase();
@@ -143,18 +198,11 @@ export function HomeScreen() {
         {/* HEADER */}
         <Animated.View style={[styles.header, { opacity: headerOpacity }]}>
           <TouchableOpacity onPress={() => navigation.navigate("Profile")} activeOpacity={0.8}>
-            <View
-              style={{
-                width: 52,
-                height: 52,
-                borderRadius: 26,
-                borderWidth: 3,
-                borderColor: colors.dividerColor,
-                alignItems: "center",
-                justifyContent: "center",
-                marginRight: 12,
-              }}
-            >
+            <View style={{
+              width: 52, height: 52, borderRadius: 26,
+              borderWidth: 3, borderColor: colors.dividerColor,
+              alignItems: "center", justifyContent: "center", marginRight: 12,
+            }}>
               {avatarUrl ? (
                 <Image source={{ uri: avatarUrl }} style={styles.avatar} />
               ) : (
@@ -165,12 +213,8 @@ export function HomeScreen() {
             </View>
           </TouchableOpacity>
           <View style={styles.headerInfo}>
-            <Text style={[styles.headerHello, { color: colors.subTextColor }]}>
-              {greeting},
-            </Text>
-            <Text style={[styles.headerName, { color: colors.textColor }]}>
-              {firstName}! 👋
-            </Text>
+            <Text style={[styles.headerHello, { color: colors.subTextColor }]}>{greeting},</Text>
+            <Text style={[styles.headerName,  { color: colors.textColor }]}>{firstName}! 👋</Text>
           </View>
         </Animated.View>
 
@@ -196,17 +240,30 @@ export function HomeScreen() {
             </View>
             <View style={styles.pointsNumBlock}>
               <Text style={[styles.pointsNumber, { color: GREEN }]}>{displayPoints}</Text>
-              <Text style={[styles.pointsLabel, { color: colors.subTextColor }]}>pontos</Text>
+              <Text style={[styles.pointsLabel,  { color: colors.subTextColor }]}>pontos</Text>
             </View>
           </View>
 
           <View style={[styles.divider, { backgroundColor: colors.dividerColor }]} />
 
           <View style={styles.rankingLinkRow}>
-            <IconTrend color={ORANGE} size={16} />
-            <Text style={[styles.rankingLinkText, { color: colors.subTextColor }]}>
-              {totalPoints === 0 ? "Nenhum ponto ainda" : "Arrasando! 🔥"}
-            </Text>
+            <TouchableOpacity
+              onPress={() => setStreakSheetVisible(true)}
+              activeOpacity={0.7}
+              style={{ flexDirection: "row", alignItems: "center", gap: 6, flex: 1 }}
+            >
+              <Animated.View style={{ transform: [{ scale: flamePop }] }}>
+                <IconFlame
+                  outer={flameColors.outer}
+                  innerStart={flameColors.innerStart}
+                  innerEnd={flameColors.innerEnd}
+                  size={16}
+                />
+              </Animated.View>
+              <Text style={[styles.rankingLinkText, { color: colors.subTextColor }]}>
+                {streakLabel(streak)}
+              </Text>
+            </TouchableOpacity>
             <TouchableOpacity
               onPress={() => navigation.navigate("Ranking")}
               style={styles.rankingLink}
@@ -228,7 +285,7 @@ export function HomeScreen() {
             activeOpacity={0.85}
             onPress={() => navigation.navigate("Scanner")}
           >
-            <IconCamera color="#fff" size={22} />
+            <IconCamera color="#fff" size={22} style={{ marginTop: -5 }} />
             <Text style={styles.scanText}>Escanear lixo</Text>
           </TouchableOpacity>
         </Animated.View>
@@ -245,7 +302,7 @@ export function HomeScreen() {
             </View>
             <View style={{ flex: 1 }}>
               <Text style={[styles.missionLabel, { color: colors.subTextColor }]}>Missão do dia</Text>
-              <Text style={[styles.missionText, { color: colors.textColor }]}>
+              <Text style={[styles.missionText,  { color: colors.textColor }]}>
                 Escaneie pelo menos 1 item de cada categoria
               </Text>
             </View>
@@ -277,7 +334,7 @@ export function HomeScreen() {
               <IconTrend color={ORANGE} size={16} />
             </View>
             <Text style={[styles.rankItemLabel, { color: colors.subTextColor }]}>Sua turma</Text>
-            <Text style={[styles.rankItemNum, { color: ORANGE }]}>
+            <Text style={[styles.rankItemNum,   { color: ORANGE }]}>
               {turmaRank ? `#${turmaRank}` : "--"}
             </Text>
           </View>
@@ -289,17 +346,14 @@ export function HomeScreen() {
               <IconTrophy color={BLUE} size={16} />
             </View>
             <Text style={[styles.rankItemLabel, { color: colors.subTextColor }]}>Escola inteira</Text>
-            <Text style={[styles.rankItemNum, { color: BLUE }]}>
+            <Text style={[styles.rankItemNum,   { color: BLUE }]}>
               {schoolRank ? `#${schoolRank}` : "--"}
             </Text>
           </View>
 
           <View style={[styles.divider, { backgroundColor: colors.dividerColor }]} />
 
-          <TouchableOpacity
-            style={styles.rankingLink}
-            onPress={() => navigation.navigate("Ranking")}
-          >
+          <TouchableOpacity style={styles.rankingLink} onPress={() => navigation.navigate("Ranking")}>
             <Text style={[styles.rankingLinkBtn, { color: GREEN }]}>Ver detalhes </Text>
             <Text style={{ color: GREEN, fontSize: 12 }}>›</Text>
           </TouchableOpacity>
@@ -313,12 +367,12 @@ export function HomeScreen() {
           overflow: "hidden",
         }]}>
           <View style={styles.factContent}>
-            <View style={[styles.missionIconWrap]}>
+            <View style={styles.missionIconWrap}>
               <IconBulb color={colors.factIcon} size={40} />
             </View>
             <View style={{ flex: 1 }}>
               <Text style={[styles.factTitle, { color: colors.factSubText }]}>Você sabia?</Text>
-              <Text style={[styles.factText, { color: colors.factSubText }]}>{fact}</Text>
+              <Text style={[styles.factText,  { color: colors.factSubText }]}>{fact}</Text>
             </View>
           </View>
           <Image
@@ -334,18 +388,13 @@ export function HomeScreen() {
           opacity: card5Opacity,
           transform: [{ translateY: card5Y }],
         }]}>
-          <Text style={[styles.lastTitle, { color: colors.subTextColor, marginBottom: 0 }]}>Último escaneamento</Text>
-          <View
-            style={[
-              styles.divider,
-              { backgroundColor: colors.dividerColor, marginBottom: 12, marginTop: 6 },
-            ]}
-          />
+          <Text style={[styles.lastTitle, { color: colors.subTextColor, marginBottom: 0 }]}>
+            Último escaneamento
+          </Text>
+          <View style={[styles.divider, { backgroundColor: colors.dividerColor, marginBottom: 12, marginTop: 6 }]} />
           {lastScan ? (
             <View style={styles.lastRow}>
-              <View style={[styles.lastIconWrap, {
-                backgroundColor: CATEGORY_COLOR[lastScan.category] + "22",
-              }]}>
+              <View style={[styles.lastIconWrap, { backgroundColor: CATEGORY_COLOR[lastScan.category] + "22" }]}>
                 <IconRecycle color={CATEGORY_COLOR[lastScan.category]} size={20} />
               </View>
               <View style={{ flex: 1 }}>
@@ -364,8 +413,83 @@ export function HomeScreen() {
             </Text>
           )}
         </Animated.View>
-
       </ScrollView>
+
+      {/* LEVEL UP OVERLAY */}
+      {showOverlay && (
+        <Animated.View style={[overlayStyles.backdrop, { opacity: overlayOpacity }]}>
+          <Animated.View style={[overlayStyles.card, {
+            backgroundColor: colors.cardBg,
+            transform: [{ scale: cardScale }],
+          }]}>
+            <Animated.View style={{ transform: [{ scale: flameScale }] }}>
+              <IconFlame
+                outer={flameColors.outer}
+                innerStart={flameColors.innerStart}
+                innerEnd={flameColors.innerEnd}
+                size={96}
+              />
+            </Animated.View>
+            <Text style={[overlayStyles.title, { color: colors.textColor }]}>
+              Sequência evoluiu!
+            </Text>
+            <Text style={[overlayStyles.sub, { color: colors.subTextColor }]}>
+              {streak} {streak === 1 ? "dia seguido" : "dias seguidos"}
+            </Text>
+            <View style={[overlayStyles.badge, { backgroundColor: flameColors.outer + "22" }]}>
+              <Text style={[overlayStyles.badgeText, { color: flameColors.outer }]}>
+                Novo nível desbloqueado
+              </Text>
+            </View>
+          </Animated.View>
+        </Animated.View>
+      )}
+      <StreakSheetModal
+        visible={streakSheetVisible}
+        streak={streak}
+        onClose={() => setStreakSheetVisible(false)}
+      />
     </View>
   );
 }
+
+const overlayStyles = StyleSheet.create({
+  backdrop: {
+    ...StyleSheet.absoluteFillObject,
+    backgroundColor: "rgba(0,0,0,0.65)",
+    alignItems:      "center",
+    justifyContent:  "center",
+    zIndex:          99,
+  },
+  card: {
+    width:         280,
+    borderRadius:  28,
+    padding:       32,
+    alignItems:    "center",
+    gap:           12,
+    shadowColor:   "#000",
+    shadowOffset:  { width: 0, height: 8 },
+    shadowOpacity: 0.3,
+    shadowRadius:  20,
+    elevation:     12,
+  },
+  title: {
+    fontSize:      22,
+    fontWeight:    "900",
+    letterSpacing: -0.5,
+  },
+  sub: {
+    fontSize:   14,
+    fontWeight: "600",
+  },
+  badge: {
+    paddingHorizontal: 16,
+    paddingVertical:   8,
+    borderRadius:      20,
+    marginTop:         4,
+  },
+  badgeText: {
+    fontSize:   13,
+    fontWeight: "800",
+  },
+});

@@ -6,8 +6,10 @@ import {
 import * as NavigationBar from "expo-navigation-bar";
 import { useNavigation, useRoute } from "@react-navigation/native";
 
-import { useScanResultColors } from "../../hooks/useScanResultColors";
-import { styles }              from "./scanResultStyles";
+import { useAuthStore }          from "../../store/useAuthStore";
+import { getStreakColors }        from "../../hooks/streakColors";
+import { useScanResultColors }   from "../../hooks/useScanResultColors";
+import { styles }                from "./scanResultStyles";
 import { IconTrophy, IconRecycle } from "../../components/icons";
 
 const GREEN = "#22c55e";
@@ -36,20 +38,32 @@ const CATEGORY_BIN: Record<string, { color: string; label: string }> = {
   vidro:    { color: "#22c55e", label: "Lixeira Verde" },
 };
 
+const STREAK_THRESHOLDS = [0, 1, 3, 7, 14, 21, 30, 45, 60, 90, 120];
+
+function streakLevel(streak: number): number {
+  let level = 0;
+  for (const t of STREAK_THRESHOLDS) {
+    if (streak >= t) level = t;
+    else break;
+  }
+  return level;
+}
+
 export function ScanResultScreen() {
-  const navigation = useNavigation<any>();
-  const route      = useRoute<any>();
-  const colors     = useScanResultColors();
+  const navigation   = useNavigation<any>();
+  const route        = useRoute<any>();
+  const colors       = useScanResultColors();
+  const setStreak    = useAuthStore((s) => s.setStreak);
+  const setLeveledUp = useAuthStore((s) => s.setLeveledUp);
+  const prevStreak   = useAuthStore((s) => s.streak);
 
   const { result, photoUri, error } = route.params ?? {};
-  console.log("photoUri:", photoUri);
 
   const headerAnim    = useRef(new Animated.Value(0)).current;
   const cardAnim      = useRef(new Animated.Value(60)).current;
   const cardOpacity   = useRef(new Animated.Value(0)).current;
   const pointsScale   = useRef(new Animated.Value(0.5)).current;
   const pointsOpacity = useRef(new Animated.Value(0)).current;
-  const photoAnim     = useRef(new Animated.Value(1)).current;
 
   useEffect(() => {
     NavigationBar.setBackgroundColorAsync(GREEN);
@@ -67,6 +81,15 @@ export function ScanResultScreen() {
       ]),
     ]).start();
   }, []);
+
+  const newStreak   = result?.streak ?? 0;
+  const leveledUp   = streakLevel(newStreak) > streakLevel(prevStreak);
+
+  function goHome() {
+    setStreak(newStreak);
+    if (leveledUp) setLeveledUp(true);
+    navigation.navigate("Tabs", { screen: "Home" });
+  }
 
   if (error) {
     return (
@@ -94,45 +117,39 @@ export function ScanResultScreen() {
 
       <ScrollView contentContainerStyle={styles.scroll} showsVerticalScrollIndicator={false}>
 
-        {/* ── HEADER VERDE ── */}
+        {/* HEADER VERDE */}
         <Animated.View style={[styles.header, { opacity: headerAnim }]}>
-            <View style={styles.iconWrap}>
-                <IconRecycle color="#fff" size={36} />
-            </View>
-            <Animated.View style={[styles.pointsBadge, {
-                transform: [{ scale: pointsScale }],
-                opacity: pointsOpacity,
-            }]}>
-                <Text style={styles.pointsEarned}>+{result?.pointsEarned ?? 0}</Text>
-            </Animated.View>
-            <Text style={styles.pointsLabel}>pontos ganhos!</Text>
+          <View style={styles.iconWrap}>
+            <IconRecycle color="#fff" size={36} />
+          </View>
+          <Animated.View style={[styles.pointsBadge, {
+            transform: [{ scale: pointsScale }],
+            opacity:   pointsOpacity,
+          }]}>
+            <Text style={styles.pointsEarned}>+{result?.pointsEarned ?? 0}</Text>
+          </Animated.View>
+          <Text style={styles.pointsLabel}>pontos ganhos!</Text>
         </Animated.View>
 
-        {/* ── CARD RESULTADO ── */}
+        {/* CARD RESULTADO */}
         <Animated.View style={[styles.card, {
           backgroundColor: colors.cardBg,
-          opacity: cardOpacity,
+          opacity:   cardOpacity,
           transform: [{ translateY: cardAnim }],
         }]}>
           <Text style={[styles.cardTitle, { color: colors.textColor }]}>
             Boa, é um {CATEGORY_LABEL[result?.category] ?? "Resíduo"}!
           </Text>
 
-            {/* foto do lixo */}
-            {photoUri ? (
-            <Image
-                source={{ uri: photoUri }}
-                style={styles.photo}
-                resizeMode="cover"
-                onError={(e) => console.log("Erro na imagem:", e.nativeEvent.error)}
-            />
-            ) : (
+          {photoUri ? (
+            <Image source={{ uri: photoUri }} style={styles.photo} resizeMode="cover" />
+          ) : (
             <Text style={{ color: "red" }}>sem foto</Text>
-        )}
+          )}
 
-        <Text style={[styles.cardSub, { color: colors.subTextColor, marginTop: 12 }]}>
+          <Text style={[styles.cardSub, { color: colors.subTextColor, marginTop: 12 }]}>
             {CATEGORY_TIP[result?.category] ?? "Continue reciclando!"}
-        </Text>
+          </Text>
 
           <View style={[styles.divider, { backgroundColor: colors.dividerColor }]} />
 
@@ -180,7 +197,7 @@ export function ScanResultScreen() {
 
           <TouchableOpacity
             style={[styles.btnSecondary, { borderColor: colors.dividerColor }]}
-            onPress={() => navigation.navigate("Tabs", { screen: "Home" })}
+            onPress={goHome}
             activeOpacity={0.7}
           >
             <Text style={[styles.btnSecondaryText, { color: colors.textColor }]}>
