@@ -1,11 +1,13 @@
 import { create } from "zustand";
 
 interface User {
-  id:         string;
-  name:       string;
-  email:      string;
-  turma?:     string;
-  avatarUrl?: string;
+  id:               string;
+  name:             string;
+  email:            string;
+  turma?:           string;
+  avatarUrl?:       string;
+  emailVerified?:   boolean;
+  twoFactorEnabled?: boolean;
 }
 
 interface AuthState {
@@ -17,6 +19,7 @@ interface AuthState {
   setAvatar:    (url: string) => void;
   setStreak:    (streak: number) => void;
   setLeveledUp: (v: boolean) => void;
+  setUser:      (user: Partial<User>) => void;
   clearAuth:    () => void;
 }
 
@@ -31,5 +34,8 @@ export const useAuthStore = create<AuthState>((set) => ({
   })),
   setStreak:    (streak) => set({ streak }),
   setLeveledUp: (v) => set({ leveledUp: v }),
+  setUser:      (partial) => set((state) => ({
+    user: state.user ? { ...state.user, ...partial } : null,
+  })),
   clearAuth:    () => set({ user: null, token: null, streak: 0, leveledUp: false }),
 }));
