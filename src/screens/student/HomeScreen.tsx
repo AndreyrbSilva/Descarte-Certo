@@ -7,6 +7,7 @@ import * as NavigationBar      from "expo-navigation-bar";
 import { useNavigation }       from "@react-navigation/native";
 import { useFocusEffect }      from "@react-navigation/native";
 import { useColorScheme }      from "react-native";
+import { StreakSheetModal } from "../../components/modals/StreakSheetModal";
 
 import { useAuthStore }    from "../../store/useAuthStore";
 import { fetchHomeData }   from "../../services/homeService";
@@ -76,6 +77,7 @@ export function HomeScreen() {
   const [lastScan,      setLastScan]      = useState<LastScan>(null);
   const [fact,          setFact]          = useState("");
   const [showOverlay,   setShowOverlay]   = useState(false);
+  const [streakSheetVisible, setStreakSheetVisible] = useState(false);
 
   const headerOpacity  = useRef(new Animated.Value(0)).current;
   const card1Opacity   = useRef(new Animated.Value(0)).current;
@@ -245,17 +247,23 @@ export function HomeScreen() {
           <View style={[styles.divider, { backgroundColor: colors.dividerColor }]} />
 
           <View style={styles.rankingLinkRow}>
-            <Animated.View style={{ transform: [{ scale: flamePop }] }}>
-              <IconFlame
-                outer={flameColors.outer}
-                innerStart={flameColors.innerStart}
-                innerEnd={flameColors.innerEnd}
-                size={16}
-              />
-            </Animated.View>
-            <Text style={[styles.rankingLinkText, { color: colors.subTextColor }]}>
-              {streakLabel(streak)}
-            </Text>
+            <TouchableOpacity
+              onPress={() => setStreakSheetVisible(true)}
+              activeOpacity={0.7}
+              style={{ flexDirection: "row", alignItems: "center", gap: 6, flex: 1 }}
+            >
+              <Animated.View style={{ transform: [{ scale: flamePop }] }}>
+                <IconFlame
+                  outer={flameColors.outer}
+                  innerStart={flameColors.innerStart}
+                  innerEnd={flameColors.innerEnd}
+                  size={16}
+                />
+              </Animated.View>
+              <Text style={[styles.rankingLinkText, { color: colors.subTextColor }]}>
+                {streakLabel(streak)}
+              </Text>
+            </TouchableOpacity>
             <TouchableOpacity
               onPress={() => navigation.navigate("Ranking")}
               style={styles.rankingLink}
@@ -436,6 +444,11 @@ export function HomeScreen() {
           </Animated.View>
         </Animated.View>
       )}
+      <StreakSheetModal
+        visible={streakSheetVisible}
+        streak={streak}
+        onClose={() => setStreakSheetVisible(false)}
+      />
     </View>
   );
 }

@@ -29,7 +29,7 @@ export const styles = StyleSheet.create({
 
   rankingLinkRow: { flexDirection: "row", alignItems: "center" },
   rankingLink:    { flexDirection: "row", alignItems: "center", marginLeft: "auto" },
-  rankingLinkText:{ fontSize: 12, fontWeight: "600", flex: 1, marginLeft: 6 },
+  rankingLinkText:{ fontSize: 12, fontWeight: "600", flex: 1 },
   rankingLinkBtn: { fontSize: 13, fontWeight: "700" },
 
   scanBtn: {
