@@ -81,6 +81,7 @@ export const styles = StyleSheet.create({
   podiumPoints: {
     fontSize:   11,
     fontWeight: "600",
+    marginTop:  -7,
   },
   podiumBase: {
     width:        "100%",

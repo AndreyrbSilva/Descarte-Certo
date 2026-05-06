@@ -8,7 +8,7 @@ import * as NavigationBar from "expo-navigation-bar";
 import { useRankingColors }                    from "../../hooks/useRankingColors";
 import { fetchTurmaRanking, fetchEscolaRanking, RankingEntry } from "../../services/rankingService";
 import { getStreakColors }                     from "../../hooks/streakColors";
-import { IconFlame }                           from "../../components/icons";
+import { IconFlame, IconCrown, IconMedal } from "../../components/icons";
 import { styles }                              from "./rankingStyles";
 import { useFocusEffect } from "@react-navigation/native";
 
@@ -39,8 +39,8 @@ function Avatar({ name, avatarUrl, size, bg }: {
   );
 }
 
-function PodiumItem({ entry, height, colors, medal, showTurma }: {
-  entry: RankingEntry; height: number; colors: any; medal: string; showTurma?: boolean;
+function PodiumItem({ entry, height, colors, showTurma }: {
+  entry: RankingEntry; height: number; colors: any; showTurma?: boolean;
 }) {
   const fc = getStreakColors(entry.streak);
   const bg = entry.position === 1
@@ -51,7 +51,7 @@ function PodiumItem({ entry, height, colors, medal, showTurma }: {
 
   return (
     <View style={styles.podiumItem}>
-      {entry.position === 1 && <Text style={styles.podiumCrown}>👑</Text>}
+      {entry.position === 1 && <IconCrown size={30} />}
       <View style={[
         styles.podiumAvatar,
         entry.isMe && { borderWidth: 3, borderColor: GREEN },
@@ -61,12 +61,21 @@ function PodiumItem({ entry, height, colors, medal, showTurma }: {
       <Text style={[styles.podiumName, { color: colors.textColor }]} numberOfLines={1}>
         {entry.name.split(" ")[0]}{showTurma && entry.turma ? ` · T${entry.turma}` : ""}
       </Text>
+
+      <Text style={[styles.podiumPoints, { color: colors.subTextColor }]}>
+        {entry.points} pts
+      </Text>
+      
       <View style={{ flexDirection: "row", alignItems: "center", gap: 3 }}>
         <IconFlame outer={fc.outer} innerStart={fc.innerStart} innerEnd={fc.innerEnd} size={12} />
         <Text style={[styles.streakText, { color: colors.subTextColor }]}>{entry.streak}d</Text>
       </View>
+      
       <View style={[styles.podiumBase, { height, backgroundColor: bg + "cc" }]}>
-        <Text style={styles.podiumPosition}>{medal}</Text>
+        <IconMedal
+          type={entry.position === 1 ? "gold" : entry.position === 2 ? "silver" : "bronze"}
+          size={32}
+        />
       </View>
     </View>
   );
@@ -212,7 +221,6 @@ export function RankingScreen() {
                     key={entry.userId}
                     entry={entry}
                     colors={colors}
-                    medal={entry.position === 1 ? "🥇" : entry.position === 2 ? "🥈" : "🥉"}
                     height={entry.position === 1 ? 80 : entry.position === 2 ? 60 : 48}
                     showTurma={tab === "escola"}
                   />
