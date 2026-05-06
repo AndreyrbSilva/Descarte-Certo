@@ -285,7 +285,7 @@ export function HomeScreen() {
             activeOpacity={0.85}
             onPress={() => navigation.navigate("Scanner")}
           >
-            <IconCamera color="#fff" size={22} />
+            <IconCamera color="#fff" size={22} style={{ marginTop: -5 }} />
             <Text style={styles.scanText}>Escanear lixo</Text>
           </TouchableOpacity>
         </Animated.View>

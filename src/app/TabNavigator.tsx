@@ -112,7 +112,7 @@ export function TabNavigator() {
           tabBarIcon: () => (
             <View style={styles.fabWrap}>
               <View style={[styles.fab, { backgroundColor: GREEN }]}>
-                <IconCamera color="#fff" size={22} />
+                <IconCamera color="#fff" size={26} style={{ marginTop: -6 }} />
               </View>
             </View>
           ),
