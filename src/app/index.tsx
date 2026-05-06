@@ -6,6 +6,7 @@ import { LoginScreen }           from "../screens/student/LoginScreen";
 import { RegisterScreen }        from "../screens/student/RegisterScreen";
 import { RegisterSuccessScreen } from "../screens/student/RegisterSuccessScreen";
 import { ScanResultScreen }      from "../screens/student/ScanResultScreen";
+import { PublicProfileScreen } from "../screens/student/PublicProfileScreen";
 import { TabNavigator }          from "./TabNavigator";
 
 const Stack = createNativeStackNavigator();
@@ -20,6 +21,7 @@ export function AppNavigator() {
         <Stack.Screen name="RegisterSuccess" component={RegisterSuccessScreen} options={{ animation: "fade" }} />
         <Stack.Screen name="Tabs"           component={TabNavigator}          options={{ animation: "fade" }} />
         <Stack.Screen name="ScanResult"     component={ScanResultScreen}      options={{ animation: "slide_from_right", animationDuration: 250, gestureEnabled: false }} />
+        <Stack.Screen name="PublicProfile" component={PublicProfileScreen} options={{ animation: "slide_from_right" }} />
       </Stack.Navigator>
     </NavigationContainer>
   );

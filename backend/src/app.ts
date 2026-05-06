@@ -1,15 +1,15 @@
 import Fastify from "fastify";
 import cors from "@fastify/cors";
 import rateLimit from "@fastify/rate-limit";
-import { authRoutes } from "./routes/authRoutes";
-import { scanRoutes } from "./routes/scanRoutes";
+import { authRoutes }    from "./routes/authRoutes";
+import { scanRoutes }    from "./routes/scanRoutes";
 import { rankingRoutes } from "./routes/rankingRoutes";
+import { profileRoutes } from "./routes/profileRoutes";
 
 export const app = Fastify({ logger: true });
 
 app.register(cors, { origin: "*" });
 
-// 100 req/min global
 app.register(rateLimit, {
   global: true,
   max: 100,
@@ -22,5 +22,6 @@ app.register(rateLimit, {
 app.register(authRoutes);
 app.register(scanRoutes);
 app.register(rankingRoutes);
+app.register(profileRoutes);
 
 app.get("/health", async () => ({ status: "ok" }));
