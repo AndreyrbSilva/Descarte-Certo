@@ -18,7 +18,7 @@ import {
   setup2FA, verify2FA, disable2FA,
   fetchMe, logout,
 } from "../../services/authService";
-import { IconEye } from "../../components/icons";
+import { IconEye, IconLogout } from "../../components/icons";
 import { useTheme } from "../../context/ThemeContext";
 
 const GREEN = "#22c55e";
@@ -315,6 +315,7 @@ export function ConfigScreen() {
   const [error,   setError]   = useState("");
   const [success, setSuccess] = useState("");
   const [loading, setLoading] = useState(false);
+  const [showLogout, setShowLogout] = useState(false);
   const { isDark, setTheme } = useTheme();
 
   // modais
@@ -463,7 +464,8 @@ type ModalType =
   }
 
   // ── logout
-  async function handleLogout() {
+  async function confirmLogout() {
+    setShowLogout(false);
     await logout();
     navigation.replace("Login");
   }
@@ -584,7 +586,11 @@ type ModalType =
         </View>
 
         {/* LOGOUT */}
-        <TouchableOpacity style={styles.logoutBtn} onPress={handleLogout} activeOpacity={0.7}>
+        <TouchableOpacity
+            style={styles.logoutBtn}
+            onPress={() => setShowLogout(true)}
+            activeOpacity={0.7}
+          >
           <Text style={styles.logoutText}>Sair da conta</Text>
         </TouchableOpacity>
 
@@ -654,6 +660,119 @@ type ModalType =
         onClose={() => setModal(null)}
         loading={loading}
       />
+
+      <Modal
+        visible={showLogout}
+        transparent
+        animationType="fade"
+        onRequestClose={() => setShowLogout(false)}
+      >
+        <View
+          style={{
+            flex: 1,
+            backgroundColor: "rgba(0,0,0,0.5)",
+            alignItems: "center",
+            justifyContent: "center",
+            padding: 32,
+          }}
+        >
+          <View
+            style={[
+              {
+                width: "100%",
+                borderRadius: 24,
+                padding: 24,
+                alignItems: "center",
+              },
+              { backgroundColor: colors.cardBg },
+            ]}
+          >
+            <View
+              style={{
+                width: 56,
+                height: 56,
+                borderRadius: 28,
+                backgroundColor: "#fee2e2",
+                alignItems: "center",
+                justifyContent: "center",
+                marginBottom: 16,
+              }}
+            >
+              <IconLogout color="#ef4444" size={28} />
+            </View>
+
+            <Text
+              style={[
+                {
+                  fontSize: 20,
+                  fontWeight: "800",
+                  marginBottom: 8,
+                },
+                { color: colors.textColor },
+              ]}
+            >
+              Sair da conta?
+            </Text>
+
+            <Text
+              style={[
+                {
+                  fontSize: 14,
+                  textAlign: "center",
+                  marginBottom: 24,
+                },
+                { color: colors.subTextColor },
+              ]}
+            >
+              Você precisará entrar novamente para acessar o app.
+            </Text>
+
+            <TouchableOpacity
+              style={{
+                width: "100%",
+                paddingVertical: 14,
+                borderRadius: 14,
+                backgroundColor: "#ef4444",
+                alignItems: "center",
+                marginBottom: 10,
+              }}
+              onPress={confirmLogout}
+            >
+              <Text
+                style={{
+                  color: "#fff",
+                  fontWeight: "800",
+                  fontSize: 15,
+                }}
+              >
+                Sair
+              </Text>
+            </TouchableOpacity>
+
+            <TouchableOpacity
+              style={{
+                width: "100%",
+                paddingVertical: 14,
+                borderRadius: 14,
+                borderWidth: 1.5,
+                borderColor: colors.dividerColor,
+                alignItems: "center",
+              }}
+              onPress={() => setShowLogout(false)}
+            >
+              <Text
+                style={{
+                  fontWeight: "700",
+                  fontSize: 15,
+                  color: colors.textColor,
+                }}
+              >
+                Cancelar
+              </Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      </Modal>
     </View>
   );
 }
