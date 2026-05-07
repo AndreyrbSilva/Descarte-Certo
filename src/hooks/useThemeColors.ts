@@ -1,8 +1,7 @@
-import { useColorScheme } from "react-native";
+import { useTheme } from "../context/ThemeContext";
 
 export function useThemeColors() {
-  const isDark = useColorScheme() === "dark";
-
+  const { isDark } = useTheme();
   return {
     cardBg:       isDark ? "#242424" : "#ffffff",
     inputBg:      isDark ? "#2d2d2d" : "#f8fafc",

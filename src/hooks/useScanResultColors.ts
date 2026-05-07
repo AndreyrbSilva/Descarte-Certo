@@ -1,7 +1,7 @@
-import { useColorScheme } from "react-native";
+import { useTheme } from "../context/ThemeContext";
 
 export function useScanResultColors() {
-  const dark = useColorScheme() === "dark";
+  const { isDark: dark } = useTheme();
   return {
     cardBg:       dark ? "#1e293b" : "#ffffff",
     textColor:    dark ? "#f1f5f9" : "#1e293b",

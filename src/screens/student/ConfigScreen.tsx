@@ -19,6 +19,7 @@ import {
   fetchMe, logout,
 } from "../../services/authService";
 import { IconEye } from "../../components/icons";
+import { useTheme } from "../../context/ThemeContext";
 
 const GREEN = "#22c55e";
 
@@ -314,6 +315,7 @@ export function ConfigScreen() {
   const [error,   setError]   = useState("");
   const [success, setSuccess] = useState("");
   const [loading, setLoading] = useState(false);
+  const { isDark, setTheme } = useTheme();
 
   // modais
 type ModalType =
@@ -514,6 +516,27 @@ type ModalType =
               </Text>
             </View>
           </View>
+        </View>
+
+        {/* THEME TOGGLE */}
+        <Text style={[styles.sectionLabel, { color: colors.sectionLabel }]}>Tema</Text>
+        <View
+          style={[
+            styles.section,
+            {
+              backgroundColor: colors.cardBg,
+              marginTop: 1,
+              marginBottom: 18,
+            },
+          ]}
+        >
+          <Item
+            icon={isDark ? "🌙" : "☀️"}
+            label={isDark ? "Tema escuro" : "Tema claro"}
+            sub="Toque para alternar o tema"
+            iconBg={isDark ? "#1e293b" : "#fef9c3"}
+            onPress={() => setTheme(isDark ? "light" : "dark")}
+          />
         </View>
 
         {/* SEÇÃO EMAIL */}

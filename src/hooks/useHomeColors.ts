@@ -1,7 +1,7 @@
-import { useColorScheme } from "react-native";
+import { useTheme } from "../context/ThemeContext";
 
 export function useHomeColors() {
-  const dark = useColorScheme() === "dark";
+  const { isDark: dark } = useTheme();
   return {
     bg:            dark ? "#0f172a" : "#f8fafc",
     cardBg:        dark ? "#1e293b" : "#ffffff",
@@ -11,10 +11,10 @@ export function useHomeColors() {
     iconBg:        dark ? "#162418" : "#dcfce7",
     progressTrack: dark ? "#334155" : "#e2e8f0",
     statusBar:     dark ? "light-content" : "dark-content" as any,
-    factIcon:      dark ? "#ffffff" : "#ffffff",
-    factContent:   dark ? "#ffffff" : "#ffffff",
+    factIcon:      "#ffffff",
+    factContent:   "#ffffff",
     factIconBg:    dark ? "#1e293b" : "#e2e8f0",
-    factBg:        dark ? "#4b7ee7" : "#4b7ee7",
-    factSubText:   dark ? "#ffffff" : "#ffffff",
+    factBg:        "#4b7ee7",
+    factSubText:   "#ffffff",
   };
 }
