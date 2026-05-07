@@ -1,8 +1,12 @@
-import { Resend } from "resend";
+import { BrevoClient } from "@getbrevo/brevo";
 
-const resend = new Resend(process.env.RESEND_API_KEY);
+const client = new BrevoClient({ apiKey: process.env.BREVO_API_KEY ?? "" });
 
-export async function sendEmailCode(to: string, code: string, reason: "verify" | "change-email" | "change-password") {
+export async function sendEmailCode(
+  to: string,
+  code: string,
+  reason: "verify" | "change-email" | "change-password"
+) {
   const subjects: Record<typeof reason, string> = {
     "verify":          "Confirme seu e-mail — Descarte Certo",
     "change-email":    "Alteração de e-mail — Descarte Certo",
@@ -15,11 +19,11 @@ export async function sendEmailCode(to: string, code: string, reason: "verify" |
     "change-password": "Você solicitou a alteração da sua senha. Use o código abaixo para confirmar:",
   };
 
-  await resend.emails.send({
-    from:    "Descarte Certo <onboarding@resend.dev>",
-    to,
-    subject: subjects[reason],
-    html: `
+  await client.transactionalEmails.sendTransacEmail({
+    subject:     subjects[reason],
+    sender:      { name: "Descarte Certo", email: "andreyrdh@gmail.com" },
+    to:          [{ email: to }],
+    htmlContent: `
       <div style="font-family:sans-serif;max-width:480px;margin:0 auto;padding:32px;">
         <h2 style="color:#22c55e;margin-bottom:8px;">Descarte Certo</h2>
         <p style="color:#475569;margin-bottom:24px;">${intros[reason]}</p>
