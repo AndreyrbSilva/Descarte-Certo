@@ -23,6 +23,86 @@ import { useTheme } from "../../context/ThemeContext";
 
 const GREEN = "#22c55e";
 
+// ─── botão toggle ─────────────────────────────────────────────────
+function ThemeToggle() {
+  const colors        = useConfigColors();
+  const { isDark, setTheme } = useTheme();
+  const thumbAnim     = useRef(new Animated.Value(isDark ? 1 : 0)).current;
+
+  function toggle() {
+    const next = isDark ? "light" : "dark";
+    Animated.spring(thumbAnim, {
+      toValue:   next === "dark" ? 1 : 0,
+      tension:   120,
+      friction:  8,
+      useNativeDriver: true,
+    }).start();
+    setTheme(next);
+  }
+
+  const thumbX = thumbAnim.interpolate({
+    inputRange:  [0, 1],
+    outputRange: [2, 26],
+  });
+
+  const trackBg = thumbAnim.interpolate({
+    inputRange:  [0, 1],
+    outputRange: ["#e2e8f0", "#334155"],
+  });
+
+  return (
+    <TouchableOpacity
+      style={[styles.item, { paddingVertical: 14 }]}
+      onPress={toggle}
+      activeOpacity={0.8}
+    >
+      {/* ícone */}
+      <View style={[styles.itemIconWrap, { backgroundColor: isDark ? "#1e293b" : "#fef9c3" }]}>
+        <Text style={{ fontSize: 18 }}>{isDark ? "🌙" : "☀️"}</Text>
+      </View>
+
+      {/* texto */}
+      <View style={styles.itemText}>
+        <Text style={[styles.itemLabel, { color: colors.textColor }]}>
+          {isDark ? "Tema escuro" : "Tema claro"}
+        </Text>
+        <Text style={[styles.itemSub, { color: colors.subTextColor }]}>
+          {isDark ? "Usando modo escuro" : "Usando modo claro"}
+        </Text>
+      </View>
+
+      {/* toggle customizado */}
+      <TouchableOpacity onPress={toggle} activeOpacity={0.8}>
+        <Animated.View style={{
+          width:        52,
+          height:       28,
+          borderRadius: 14,
+          backgroundColor: trackBg,
+          justifyContent: "center",
+          padding:      2,
+        }}>
+          <Animated.View style={{
+            width:        24,
+            height:       24,
+            borderRadius: 12,
+            backgroundColor: "#fff",
+            transform:    [{ translateX: thumbX }],
+            alignItems:   "center",
+            justifyContent: "center",
+            shadowColor:  "#000",
+            shadowOffset: { width: 0, height: 1 },
+            shadowOpacity: 0.15,
+            shadowRadius: 2,
+            elevation:    2,
+          }}>
+            <Text style={{ fontSize: 12 }}>{isDark ? "🌙" : "☀️"}</Text>
+          </Animated.View>
+        </Animated.View>
+      </TouchableOpacity>
+    </TouchableOpacity>
+  );
+}
+
 // ─── modal genérico de código ─────────────────────────────────────────────────
 function CodeModal({ visible, title, subtitle, onConfirm, onClose, loading }: {
   visible:   boolean;
@@ -519,26 +599,11 @@ type ModalType =
             </View>
           </View>
         </View>
-
-        {/* THEME TOGGLE */}
-        <Text style={[styles.sectionLabel, { color: colors.sectionLabel }]}>Tema</Text>
-        <View
-          style={[
-            styles.section,
-            {
-              backgroundColor: colors.cardBg,
-              marginTop: 1,
-              marginBottom: 18,
-            },
-          ]}
-        >
-          <Item
-            icon={isDark ? "🌙" : "☀️"}
-            label={isDark ? "Tema escuro" : "Tema claro"}
-            sub="Toque para alternar o tema"
-            iconBg={isDark ? "#1e293b" : "#fef9c3"}
-            onPress={() => setTheme(isDark ? "light" : "dark")}
-          />
+        
+        {/* TEMA */}
+        <Text style={[styles.sectionLabel, { color: colors.sectionLabel }]}>Aparência</Text>
+        <View style={[styles.section, { backgroundColor: colors.cardBg, marginBottom: 18 }]}>
+          <ThemeToggle />
         </View>
 
         {/* SEÇÃO EMAIL */}
