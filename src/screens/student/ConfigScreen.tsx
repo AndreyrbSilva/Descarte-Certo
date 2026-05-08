@@ -8,7 +8,7 @@ import * as NavigationBar from "expo-navigation-bar";
 import { useFocusEffect, useNavigation } from "@react-navigation/native";
 import * as SecureStore from "expo-secure-store";
 
-import { useConfigColors } from "../../hooks/useConfigColors";
+import { useConfigColors, useAnimatedConfigColors } from "../../hooks/useConfigColors";
 import { useAuthStore }    from "../../store/useAuthStore";
 import { styles }          from "./configStyles";
 import {
@@ -25,17 +25,25 @@ const GREEN = "#22c55e";
 
 // ─── botão toggle ─────────────────────────────────────────────────
 function ThemeToggle() {
-  const colors        = useConfigColors();
+  const aColors       = useAnimatedConfigColors();
   const { isDark, setTheme } = useTheme();
+  // Dois valores separados: posição usa native driver, cor usa JS driver
   const thumbAnim     = useRef(new Animated.Value(isDark ? 1 : 0)).current;
+  const colorAnim     = useRef(new Animated.Value(isDark ? 1 : 0)).current;
 
   function toggle() {
     const next = isDark ? "light" : "dark";
+    const toValue = next === "dark" ? 1 : 0;
     Animated.spring(thumbAnim, {
-      toValue:   next === "dark" ? 1 : 0,
+      toValue,
       tension:   120,
       friction:  8,
       useNativeDriver: true,
+    }).start();
+    Animated.timing(colorAnim, {
+      toValue,
+      duration: 350,
+      useNativeDriver: false,
     }).start();
     setTheme(next);
   }
@@ -45,9 +53,14 @@ function ThemeToggle() {
     outputRange: [2, 26],
   });
 
-  const trackBg = thumbAnim.interpolate({
+  const trackBg = colorAnim.interpolate({
     inputRange:  [0, 1],
     outputRange: ["#e2e8f0", "#334155"],
+  });
+
+  const iconBg = colorAnim.interpolate({
+    inputRange:  [0, 1],
+    outputRange: ["#fef9c3", "#1e293b"],
   });
 
   return (
@@ -57,18 +70,18 @@ function ThemeToggle() {
       activeOpacity={0.8}
     >
       {/* ícone */}
-      <View style={[styles.itemIconWrap, { backgroundColor: isDark ? "#1e293b" : "#fef9c3" }]}>
+      <Animated.View style={[styles.itemIconWrap, { backgroundColor: iconBg }]}>
         <Text style={{ fontSize: 18 }}>{isDark ? "🌙" : "☀️"}</Text>
-      </View>
+      </Animated.View>
 
       {/* texto */}
       <View style={styles.itemText}>
-        <Text style={[styles.itemLabel, { color: colors.textColor }]}>
+        <Animated.Text style={[styles.itemLabel, { color: aColors.textColor }]}>
           {isDark ? "Tema escuro" : "Tema claro"}
-        </Text>
-        <Text style={[styles.itemSub, { color: colors.subTextColor }]}>
+        </Animated.Text>
+        <Animated.Text style={[styles.itemSub, { color: aColors.subTextColor }]}>
           {isDark ? "Usando modo escuro" : "Usando modo claro"}
-        </Text>
+        </Animated.Text>
       </View>
 
       {/* toggle customizado */}
@@ -367,19 +380,19 @@ function Item({ icon, label, sub, onPress, iconBg, danger }: {
   iconBg: string;
   danger?: boolean;
 }) {
-  const colors = useConfigColors();
+  const aColors = useAnimatedConfigColors();
   return (
     <TouchableOpacity style={styles.item} onPress={onPress} activeOpacity={0.7}>
       <View style={[styles.itemIconWrap, { backgroundColor: iconBg }]}>
         <Text style={{ fontSize: 18 }}>{icon}</Text>
       </View>
       <View style={styles.itemText}>
-        <Text style={[styles.itemLabel, { color: danger ? colors.dangerColor : colors.textColor }]}>
+        <Animated.Text style={[styles.itemLabel, { color: danger ? aColors.dangerColor : aColors.textColor }]}>
           {label}
-        </Text>
-        {sub && <Text style={[styles.itemSub, { color: colors.subTextColor }]}>{sub}</Text>}
+        </Animated.Text>
+        {sub && <Animated.Text style={[styles.itemSub, { color: aColors.subTextColor }]}>{sub}</Animated.Text>}
       </View>
-      <Text style={[styles.chevron, { color: colors.subTextColor }]}>›</Text>
+      <Animated.Text style={[styles.chevron, { color: aColors.subTextColor }]}>›</Animated.Text>
     </TouchableOpacity>
   );
 }
@@ -388,6 +401,7 @@ function Item({ icon, label, sub, onPress, iconBg, danger }: {
 export function ConfigScreen() {
   const navigation   = useNavigation<any>();
   const colors       = useConfigColors();
+  const aColors      = useAnimatedConfigColors();
   const user         = useAuthStore((s) => s.user);
   const setUser      = useAuthStore((s) => s.setUser);
   const headerOpacity = useRef(new Animated.Value(0)).current;
@@ -554,17 +568,17 @@ type ModalType =
   const twoFactorEnabled = user?.twoFactorEnabled ?? false;
 
   return (
-    <View style={[styles.root, { backgroundColor: colors.bg }]}>
+    <Animated.View style={[styles.root, { backgroundColor: aColors.bg }]}>
       <StatusBar barStyle={colors.statusBar} backgroundColor={colors.bg} />
 
       <ScrollView contentContainerStyle={styles.scroll} showsVerticalScrollIndicator={false}>
 
         {/* HEADER */}
         <Animated.View style={[styles.header, { opacity: headerOpacity }]}>
-          <Text style={[styles.headerTitle, { color: colors.textColor }]}>Configurações</Text>
-          <Text style={[styles.headerSub,   { color: colors.subTextColor }]}>
+          <Animated.Text style={[styles.headerTitle, { color: aColors.textColor }]}>Configurações</Animated.Text>
+          <Animated.Text style={[styles.headerSub,   { color: aColors.subTextColor }]}>
             Gerencie sua conta
-          </Text>
+          </Animated.Text>
         </Animated.View>
 
         {/* FEEDBACK */}
@@ -581,11 +595,11 @@ type ModalType =
         )}
 
         {/* EMAIL CARD */}
-        <View style={[styles.emailCard, { backgroundColor: colors.cardBg }]}>
+        <Animated.View style={[styles.emailCard, { backgroundColor: aColors.cardBg }]}>
           <View style={styles.emailRow}>
             <View style={styles.emailInfo}>
-              <Text style={[styles.emailLabel, { color: colors.subTextColor }]}>E-mail da conta</Text>
-              <Text style={[styles.emailValue, { color: colors.textColor }]}>{user?.email ?? "..."}</Text>
+              <Animated.Text style={[styles.emailLabel, { color: aColors.subTextColor }]}>E-mail da conta</Animated.Text>
+              <Animated.Text style={[styles.emailValue, { color: aColors.textColor }]}>{user?.email ?? "..."}</Animated.Text>
             </View>
             <View style={[styles.verifiedBadge, {
               backgroundColor: emailVerified ? "#dcfce7" : "#fef9c3",
@@ -598,17 +612,17 @@ type ModalType =
               </Text>
             </View>
           </View>
-        </View>
+        </Animated.View>
         
         {/* TEMA */}
-        <Text style={[styles.sectionLabel, { color: colors.sectionLabel }]}>Aparência</Text>
-        <View style={[styles.section, { backgroundColor: colors.cardBg, marginBottom: 18 }]}>
+        <Animated.Text style={[styles.sectionLabel, { color: aColors.sectionLabel }]}>Aparência</Animated.Text>
+        <Animated.View style={[styles.section, { backgroundColor: aColors.cardBg, marginBottom: 18 }]}>
           <ThemeToggle />
-        </View>
+        </Animated.View>
 
         {/* SEÇÃO EMAIL */}
-        <Text style={[styles.sectionLabel, { color: colors.sectionLabel }]}>E-mail</Text>
-        <View style={[styles.section, { backgroundColor: colors.cardBg }]}>
+        <Animated.Text style={[styles.sectionLabel, { color: aColors.sectionLabel }]}>E-mail</Animated.Text>
+        <Animated.View style={[styles.section, { backgroundColor: aColors.cardBg }]}>
           {!emailVerified && (
             <>
               <Item
@@ -618,7 +632,7 @@ type ModalType =
                 iconBg="#fef9c3"
                 onPress={handleSendVerify}
               />
-              <View style={[styles.divider, { backgroundColor: colors.dividerColor }]} />
+              <Animated.View style={[styles.divider, { backgroundColor: aColors.dividerColor }]} />
             </>
           )}
           <Item
@@ -628,11 +642,11 @@ type ModalType =
             iconBg="#eff6ff"
             onPress={() => setModal("change-email")}
           />
-        </View>
+        </Animated.View>
 
         {/* SEÇÃO SEGURANÇA */}
-        <Text style={[styles.sectionLabel, { color: colors.sectionLabel }]}>Segurança</Text>
-        <View style={[styles.section, { backgroundColor: colors.cardBg }]}>
+        <Animated.Text style={[styles.sectionLabel, { color: aColors.sectionLabel }]}>Segurança</Animated.Text>
+        <Animated.View style={[styles.section, { backgroundColor: aColors.cardBg }]}>
           <Item
             icon="🔑"
             label="Alterar senha"
@@ -640,7 +654,7 @@ type ModalType =
             iconBg="#f5f3ff"
             onPress={() => setModal("change-password")}
           />
-          <View style={[styles.divider, { backgroundColor: colors.dividerColor }]} />
+          <Animated.View style={[styles.divider, { backgroundColor: aColors.dividerColor }]} />
           <Item
             icon={twoFactorEnabled ? "🛡️" : "🔓"}
             label={twoFactorEnabled ? "2FA ativo" : "Ativar autenticação 2FA"}
@@ -648,7 +662,7 @@ type ModalType =
             iconBg={twoFactorEnabled ? "#dcfce7" : "#f0fdf4"}
             onPress={twoFactorEnabled ? () => setModal("2fa-disable") : handleSetup2FA}
           />
-        </View>
+        </Animated.View>
 
         {/* LOGOUT */}
         <TouchableOpacity
@@ -838,7 +852,7 @@ type ModalType =
           </View>
         </View>
       </Modal>
-    </View>
+    </Animated.View>
   );
 }
 
