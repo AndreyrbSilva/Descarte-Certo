@@ -1,43 +1,71 @@
-import { View, StyleSheet } from "react-native";
+import Svg, { G, Path } from "react-native-svg";
 
-export function IconFlash({ color, size = 20 }: { color: string; size?: number }) {
-  const s = size / 20;
+type IconProps = {
+  size?: number;
+  color?: string;
+};
+
+export function IconFlash({
+  size = 24,
+  color = "#000",
+}: IconProps) {
   return (
-    <View style={[styles.wrap, { width: size, height: size }]}>
-      {/* corpo do raio */}
-      <View style={[styles.top, {
-        width: 8 * s, height: 1.5,
-        backgroundColor: color,
-        top: 3 * s, left: 6 * s,
-        transform: [{ rotate: "-45deg" }],
-      }]} />
-      <View style={[styles.mid, {
-        width: 10 * s, height: 1.5,
-        backgroundColor: color,
-        top: 9 * s, left: 4 * s,
-        transform: [{ rotate: "-45deg" }],
-      }]} />
-      <View style={[styles.bot, {
-        width: 8 * s, height: 1.5,
-        backgroundColor: color,
-        top: 15 * s, left: 5 * s,
-        transform: [{ rotate: "-45deg" }],
-      }]} />
-      {/* linha vertical conectando */}
-      <View style={[styles.vert, {
-        width: 1.5, height: 8 * s,
-        backgroundColor: color,
-        top: 5 * s, left: 9 * s,
-        transform: [{ rotate: "20deg" }],
-      }]} />
-    </View>
+    <Svg
+      width={size}
+      height={size}
+      viewBox="0 0 24 24"
+      fill="none"
+    >
+      <G>
+        <Path
+          d="M15 22V17.6569C15 16.8394 15 16.4306 15.1522 16.0631C15.3045 15.6955 15.5935 15.4065 16.1716 14.8284L19.4142 11.5858C19.7032 11.2968 19.8478 11.1522 19.9239 10.9685C20 10.7847 20 10.5803 20 10.1716V10C20 9.05719 20 8.58579 19.7071 8.29289C19.4142 8 18.9428 8 18 8H17M9 22V17.6569C9 16.8394 9 16.4306 8.84776 16.0631C8.69552 15.6955 8.40649 15.4065 7.82843 14.8284L4.58579 11.5858C4.29676 11.2968 4.15224 11.1522 4.07612 10.9685C4 10.7847 4 10.5803 4 10.1716V10C4 9.05719 4 8.58579 4.29289 8.29289C4.58579 8 5.05719 8 6 8H13"
+          stroke={color}
+          strokeWidth={1.5}
+          strokeLinecap="round"
+        />
+
+        <Path
+          d="M15 16H9"
+          stroke={color}
+          strokeWidth={1.5}
+          strokeLinecap="round"
+        />
+
+        <Path
+          d="M4.5 11H19.5"
+          stroke={color}
+          strokeWidth={1.5}
+          strokeLinecap="round"
+        />
+
+        <Path
+          d="M12 5V2"
+          stroke={color}
+          strokeWidth={1.5}
+          strokeLinecap="round"
+        />
+
+        <Path
+          d="M8 5L6 3"
+          stroke={color}
+          strokeWidth={1.5}
+          strokeLinecap="round"
+        />
+
+        <Path
+          d="M16 5L18 3"
+          stroke={color}
+          strokeWidth={1.5}
+          strokeLinecap="round"
+        />
+
+        <Path
+          d="M12 19V21"
+          stroke={color}
+          strokeWidth={1.5}
+          strokeLinecap="round"
+        />
+      </G>
+    </Svg>
   );
 }
-
-const styles = StyleSheet.create({
-  wrap: { position: "relative" },
-  top:  { position: "absolute" },
-  mid:  { position: "absolute" },
-  bot:  { position: "absolute" },
-  vert: { position: "absolute" },
-});

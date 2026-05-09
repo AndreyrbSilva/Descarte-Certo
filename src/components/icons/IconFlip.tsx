@@ -1,58 +1,28 @@
-import { View, StyleSheet } from "react-native";
+import Svg, { Path } from "react-native-svg";
 
-export function IconFlip({ color, size = 20 }: { color: string; size?: number }) {
-  const s = size / 20;
+type IconProps = {
+  size?: number;
+  color?: string;
+};
+
+export function IconFlip({
+  size = 24,
+  color = "#000",
+}: IconProps) {
   return (
-    <View style={[styles.wrap, { width: size, height: size }]}>
-      {/* seta superior esquerda */}
-      <View style={[styles.arc, {
-        width: 14 * s, height: 7 * s,
-        borderTopWidth: 1.5, borderLeftWidth: 1.5, borderRightWidth: 1.5,
-        borderColor: color,
-        borderTopLeftRadius: 7 * s, borderTopRightRadius: 7 * s,
-        top: 2 * s, left: 3 * s,
-      }]} />
-      {/* ponta seta direita */}
-      <View style={[styles.tip, {
-        width: 4 * s, height: 1.5,
-        backgroundColor: color,
-        top: 1.5 * s, right: 1 * s,
-        transform: [{ rotate: "45deg" }],
-      }]} />
-      <View style={[styles.tip, {
-        width: 4 * s, height: 1.5,
-        backgroundColor: color,
-        top: 4.5 * s, right: 1 * s,
-        transform: [{ rotate: "-45deg" }],
-      }]} />
-      {/* linha inferior */}
-      <View style={[styles.line, {
-        width: 14 * s, height: 7 * s,
-        borderBottomWidth: 1.5, borderLeftWidth: 1.5, borderRightWidth: 1.5,
-        borderColor: color,
-        borderBottomLeftRadius: 7 * s, borderBottomRightRadius: 7 * s,
-        top: 11 * s, left: 3 * s,
-      }]} />
-      {/* ponta seta esquerda */}
-      <View style={[styles.tip, {
-        width: 4 * s, height: 1.5,
-        backgroundColor: color,
-        top: 14 * s, left: 1 * s,
-        transform: [{ rotate: "45deg" }],
-      }]} />
-      <View style={[styles.tip, {
-        width: 4 * s, height: 1.5,
-        backgroundColor: color,
-        top: 17 * s, left: 1 * s,
-        transform: [{ rotate: "-45deg" }],
-      }]} />
-    </View>
+    <Svg
+      width={size}
+      height={size}
+      viewBox="0 0 24 24"
+      fill="none"
+    >
+      <Path
+        d="M4.06189 13C4.02104 12.6724 4 12.3387 4 12C4 7.58172 7.58172 4 12 4C14.5006 4 16.7332 5.14727 18.2002 6.94416M19.9381 11C19.979 11.3276 20 11.6613 20 12C20 16.4183 16.4183 20 12 20C9.61061 20 7.46589 18.9525 6 17.2916M9 17H6V17.2916M18.2002 4V6.94416M18.2002 6.94416V6.99993L15.2002 7M6 20V17.2916"
+        stroke={color}
+        strokeWidth={2}
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    </Svg>
   );
 }
-
-const styles = StyleSheet.create({
-  wrap: { position: "relative" },
-  arc:  { position: "absolute" },
-  line: { position: "absolute" },
-  tip:  { position: "absolute" },
-});

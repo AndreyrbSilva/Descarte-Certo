@@ -11,6 +11,7 @@ const COLORS = {
     subTextColor: "#64748b",
     dividerColor: "#e2e8f0",
     sectionLabel: "#94a3b8",
+    iconBg:       "#dcfce7",
   },
   dark: {
     bg:           "#0f172a",
@@ -19,6 +20,7 @@ const COLORS = {
     subTextColor: "#94a3b8",
     dividerColor: "#334155",
     sectionLabel: "#475569",
+    iconBg:       "#162418",
   },
 };
 
@@ -35,6 +37,7 @@ export function useConfigColors() {
     subTextColor: dark ? COLORS.dark.subTextColor : COLORS.light.subTextColor,
     dividerColor: dark ? COLORS.dark.dividerColor : COLORS.light.dividerColor,
     sectionLabel: dark ? COLORS.dark.sectionLabel : COLORS.light.sectionLabel,
+    iconBg:       dark ? COLORS.dark.iconBg       : COLORS.light.iconBg,
     dangerColor:  "#ef4444",
     statusBar:    dark ? "light-content" : "dark-content" as any,
   };
@@ -71,6 +74,7 @@ export function useAnimatedConfigColors() {
     subTextColor: interpolate(COLORS.light.subTextColor, COLORS.dark.subTextColor),
     dividerColor: interpolate(COLORS.light.dividerColor, COLORS.dark.dividerColor),
     sectionLabel: interpolate(COLORS.light.sectionLabel, COLORS.dark.sectionLabel),
+    iconBg:       interpolate(COLORS.light.iconBg,       COLORS.dark.iconBg),
     dangerColor:  "#ef4444",
     statusBar:    isDark ? "light-content" : "dark-content" as any,
   };

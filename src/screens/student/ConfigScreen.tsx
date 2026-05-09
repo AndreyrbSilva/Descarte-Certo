@@ -18,7 +18,11 @@ import {
   setup2FA, verify2FA, disable2FA,
   fetchMe, logout,
 } from "../../services/authService";
-import { IconEye, IconLogout } from "../../components/icons";
+import {
+  IconEye, IconLogout, IconMailCheck, IconMailEdit,
+  IconMoonStars, IconSun,
+  IconResetPass, IconShield, IconSecureLock,
+} from "../../components/icons";
 import { useTheme } from "../../context/ThemeContext";
 
 const GREEN = "#22c55e";
@@ -58,9 +62,14 @@ function ThemeToggle() {
     outputRange: ["#e2e8f0", "#334155"],
   });
 
-  const iconBg = colorAnim.interpolate({
-    inputRange:  [0, 1],
-    outputRange: ["#fef9c3", "#1e293b"],
+  const sunOpacity = colorAnim.interpolate({
+    inputRange: [0, 1],
+    outputRange: [1, 0],
+  });
+
+  const moonOpacity = colorAnim.interpolate({
+    inputRange: [0, 1],
+    outputRange: [0, 1],
   });
 
   return (
@@ -70,8 +79,13 @@ function ThemeToggle() {
       activeOpacity={0.8}
     >
       {/* ícone */}
-      <Animated.View style={[styles.itemIconWrap, { backgroundColor: iconBg }]}>
-        <Text style={{ fontSize: 18 }}>{isDark ? "🌙" : "☀️"}</Text>
+      <Animated.View style={[styles.itemIconWrap, { backgroundColor: aColors.iconBg }]}>
+        <Animated.View style={{ position: "absolute", opacity: moonOpacity }}>
+          <IconMoonStars size={20} color="#e2e8f0" />
+        </Animated.View>
+        <Animated.View style={{ position: "absolute", opacity: sunOpacity }}>
+          <IconSun size={20} color="#000000" />
+        </Animated.View>
       </Animated.View>
 
       {/* texto */}
@@ -108,7 +122,12 @@ function ThemeToggle() {
             shadowRadius: 2,
             elevation:    2,
           }}>
-            <Text style={{ fontSize: 12 }}>{isDark ? "🌙" : "☀️"}</Text>
+            <Animated.View style={{ position: "absolute", opacity: moonOpacity }}>
+              <IconMoonStars size={14} color="#334155" />
+            </Animated.View>
+            <Animated.View style={{ position: "absolute", opacity: sunOpacity }}>
+              <IconSun size={14} color="#000000" />
+            </Animated.View>
           </Animated.View>
         </Animated.View>
       </TouchableOpacity>
@@ -372,20 +391,19 @@ function QRModal({ visible, qrCode, secret, onConfirm, onClose, loading }: {
 }
 
 // ─── item de lista ────────────────────────────────────────────────────────────
-function Item({ icon, label, sub, onPress, iconBg, danger }: {
-  icon:   string;
+function Item({ icon, label, sub, onPress, danger }: {
+  icon:   React.ReactNode;
   label:  string;
   sub?:   string;
   onPress: () => void;
-  iconBg: string;
   danger?: boolean;
 }) {
   const aColors = useAnimatedConfigColors();
   return (
     <TouchableOpacity style={styles.item} onPress={onPress} activeOpacity={0.7}>
-      <View style={[styles.itemIconWrap, { backgroundColor: iconBg }]}>
-        <Text style={{ fontSize: 18 }}>{icon}</Text>
-      </View>
+      <Animated.View style={[styles.itemIconWrap, { backgroundColor: aColors.iconBg }]}>
+        {icon}
+      </Animated.View>
       <View style={styles.itemText}>
         <Animated.Text style={[styles.itemLabel, { color: danger ? aColors.dangerColor : aColors.textColor }]}>
           {label}
@@ -626,20 +644,18 @@ type ModalType =
           {!emailVerified && (
             <>
               <Item
-                icon="📨"
+                icon={<IconMailCheck color="#ca8a04" size={25} />}
                 label="Confirmar e-mail"
                 sub="Verifique sua caixa de entrada"
-                iconBg="#fef9c3"
                 onPress={handleSendVerify}
               />
               <Animated.View style={[styles.divider, { backgroundColor: aColors.dividerColor }]} />
             </>
           )}
           <Item
-            icon="✏️"
+            icon={<IconMailEdit color="#3b82f6" size={25} />}
             label="Alterar e-mail"
             sub={twoFactorEnabled ? "Requer código do autenticador" : undefined}
-            iconBg="#eff6ff"
             onPress={() => setModal("change-email")}
           />
         </Animated.View>
@@ -648,18 +664,16 @@ type ModalType =
         <Animated.Text style={[styles.sectionLabel, { color: aColors.sectionLabel }]}>Segurança</Animated.Text>
         <Animated.View style={[styles.section, { backgroundColor: aColors.cardBg }]}>
           <Item
-            icon="🔑"
+            icon={<IconResetPass color="#7c3aed" size={25} />}
             label="Alterar senha"
             sub={twoFactorEnabled ? "Requer código do autenticador" : undefined}
-            iconBg="#f5f3ff"
             onPress={() => setModal("change-password")}
           />
           <Animated.View style={[styles.divider, { backgroundColor: aColors.dividerColor }]} />
           <Item
-            icon={twoFactorEnabled ? "🛡️" : "🔓"}
+            icon={twoFactorEnabled ? <IconShield color="#16a34a" size={22} /> : <IconSecureLock color="#22c55e" size={22} />}
             label={twoFactorEnabled ? "2FA ativo" : "Ativar autenticação 2FA"}
             sub={twoFactorEnabled ? "Toque para desativar" : "Proteja sua conta com TOTP"}
-            iconBg={twoFactorEnabled ? "#dcfce7" : "#f0fdf4"}
             onPress={twoFactorEnabled ? () => setModal("2fa-disable") : handleSetup2FA}
           />
         </Animated.View>
