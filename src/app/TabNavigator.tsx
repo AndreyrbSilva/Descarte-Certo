@@ -11,7 +11,7 @@ import { ConfigScreen }  from "../screens/student/ConfigScreen";
 
 import { IconHome, IconRanking, IconUser, IconConfig, IconCamera } from "../components/icons";
 import { TabBackground } from "../components/navigation/TabBackground";
-import { useTabColors }  from "../hooks/useTabColors";
+import { useTabColors, useAnimatedTabColors } from "../hooks/useTabColors";
 
 const Tab   = createBottomTabNavigator();
 const GREEN = "#22c55e";
@@ -54,8 +54,9 @@ function AnimatedIcon({ focused, activeColor, inactiveColor, children }: {
 }
 
 export function TabNavigator() {
-  const colors = useTabColors();
-  const insets = useSafeAreaInsets();
+  const colors  = useTabColors();
+  const aColors = useAnimatedTabColors();
+  const insets  = useSafeAreaInsets();
 
   return (
     <Tab.Navigator
@@ -69,7 +70,7 @@ export function TabNavigator() {
           paddingBottom: insets.bottom,
           position: "absolute",
         },
-        tabBarBackground: () => <TabBackground tabBg={colors.tabBg} border={colors.border} />,
+        tabBarBackground: () => <TabBackground tabBg={aColors.tabBg} border={aColors.border} />,
         tabBarActiveTintColor:   colors.active,
         tabBarInactiveTintColor: colors.inactive,
         tabBarLabelStyle: { fontSize: 10, fontWeight: "700", marginTop: 2 },

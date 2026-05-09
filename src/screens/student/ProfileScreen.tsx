@@ -429,10 +429,6 @@ export function ProfileScreen() {
           )}
         </Animated.View>
 
-        <TouchableOpacity style={styles.logoutBtn} onPress={() => setShowLogout(true)} activeOpacity={0.7}>
-          <Text style={styles.logoutText}>Sair da conta</Text>
-        </TouchableOpacity>
-
       </ScrollView>
 
       <Modal visible={showLogout} transparent animationType="fade" onRequestClose={() => setShowLogout(false)}>

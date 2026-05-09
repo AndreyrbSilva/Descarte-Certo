@@ -1,10 +1,10 @@
-import { useColorScheme } from "react-native";
+import { useTheme } from "../context/ThemeContext";
 
 export function useProfileColors() {
-  const dark = useColorScheme() === "dark";
+  const { isDark: dark } = useTheme();
   return {
     bg:           dark ? "#0f172a" : "#f8fafc",
-    chipBg: dark ? "#1e293b" : "#f1f5f9",
+    chipBg:       dark ? "#1e293b" : "#f1f5f9",
     cardBg:       dark ? "#1e293b" : "#ffffff",
     textColor:    dark ? "#f1f5f9" : "#1e293b",
     subTextColor: dark ? "#94a3b8" : "#64748b",

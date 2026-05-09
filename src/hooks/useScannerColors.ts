@@ -1,7 +1,7 @@
-import { useColorScheme } from "react-native";
+import { useTheme } from "../context/ThemeContext";
 
 export function useScannerColors() {
-  const dark = useColorScheme() === "dark";
+  const { isDark: dark } = useTheme();
   return {
     overlayBg:    "rgba(0,0,0,0.6)",
     btnBg:        dark ? "#ffffff20" : "#ffffff25",
