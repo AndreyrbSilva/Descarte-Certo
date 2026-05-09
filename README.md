@@ -17,13 +17,14 @@ O Descarte Certo resolve um problema real: crianças não sabem separar o lixo c
 
 | Camada | Tecnologia |
 |---|---|
-| Mobile | React Native + Expo + TypeScript |
-| Estilo | StyleSheet nativo + NativeWind |
-| Estado | Zustand + TanStack Query |
-| Backend principal | Node.js + Fastify + TypeScript |
+| Mobile | React Native + Expo SDK 54 + TypeScript |
+| Estilo | StyleSheet nativo |
+| Estado | Zustand |
+| Backend | Node.js + Fastify + TypeScript |
 | ORM | Prisma 7 |
 | Banco de dados | Supabase (PostgreSQL) |
-| Autenticação | JWT + bcrypt + AES (matrícula) |
+| Autenticação | JWT + bcrypt + AES (matrícula) + TOTP (2FA) |
+| E-mail transacional | Brevo |
 | Backend de IA | Python + FastAPI *(em desenvolvimento)* |
 
 ---
@@ -34,25 +35,26 @@ O Descarte Certo resolve um problema real: crianças não sabem separar o lixo c
 descarte-certo/
 ├── src/                        # App mobile (React Native)
 │   ├── components/
-│   │   ├── icons/              # Ícones customizados (View-based, sem SVG externo)
-│   │   ├── shared/
-│   │   └── ui/
-│   ├── constants/
-│   │   └── theme.ts            # Cores globais
+│   │   ├── icons/              # Ícones customizados SVG-based
+│   │   └── modals/             # Modais reutilizáveis (StreakSheetModal)
+│   ├── context/
+│   │   └── ThemeContext.tsx    # Contexto global de tema (dark/light/system)
 │   ├── hooks/                  # Hooks de animação e cores por tela
+│   ├── lib/
+│   │   ├── streakColors.ts     # Mapeamento de cores por nível de streak
+│   │   └── themeStorage.ts     # Persistência da preferência de tema
 │   ├── screens/
-│   │   ├── admin/              # Painel administrativo (em desenvolvimento)
 │   │   └── student/            # Fluxo do aluno
 │   ├── services/               # Chamadas à API
 │   ├── store/                  # Zustand (estado global)
-│   └── types/
+│   └── app/                    # Navegação (Stack + Tab)
 ├── backend/                    # API Node.js
 │   ├── prisma/
 │   │   ├── schema.prisma
 │   │   └── migrations/
 │   └── src/
 │       ├── controllers/
-│       ├── lib/                # prisma.ts, crypto.ts, blacklist.ts
+│       ├── lib/                # prisma.ts, crypto.ts, blacklist.ts, mailer.ts
 │       ├── middlewares/
 │       └── routes/
 └── README.md
@@ -66,6 +68,7 @@ descarte-certo/
 - npm >= 10
 - Expo CLI (`npm install -g expo-cli`)
 - Conta no [Supabase](https://supabase.com)
+- Conta no [Brevo](https://brevo.com) para envio de e-mails
 - Dispositivo físico ou emulador com Expo Go instalado
 
 ---
@@ -108,6 +111,7 @@ Crie o arquivo `backend/.env`:
 DATABASE_URL="postgresql://postgres:SUASENHA@db.SEUPROJECT.supabase.co:5432/postgres"
 JWT_SECRET="chave_jwt_longa_e_aleatoria"
 AES_SECRET="chave_aes_longa_e_aleatoria_32chars"
+BREVO_API_KEY="sua_api_key_do_brevo"
 PORT=3333
 ```
 
@@ -160,22 +164,41 @@ Escaneie o QR code com o Expo Go (Android) ou a câmera (iOS).
 | Método | Rota | Descrição | Auth |
 |---|---|---|---|
 | POST | `/auth/register` | Cadastro de aluno | ❌ |
-| POST | `/auth/login` | Login, retorna JWT | ❌ |
+| POST | `/auth/login` | Login, retorna JWT + dados do usuário | ❌ |
 | POST | `/auth/logout` | Logout, invalida token | ✅ |
+| GET | `/auth/me` | Dados atuais do usuário autenticado | ✅ |
+| PATCH | `/auth/avatar` | Atualiza URL do avatar | ✅ |
+| POST | `/auth/email/send-code` | Envia código de verificação de e-mail | ✅ |
+| POST | `/auth/email/verify` | Confirma e-mail com código | ✅ |
+| POST | `/auth/email/change` | Inicia troca de e-mail (envia código pro novo) | ✅ |
+| POST | `/auth/email/change/confirm` | Confirma troca de e-mail com código | ✅ |
+| POST | `/auth/password/change` | Altera senha (requer 2FA se ativo) | ✅ |
+| POST | `/auth/2fa/setup` | Gera secret + QR Code TOTP | ✅ |
+| POST | `/auth/2fa/verify` | Confirma ativação do 2FA | ✅ |
+| POST | `/auth/2fa/disable` | Desativa 2FA | ✅ |
 
 ### Scan
 
 | Método | Rota | Descrição | Auth |
 |---|---|---|---|
-| POST | `/scan` | Registra escaneamento e calcula pontos | ✅ |
-| GET | `/scan/points` | Retorna total de pontos do usuário | ✅ |
+| POST | `/scan` | Registra escaneamento, calcula pontos e streak | ✅ |
+| GET | `/scan/points` | Total de pontos do usuário | ✅ |
 | GET | `/scan/history` | Últimos 20 escaneamentos | ✅ |
+| GET | `/scan/streak` | Streak atual (dias consecutivos com scan) | ✅ |
 
 ### Ranking
 
 | Método | Rota | Descrição | Auth |
 |---|---|---|---|
 | GET | `/ranking/me` | Posição do usuário na turma e na escola | ✅ |
+| GET | `/ranking/turma` | Top 10 da turma com streak | ✅ |
+| GET | `/ranking/escola` | Top 15 da escola com streak e turma | ✅ |
+
+### Perfil público
+
+| Método | Rota | Descrição | Auth |
+|---|---|---|---|
+| GET | `/profile/:userId` | Perfil público de outro usuário | ✅ |
 
 > Rotas marcadas com ✅ exigem header `Authorization: Bearer <token>`.
 
@@ -196,9 +219,33 @@ Escaneie o QR code com o Expo Go (Android) ou a câmera (iOS).
 - Senhas com **bcrypt** (salt 10)
 - Matrícula criptografada com **AES** no banco
 - JWT com expiração de **7 dias**
-- **Token blacklist** no logout — tokens invalidados são armazenados no banco e rejeitados em requisições futuras
-- **Rate limiting** global (100 req/min) e restrito no login (5 req/min por IP) via `@fastify/rate-limit`
+- **Token blacklist** no logout
+- **Rate limiting** global (100 req/min) e restrito no login (5 req/min por IP)
 - Validação de entrada com **Zod** em todas as rotas
+- **2FA TOTP** opcional via Google Authenticator ou similar
+- Troca de e-mail e senha protegidas por código de verificação ou TOTP quando 2FA está ativo
+
+---
+
+## Sistema de Streak
+
+O streak representa dias consecutivos com pelo menos um scan. A cor do ícone de chama evolui conforme o nível:
+
+| Dias | Cor |
+|---|---|
+| 0 | Cinza (inativo) |
+| 1–2 | Laranja claro |
+| 3–6 | Laranja |
+| 7–13 | Vermelho |
+| 14–20 | Vermelho escuro |
+| 21–29 | Amarelo |
+| 30–44 | Verde |
+| 45–59 | Ciano |
+| 60–89 | Azul |
+| 90–119 | Roxo |
+| 120+ | Rosa |
+
+Ao subir de nível, um overlay animado aparece na HomeScreen com o novo foguinho e a cor do nível atingido.
 
 ---
 
@@ -210,9 +257,10 @@ Aluno abre o app
   → app recorta a região do frame (expo-image-manipulator)
   → envia categoria para POST /scan                    ← hoje: categoria simulada aleatória
   → backend valida JWT + blacklist
-  → calcula pontos e salva Scan + atualiza UserPoints
-  → retorna { category, pointsEarned, totalPoints }
+  → calcula pontos, atualiza UserPoints e computa streak
+  → retorna { category, pointsEarned, totalPoints, streak }
   → app exibe tela de resultado com animação
+  → ao voltar para Home, detecta level up de streak e exibe overlay
 ```
 
 > **Modo simulado:** enquanto o modelo de IA não está integrado, a categoria é sorteada aleatoriamente no `scanService.ts`. Quando o FastAPI estiver pronto, será necessário apenas substituir essa lógica — o restante do fluxo permanece idêntico.
@@ -224,14 +272,21 @@ Aluno abre o app
 - [x] Autenticação completa (registro, login, logout, sessão persistente)
 - [x] Escaneamento com câmera e resultado animado
 - [x] Sistema de pontos e histórico
-- [x] Ranking por turma e escola
-- [ ] Tela de perfil do aluno
-- [ ] Painel administrativo
-- [ ] Backend de IA (FastAPI + TensorFlow)
+- [x] Sistema de streak com foguinho animado e níveis de cor
+- [x] Overlay de level up ao subir de nível de streak
+- [x] Modal de selos de sequência (milestone sheet)
+- [x] Ranking por turma (top 10) e escola (top 15) com pódio animado
+- [x] Perfil público de outros alunos via ranking
+- [x] Tela de perfil com avatar, XP, histórico e filtros de tempo
+- [x] Upload de avatar no Supabase Storage
+- [x] Tela de configurações com trocar tema, verificação de e-mail, troca de e-mail e senha, 2FA TOTP
+- [x] Sistema de tema dark/light persistido com override do sistema
+- [ ] Missões diárias funcionais
+- [ ] Sistema de troféus e conquistas
+- [ ] Backend de IA (FastAPI + TensorFlow/MobileNet)
 - [ ] Integração do modelo de classificação de resíduos
-- [ ] Missões diárias
-- [ ] Sistema de troféus
 - [ ] Recuperação de senha por e-mail
+- [ ] Painel administrativo
 - [ ] Deploy (Railway + EAS Build)
 
 ---
@@ -243,8 +298,7 @@ Aluno abre o app
 | `DATABASE_URL` | `backend/.env` | Connection string do Supabase |
 | `JWT_SECRET` | `backend/.env` | Chave para assinar tokens JWT |
 | `AES_SECRET` | `backend/.env` | Chave para criptografar matrículas |
+| `BREVO_API_KEY` | `backend/.env` | API key do Brevo para envio de e-mails |
 | `PORT` | `backend/.env` | Porta do servidor (padrão: 3333) |
 
 > Nunca commite o arquivo `.env`. Ele já está no `.gitignore`.
-
----
