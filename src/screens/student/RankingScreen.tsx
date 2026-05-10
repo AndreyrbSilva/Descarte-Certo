@@ -1,10 +1,11 @@
 import { useEffect, useRef, useState, useCallback } from "react";
 import {
   View, Text, ScrollView, Animated,
-  StatusBar, TouchableOpacity, Image, useColorScheme,
+  StatusBar, TouchableOpacity, Image,
 } from "react-native";
 import * as NavigationBar from "expo-navigation-bar";
 import { useFocusEffect, useNavigation } from "@react-navigation/native";
+import { useTheme } from "../../context/ThemeContext";
 
 import { useRankingColors }                              from "../../hooks/useRankingColors";
 import { fetchTurmaRanking, fetchEscolaRanking, RankingEntry } from "../../services/rankingService";
@@ -68,7 +69,7 @@ function PodiumItem({ entry, height, colors, showTurma, onPress }: {
 export function RankingScreen() {
   const navigation = useNavigation<any>();
   const colors     = useRankingColors();
-  const dark       = useColorScheme() === "dark";
+  const { isDark: dark } = useTheme();
 
   const [tab,        setTab]        = useState<Tab>("turma");
   const [turmaData,  setTurmaData]  = useState<RankingEntry[]>([]);
@@ -219,7 +220,7 @@ export function RankingScreen() {
                       <View style={[
                         styles.card,
                         {
-                          backgroundColor: entry.isMe ? (dark ? "#14532d" : "#dcfce7") : colors.cardBg,
+                          backgroundColor: entry.isMe ? (dark ? "#162418" : "#dcfce7") : colors.cardBg,
                           borderWidth:     entry.isMe ? 1.5 : 0,
                           borderColor:     entry.isMe ? GREEN : "transparent",
                         },
