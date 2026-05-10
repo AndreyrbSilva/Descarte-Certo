@@ -48,8 +48,14 @@ function PodiumItem({ entry, position, height, colors, showTurma, onPress }: {
       
       {entry ? (
         <TouchableOpacity onPress={onPress} activeOpacity={0.8}>
-          <View style={[styles.podiumAvatar, entry.isMe && { borderWidth: 3, borderColor: GREEN }]}>
-            <Avatar name={entry.name} avatarUrl={entry.avatarUrl} size={56} bg={bg} />
+          <View style={[
+            styles.podiumAvatar, 
+            { 
+              width: 62, height: 62, borderRadius: 31,
+              borderWidth: 3, borderColor: entry.isMe ? GREEN : "transparent" 
+            }
+          ]}>
+            <Avatar name={entry.name} avatarUrl={entry.avatarUrl} size={50} bg={bg} />
           </View>
         </TouchableOpacity>
       ) : (
