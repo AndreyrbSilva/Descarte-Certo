@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState, useCallback } from "react";
 import {
   View, Text, ScrollView, Animated,
-  StatusBar, TouchableOpacity, Image,
+  StatusBar, TouchableOpacity, Image, useColorScheme,
 } from "react-native";
 import * as NavigationBar from "expo-navigation-bar";
 import { useFocusEffect, useNavigation } from "@react-navigation/native";
@@ -68,6 +68,7 @@ function PodiumItem({ entry, height, colors, showTurma, onPress }: {
 export function RankingScreen() {
   const navigation = useNavigation<any>();
   const colors     = useRankingColors();
+  const dark       = useColorScheme() === "dark";
 
   const [tab,        setTab]        = useState<Tab>("turma");
   const [turmaData,  setTurmaData]  = useState<RankingEntry[]>([]);
@@ -186,7 +187,7 @@ export function RankingScreen() {
           <Animated.View style={{ opacity: listOpacity }}>
 
             {/* PÓDIO */}
-            {top3.length >= 2 && (
+            {top3.length >= 1 && (
               <View style={styles.podium}>
                 {podiumOrder.map((entry) => (
                   <PodiumItem
@@ -218,7 +219,7 @@ export function RankingScreen() {
                       <View style={[
                         styles.card,
                         {
-                          backgroundColor: entry.isMe ? GREEN + "18" : colors.cardBg,
+                          backgroundColor: entry.isMe ? (dark ? "#14532d" : "#dcfce7") : colors.cardBg,
                           borderWidth:     entry.isMe ? 1.5 : 0,
                           borderColor:     entry.isMe ? GREEN : "transparent",
                         },
@@ -229,7 +230,7 @@ export function RankingScreen() {
                         <Avatar name={entry.name} avatarUrl={entry.avatarUrl} size={44} bg={GREEN} />
                         <View style={styles.info}>
                           <Text style={[styles.name, { color: colors.textColor }]} numberOfLines={1}>
-                            {entry.name.split(" ")[0]}
+                            {entry.name.split(" ").slice(0, 2).join(" ")}
                           </Text>
                           <View style={styles.streakRow}>
                             <IconFlame outer={fc.outer} innerStart={fc.innerStart} innerEnd={fc.innerEnd} size={12} />
