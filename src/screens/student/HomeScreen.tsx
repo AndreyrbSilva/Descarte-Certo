@@ -16,7 +16,7 @@ import { useHomeColors }   from "../../hooks/useHomeColors";
 import { getStreakColors } from "../../hooks/streakColors";
 import { styles }          from "./homeStyles";
 import {
-  IconTrophy, IconTrend, IconCamera,
+  IconTrophy, IconTrend, IconCamera, IconCheck,
   IconTarget, IconBulb, IconRecycle, IconRanking, IconStar, IconFlame,
 } from "../../components/icons";
 
@@ -298,21 +298,24 @@ export function HomeScreen() {
 
         {/* MISSÃO DO DIA */}
         <Animated.View style={[styles.card, {
-          backgroundColor: mission?.completed ? (dark ? "#14532d" : "#dcfce7") : colors.cardBg,
+          backgroundColor: colors.cardBg,
           opacity: card3Opacity,
           transform: [{ translateY: card3Y }],
-          borderWidth: mission?.completed ? 1 : 0,
+          borderWidth: mission?.completed ? 1.5 : 0,
           borderColor: mission?.completed ? GREEN : "transparent",
         }]}>
           <View style={styles.missionHeader}>
             <View style={[styles.missionIconWrap, {
-              backgroundColor: mission?.completed ? GREEN + "33" : colors.iconBg,
+              backgroundColor: mission?.completed ? GREEN + "22" : colors.iconBg,
             }]}>
-              <IconTarget color={mission?.completed ? GREEN : ORANGE} size={20} />
+              {mission?.completed
+                ? <IconCheck color={GREEN} size={20} />
+                : <IconTarget color={ORANGE} size={20} />
+              }
             </View>
             <View style={{ flex: 1 }}>
               <Text style={[styles.missionLabel, { color: colors.subTextColor }]}>
-                {mission?.completed ? "✅ Missão completa!" : "Missão do dia"}
+                {mission?.completed ? "Missão completa!" : "Missão diária"}
               </Text>
               <Text style={[styles.missionText, { color: colors.textColor }]}>
                 {mission?.mission.title ?? "Carregando..."}
@@ -351,6 +354,15 @@ export function HomeScreen() {
                 : "0/0"}
             </Text>
           </View>
+          {mission?.completed ? (
+            <Text style={{ color: colors.subTextColor, fontSize: 11, marginTop: 8, textAlign: "center" }}>
+              Volte amanhã para uma nova missão!
+            </Text>
+          ) : (
+            <Text style={{ color: colors.subTextColor, fontSize: 11, marginTop: 8, textAlign: "center", opacity: 0.7 }}>
+              Nova missão todos os dias à meia-noite
+            </Text>
+          )}
         </Animated.View>
 
         {/* RANKING */}
