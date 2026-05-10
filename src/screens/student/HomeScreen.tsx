@@ -11,6 +11,7 @@ import { StreakSheetModal } from "../../components/modals/StreakSheetModal";
 
 import { useAuthStore }    from "../../store/useAuthStore";
 import { fetchHomeData }   from "../../services/homeService";
+import { fetchDailyMission, DailyMissionData } from "../../services/missionService";
 import { useHomeColors }   from "../../hooks/useHomeColors";
 import { getStreakColors } from "../../hooks/streakColors";
 import { styles }          from "./homeStyles";
@@ -78,6 +79,7 @@ export function HomeScreen() {
   const [fact,          setFact]          = useState("");
   const [showOverlay,   setShowOverlay]   = useState(false);
   const [streakSheetVisible, setStreakSheetVisible] = useState(false);
+  const [mission,       setMission]       = useState<DailyMissionData | null>(null);
 
   const headerOpacity  = useRef(new Animated.Value(0)).current;
   const card1Opacity   = useRef(new Animated.Value(0)).current;
@@ -155,6 +157,10 @@ export function HomeScreen() {
         }
       }, 30);
     });
+
+    fetchDailyMission()
+      .then(setMission)
+      .catch(() => setMission(null));
   }, []);
 
   // detecta level up ao voltar pra tela
@@ -292,27 +298,58 @@ export function HomeScreen() {
 
         {/* MISSÃO DO DIA */}
         <Animated.View style={[styles.card, {
-          backgroundColor: colors.cardBg,
+          backgroundColor: mission?.completed ? (dark ? "#14532d" : "#dcfce7") : colors.cardBg,
           opacity: card3Opacity,
           transform: [{ translateY: card3Y }],
+          borderWidth: mission?.completed ? 1 : 0,
+          borderColor: mission?.completed ? GREEN : "transparent",
         }]}>
           <View style={styles.missionHeader}>
-            <View style={[styles.missionIconWrap, { backgroundColor: colors.iconBg }]}>
-              <IconTarget color={ORANGE} size={20} />
+            <View style={[styles.missionIconWrap, {
+              backgroundColor: mission?.completed ? GREEN + "33" : colors.iconBg,
+            }]}>
+              <IconTarget color={mission?.completed ? GREEN : ORANGE} size={20} />
             </View>
             <View style={{ flex: 1 }}>
-              <Text style={[styles.missionLabel, { color: colors.subTextColor }]}>Missão do dia</Text>
-              <Text style={[styles.missionText,  { color: colors.textColor }]}>
-                Escaneie pelo menos 1 item de cada categoria
+              <Text style={[styles.missionLabel, { color: colors.subTextColor }]}>
+                {mission?.completed ? "✅ Missão completa!" : "Missão do dia"}
+              </Text>
+              <Text style={[styles.missionText, { color: colors.textColor }]}>
+                {mission?.mission.title ?? "Carregando..."}
               </Text>
             </View>
+            {mission?.completed && (
+              <View style={{
+                backgroundColor: GREEN,
+                paddingHorizontal: 10,
+                paddingVertical: 4,
+                borderRadius: 12,
+              }}>
+                <Text style={{ color: "#fff", fontSize: 11, fontWeight: "800" }}>
+                  +{mission.mission.reward} pts
+                </Text>
+              </View>
+            )}
           </View>
           <View style={[styles.progressTrack, { backgroundColor: colors.progressTrack }]}>
-            <View style={[styles.progressBar, { width: "0%", backgroundColor: GREEN }]} />
+            <View style={[styles.progressBar, {
+              width: mission
+                ? `${Math.min((mission.progress / mission.mission.target) * 100, 100)}%`
+                : "0%",
+              backgroundColor: mission?.completed ? GREEN : ORANGE,
+            }]} />
           </View>
           <View style={styles.progressFooter}>
-            <Text style={[styles.progressPct, { color: colors.subTextColor }]}>0%</Text>
-            <Text style={[styles.progressPct, { color: colors.subTextColor }]}>0/5 categorias</Text>
+            <Text style={[styles.progressPct, { color: colors.subTextColor }]}>
+              {mission
+                ? `${Math.min(Math.round((mission.progress / mission.mission.target) * 100), 100)}%`
+                : "0%"}
+            </Text>
+            <Text style={[styles.progressPct, { color: colors.subTextColor }]}>
+              {mission
+                ? `${Math.min(mission.progress, mission.mission.target)}/${mission.mission.target}`
+                : "0/0"}
+            </Text>
           </View>
         </Animated.View>
 
