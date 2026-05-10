@@ -32,35 +32,59 @@ function Avatar({ name, avatarUrl, size, bg }: {
   );
 }
 
-function PodiumItem({ entry, height, colors, showTurma, onPress }: {
-  entry: RankingEntry; height: number; colors: any; showTurma?: boolean; onPress: () => void;
+function PodiumItem({ entry, position, height, colors, showTurma, onPress }: {
+  entry: RankingEntry | null; position: 1 | 2 | 3; height: number; colors: any; showTurma?: boolean; onPress?: () => void;
 }) {
-  const fc = getStreakColors(entry.streak);
-  const bg = entry.position === 1 ? colors.gold : entry.position === 2 ? colors.silver : colors.bronze;
+  const fc = entry ? getStreakColors(entry.streak) : null;
+  const bg = position === 1 ? colors.gold : position === 2 ? colors.silver : colors.bronze;
 
   return (
     <View style={styles.podiumItem}>
-      {entry.position === 1 && <IconCrown size={30} />}
-      <TouchableOpacity onPress={onPress} activeOpacity={0.8}>
-        <View style={[styles.podiumAvatar, entry.isMe && { borderWidth: 3, borderColor: GREEN }]}>
-          <Avatar name={entry.name} avatarUrl={entry.avatarUrl} size={56} bg={bg} />
+      {position === 1 && (
+        <View style={{ opacity: entry ? 1 : 0.4 }}>
+          <IconCrown size={30} />
         </View>
-      </TouchableOpacity>
-      <Text style={[styles.podiumName, { color: colors.textColor }]} numberOfLines={1}>
-        {entry.name.split(" ")[0]}{showTurma && entry.turma ? ` · T${entry.turma}` : ""}
-      </Text>
-      <Text style={[styles.podiumPoints, { color: colors.subTextColor }]}>
-        {entry.points} pts
-      </Text>
-      <View style={{ flexDirection: "row", alignItems: "center", gap: 3 }}>
-        <IconFlame outer={fc.outer} innerStart={fc.innerStart} innerEnd={fc.innerEnd} size={12} />
-        <Text style={[styles.streakText, { color: colors.subTextColor }]}>{entry.streak}d</Text>
-      </View>
-      <View style={[styles.podiumBase, { height, backgroundColor: bg + "cc" }]}>
-        <IconMedal
-          type={entry.position === 1 ? "gold" : entry.position === 2 ? "silver" : "bronze"}
-          size={32}
-        />
+      )}
+      
+      {entry ? (
+        <TouchableOpacity onPress={onPress} activeOpacity={0.8}>
+          <View style={[styles.podiumAvatar, entry.isMe && { borderWidth: 3, borderColor: GREEN }]}>
+            <Avatar name={entry.name} avatarUrl={entry.avatarUrl} size={56} bg={bg} />
+          </View>
+        </TouchableOpacity>
+      ) : (
+        <View style={[styles.podiumAvatar, { 
+          backgroundColor: colors.iconBg, 
+          borderWidth: 2, 
+          borderColor: colors.dividerColor, 
+          borderStyle: "dashed" 
+        }]} />
+      )}
+
+      {entry ? (
+        <>
+          <Text style={[styles.podiumName, { color: colors.textColor }]} numberOfLines={1}>
+            {entry.name.split(" ")[0]}{showTurma && entry.turma ? ` · T${entry.turma}` : ""}
+          </Text>
+          <Text style={[styles.podiumPoints, { color: colors.subTextColor }]}>
+            {entry.points} pts
+          </Text>
+          <View style={{ flexDirection: "row", alignItems: "center", gap: 3 }}>
+            <IconFlame outer={fc!.outer} innerStart={fc!.innerStart} innerEnd={fc!.innerEnd} size={12} />
+            <Text style={[styles.streakText, { color: colors.subTextColor }]}>{entry.streak}d</Text>
+          </View>
+        </>
+      ) : (
+        <View style={{ height: 48 }} /> // Altura aproximada do texto pra alinhar o pódio
+      )}
+
+      <View style={[styles.podiumBase, { height, backgroundColor: bg + (entry ? "cc" : "44") }]}>
+        <View style={{ opacity: entry ? 1 : 0.5 }}>
+          <IconMedal
+            type={position === 1 ? "gold" : position === 2 ? "silver" : "bronze"}
+            size={32}
+          />
+        </View>
       </View>
     </View>
   );
@@ -133,7 +157,11 @@ export function RankingScreen() {
   const data         = tab === "turma" ? turmaData : escolaData;
   const top3         = data.slice(0, 3);
   const rest         = data.slice(3);
-  const podiumOrder  = [top3[1], top3[0], top3[2]].filter(Boolean);
+  const podiumOrder  = [
+    { position: 2 as const, entry: top3[1] ?? null, height: 60 },
+    { position: 1 as const, entry: top3[0] ?? null, height: 80 },
+    { position: 3 as const, entry: top3[2] ?? null, height: 48 },
+  ];
 
   const tabIndicatorLeft = tabAnim.interpolate({
     inputRange:  [0, 1],
@@ -177,31 +205,34 @@ export function RankingScreen() {
           <View style={styles.emptyWrap}>
             <Text style={[styles.emptyText, { color: colors.subTextColor }]}>Carregando...</Text>
           </View>
-        ) : data.length === 0 ? (
-          <View style={styles.emptyWrap}>
-            <Text style={[styles.emptyText, { color: colors.textColor }]}>Nenhum dado ainda</Text>
-            <Text style={[styles.emptySub,  { color: colors.subTextColor }]}>
-              Faça seu primeiro scan para entrar no ranking!
-            </Text>
-          </View>
         ) : (
           <Animated.View style={{ opacity: listOpacity }}>
 
-            {/* PÓDIO */}
-            {top3.length >= 1 && (
-              <View style={styles.podium}>
-                {podiumOrder.map((entry) => (
-                  <PodiumItem
-                    key={entry.userId}
-                    entry={entry}
-                    colors={colors}
-                    height={entry.position === 1 ? 80 : entry.position === 2 ? 60 : 48}
-                    showTurma={tab === "escola"}
-                    onPress={() => navigation.navigate("PublicProfile", { userId: entry.userId })}
-                  />
-                ))}
+            {data.length === 0 && (
+              <View style={{ alignItems: "center", paddingHorizontal: 20, marginBottom: 20 }}>
+                <Text style={{ fontSize: 16, fontWeight: "800", color: colors.textColor, marginBottom: 4 }}>
+                  Pódio vazio! 🏃‍♂️
+                </Text>
+                <Text style={{ fontSize: 13, color: colors.subTextColor, textAlign: "center" }}>
+                  Dê a largada e conquiste o 1º lugar fazendo o seu primeiro escaneamento.
+                </Text>
               </View>
             )}
+
+            {/* PÓDIO SEMPRE VISÍVEL */}
+            <View style={styles.podium}>
+              {podiumOrder.map((item) => (
+                <PodiumItem
+                  key={item.position}
+                  entry={item.entry}
+                  position={item.position}
+                  colors={colors}
+                  height={item.height}
+                  showTurma={tab === "escola"}
+                  onPress={item.entry ? () => navigation.navigate("PublicProfile", { userId: item.entry!.userId }) : undefined}
+                />
+              ))}
+            </View>
 
             {/* LISTA */}
             <View style={styles.listWrap}>
