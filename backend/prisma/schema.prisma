@@ -24,8 +24,9 @@ model User {
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
-  scans      Scan[]
-  points     UserPoints?
+  scans           Scan[]
+  points          UserPoints?
+  missionProgress UserMissionProgress[]
 }
 
 model BlacklistedToken {
@@ -52,4 +53,33 @@ model UserPoints {
   updatedAt  DateTime @updatedAt
 
   user       User     @relation(fields: [userId], references: [id])
+}
+
+model DailyMission {
+  id          String   @id @default(uuid())
+  title       String
+  description String
+  type        String                           // "scan_count" | "scan_category"
+  target      Int
+  category    String?                          // só para scan_category: "plastico", "papel", etc
+  reward      Int
+  createdAt   DateTime @default(now())
+
+  progress    UserMissionProgress[]
+}
+
+model UserMissionProgress {
+  id            String    @id @default(uuid())
+  userId        String
+  missionId     String
+  progress      Int       @default(0)
+  completed     Boolean   @default(false)
+  rewardClaimed Boolean   @default(false)
+  assignedAt    DateTime  @default(now())
+  completedAt   DateTime?
+
+  user    User         @relation(fields: [userId], references: [id])
+  mission DailyMission @relation(fields: [missionId], references: [id])
+
+  @@unique([userId, assignedAt])
 }
