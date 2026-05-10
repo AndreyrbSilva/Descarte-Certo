@@ -1,8 +1,9 @@
 import { useEffect, useRef, useState, useCallback } from "react";
 import {
-  View, Text, ScrollView, TouchableOpacity,
+  View, Text, TouchableOpacity,
   Animated, StatusBar, Image, StyleSheet,
 } from "react-native";
+import { ScrollView } from "react-native-gesture-handler";
 import * as NavigationBar      from "expo-navigation-bar";
 import { useNavigation }       from "@react-navigation/native";
 import { useFocusEffect }      from "@react-navigation/native";

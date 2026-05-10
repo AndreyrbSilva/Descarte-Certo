@@ -1,9 +1,10 @@
 import { useEffect, useRef, useState, useCallback } from "react";
 import {
-  View, Text, ScrollView, TouchableOpacity,
+  View, Text, TouchableOpacity,
   Animated, StatusBar, Modal, TextInput,
   ActivityIndicator, Image, StyleSheet,
 } from "react-native";
+import { ScrollView } from "react-native-gesture-handler";
 import * as NavigationBar from "expo-navigation-bar";
 import { useFocusEffect, useNavigation } from "@react-navigation/native";
 import * as SecureStore from "expo-secure-store";
