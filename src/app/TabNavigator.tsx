@@ -53,9 +53,18 @@ function AnimatedIcon({ focused, activeColor, inactiveColor, children }: {
   );
 }
 
-function CustomTabBar({ state, descriptors, navigation, colors, aColors, insets }: MaterialTopTabBarProps & { colors: any, aColors: any, insets: any }) {
+function CustomTabBar({ state, descriptors, navigation, position, colors, aColors, insets }: MaterialTopTabBarProps & { colors: any, aColors: any, insets: any }) {
+  const translateY = position.interpolate({
+    inputRange: [0, 1, 2, 3, 4],
+    outputRange: [0, 0, 150, 0, 0], // Hide when position is 2 (Scanner)
+  });
+
   return (
-    <View style={{ position: "absolute", bottom: 0, left: 0, right: 0, height: TAB_H + insets.bottom, paddingBottom: insets.bottom }}>
+    <Animated.View style={{ 
+      position: "absolute", bottom: 0, left: 0, right: 0, 
+      height: TAB_H + insets.bottom, paddingBottom: insets.bottom,
+      transform: [{ translateY }]
+    }}>
       <TabBackground tabBg={aColors.tabBg} border={aColors.border} />
       <View style={{ flex: 1, flexDirection: "row" }}>
         {state.routes.map((route, index) => {
@@ -99,7 +108,7 @@ function CustomTabBar({ state, descriptors, navigation, colors, aColors, insets 
           );
         })}
       </View>
-    </View>
+    </Animated.View>
   );
 }
 
