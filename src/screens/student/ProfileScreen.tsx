@@ -1,8 +1,9 @@
 import { useEffect, useRef, useState } from "react";
 import {
-  View, Text, ScrollView, TouchableOpacity,
+  View, Text, TouchableOpacity,
   Animated, StatusBar, Image, Modal, ActivityIndicator,
 } from "react-native";
+import { ScrollView } from "react-native-gesture-handler";
 import * as ImagePicker from "expo-image-picker";
 import * as NavigationBar from "expo-navigation-bar";
 import * as SecureStore from "expo-secure-store";
@@ -250,7 +251,7 @@ export function ProfileScreen() {
       <StatusBar barStyle="light-content" backgroundColor={GREEN} />
 
       <ScrollView
-        contentContainerStyle={[styles.scroll, { paddingBottom: 90 }]}
+        contentContainerStyle={[styles.scroll, { paddingBottom: 120 }]}
         showsVerticalScrollIndicator={false}
       >
 

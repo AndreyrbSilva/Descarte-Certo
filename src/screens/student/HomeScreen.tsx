@@ -1,8 +1,9 @@
 import { useEffect, useRef, useState, useCallback } from "react";
 import {
-  View, Text, ScrollView, TouchableOpacity,
+  View, Text, TouchableOpacity,
   Animated, StatusBar, Image, StyleSheet,
 } from "react-native";
+import { ScrollView } from "react-native-gesture-handler";
 import * as NavigationBar      from "expo-navigation-bar";
 import { useNavigation }       from "@react-navigation/native";
 import { useFocusEffect }      from "@react-navigation/native";
@@ -198,7 +199,7 @@ export function HomeScreen() {
       <StatusBar barStyle={colors.statusBar} backgroundColor={colors.bg} />
 
       <ScrollView
-        contentContainerStyle={[styles.scroll, { paddingBottom: 100 }]}
+        contentContainerStyle={[styles.scroll, { paddingBottom: 120 }]}
         showsVerticalScrollIndicator={false}
       >
         {/* HEADER */}
