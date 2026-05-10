@@ -1,5 +1,5 @@
-import { View, TouchableOpacity, StyleSheet, Animated } from "react-native";
-import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
+import { View, TouchableOpacity, StyleSheet, Animated, Text } from "react-native";
+import { createMaterialTopTabNavigator, MaterialTopTabBarProps } from "@react-navigation/material-top-tabs";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useRef, useEffect } from "react";
 
@@ -13,7 +13,7 @@ import { IconHome, IconRanking, IconUser, IconConfig, IconCamera } from "../comp
 import { TabBackground } from "../components/navigation/TabBackground";
 import { useTabColors, useAnimatedTabColors } from "../hooks/useTabColors";
 
-const Tab   = createBottomTabNavigator();
+const Tab   = createMaterialTopTabNavigator();
 const GREEN = "#22c55e";
 const TAB_H = 64;
 
@@ -53,6 +53,56 @@ function AnimatedIcon({ focused, activeColor, inactiveColor, children }: {
   );
 }
 
+function CustomTabBar({ state, descriptors, navigation, colors, aColors, insets }: MaterialTopTabBarProps & { colors: any, aColors: any, insets: any }) {
+  return (
+    <View style={{ position: "absolute", bottom: 0, left: 0, right: 0, height: TAB_H + insets.bottom, paddingBottom: insets.bottom }}>
+      <TabBackground tabBg={aColors.tabBg} border={aColors.border} />
+      <View style={{ flex: 1, flexDirection: "row" }}>
+        {state.routes.map((route, index) => {
+          const { options } = descriptors[route.key];
+          const isFocused = state.index === index;
+
+          const onPress = () => {
+            const event = navigation.emit({
+              type: 'tabPress',
+              target: route.key,
+              canPreventDefault: true,
+            });
+
+            if (!isFocused && !event.defaultPrevented) {
+              navigation.navigate(route.name);
+            }
+          };
+
+          if (route.name === "Scanner") {
+            return (
+              <TouchableOpacity key={route.key} activeOpacity={0.85} style={styles.fabBtn} onPress={onPress}>
+                <View style={styles.fabWrap}>
+                  <View style={[styles.fab, { backgroundColor: GREEN }]}>
+                    <IconCamera color="#fff" size={26} style={{ marginTop: -6 }} />
+                  </View>
+                </View>
+              </TouchableOpacity>
+            );
+          }
+
+          const Icon = options.tabBarIcon;
+          const label = options.tabBarLabel as string;
+
+          return (
+            <TouchableOpacity key={route.key} activeOpacity={1} style={{ flex: 1, alignItems: "center", justifyContent: "center" }} onPress={onPress}>
+              {Icon && Icon({ focused: isFocused, color: "transparent" })}
+              <Text style={{ fontSize: 10, fontWeight: "700", marginTop: 2, color: isFocused ? colors.active : colors.inactive }}>
+                {label}
+              </Text>
+            </TouchableOpacity>
+          );
+        })}
+      </View>
+    </View>
+  );
+}
+
 export function TabNavigator() {
   const colors  = useTabColors();
   const aColors = useAnimatedTabColors();
@@ -60,22 +110,11 @@ export function TabNavigator() {
 
   return (
     <Tab.Navigator
+      tabBarPosition="bottom"
+      tabBar={(props) => <CustomTabBar {...props} colors={colors} aColors={aColors} insets={insets} />}
       screenOptions={{
-        headerShown: false,
-        tabBarStyle: {
-          backgroundColor: "transparent",
-          borderTopWidth: 0,
-          elevation: 0,
-          height: TAB_H + insets.bottom,
-          paddingBottom: insets.bottom,
-          position: "absolute",
-        },
-        tabBarBackground: () => <TabBackground tabBg={aColors.tabBg} border={aColors.border} />,
-        tabBarActiveTintColor:   colors.active,
-        tabBarInactiveTintColor: colors.inactive,
-        tabBarLabelStyle: { fontSize: 10, fontWeight: "700", marginTop: 2 },
+        swipeEnabled: true,
         lazy: true,
-        animation: "shift",
       }}
     >
       <Tab.Screen
@@ -107,20 +146,6 @@ export function TabNavigator() {
       <Tab.Screen
         name="Scanner"
         component={ScannerScreen}
-        options={{
-          tabBarLabel: "",
-          tabBarStyle: { display: "none" },
-          tabBarIcon: () => (
-            <View style={styles.fabWrap}>
-              <View style={[styles.fab, { backgroundColor: GREEN }]}>
-                <IconCamera color="#fff" size={26} style={{ marginTop: -6 }} />
-              </View>
-            </View>
-          ),
-          tabBarButton: (props) => (
-            <TouchableOpacity {...props} activeOpacity={0.85} style={styles.fabBtn} />
-          ),
-        }}
       />
 
       <Tab.Screen
