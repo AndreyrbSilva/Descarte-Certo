@@ -63,7 +63,8 @@ function CustomTabBar({ state, descriptors, navigation, position, colors, aColor
     <Animated.View style={{ 
       position: "absolute", bottom: 0, left: 0, right: 0, 
       height: TAB_H + insets.bottom, paddingBottom: insets.bottom,
-      transform: [{ translateY }]
+      transform: [{ translateY }],
+      zIndex: 999, elevation: 999, // Ensure tab bar stays above pager screens
     }}>
       <TabBackground tabBg={aColors.tabBg} border={aColors.border} />
       <View style={{ flex: 1, flexDirection: "row" }}>
