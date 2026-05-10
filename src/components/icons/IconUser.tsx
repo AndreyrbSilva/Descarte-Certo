@@ -12,7 +12,7 @@ export function IconUser({ color, size = 20 }: { color: Animated.AnimatedInterpo
 const styles = StyleSheet.create({
   wrap: {
     width: 20, height: 20,
-    alignItems: "center", justifyContent: "center",
+    alignItems: "center", justifyContent: "center", marginRight: 10,
   },
   head: {
     width: 10, height: 10,
