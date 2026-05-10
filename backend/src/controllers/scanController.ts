@@ -2,6 +2,7 @@ import { FastifyRequest, FastifyReply } from "fastify";
 import { z } from "zod";
 import { prisma } from "../lib/prisma";
 import { isBlacklisted } from "../lib/blacklist";
+import { updateMissionProgress } from "./missionController";
 import jwt from "jsonwebtoken";
 
 const JWT_SECRET = process.env.JWT_SECRET ?? "changeme";
@@ -104,9 +105,10 @@ export async function registerScan(req: FastifyRequest, reply: FastifyReply) {
     create: { userId, total: points },
   });
 
-  const [userPoints, streak] = await Promise.all([
+  const [userPoints, streak, missionUpdate] = await Promise.all([
     prisma.userPoints.findUnique({ where: { userId } }),
     computeStreak(userId),
+    updateMissionProgress(userId, category),
   ]);
 
   return reply.status(201).send({
@@ -114,6 +116,15 @@ export async function registerScan(req: FastifyRequest, reply: FastifyReply) {
     pointsEarned: points,
     totalPoints:  userPoints?.total ?? points,
     streak,
+    mission: missionUpdate
+      ? {
+          title: missionUpdate.mission.title,
+          progress: missionUpdate.progress,
+          target: missionUpdate.mission.target,
+          completed: missionUpdate.completed,
+          reward: missionUpdate.mission.reward,
+        }
+      : null,
   });
 }
 
