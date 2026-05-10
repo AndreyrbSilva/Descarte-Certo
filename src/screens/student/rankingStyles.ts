@@ -2,7 +2,7 @@ import { StyleSheet } from "react-native";
 
 export const styles = StyleSheet.create({
   root:   { flex: 1 },
-  scroll: { paddingBottom: 100 },
+  scroll: { paddingBottom: 120 },
 
   header: {
     paddingHorizontal: 20,

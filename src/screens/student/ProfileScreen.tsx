@@ -251,7 +251,7 @@ export function ProfileScreen() {
       <StatusBar barStyle="light-content" backgroundColor={GREEN} />
 
       <ScrollView
-        contentContainerStyle={[styles.scroll, { paddingBottom: 90 }]}
+        contentContainerStyle={[styles.scroll, { paddingBottom: 120 }]}
         showsVerticalScrollIndicator={false}
       >
 

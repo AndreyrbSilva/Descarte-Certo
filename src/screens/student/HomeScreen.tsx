@@ -199,7 +199,7 @@ export function HomeScreen() {
       <StatusBar barStyle={colors.statusBar} backgroundColor={colors.bg} />
 
       <ScrollView
-        contentContainerStyle={[styles.scroll, { paddingBottom: 100 }]}
+        contentContainerStyle={[styles.scroll, { paddingBottom: 120 }]}
         showsVerticalScrollIndicator={false}
       >
         {/* HEADER */}
