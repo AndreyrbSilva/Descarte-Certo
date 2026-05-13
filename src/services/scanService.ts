@@ -1,4 +1,5 @@
 import { api } from "./api";
+import { NewAchievement } from "./achievementService";
 
 export type ScanCategory = "plastico" | "papel" | "metal" | "organico" | "vidro";
 
@@ -13,10 +14,11 @@ export async function submitScan(imageUri?: string) {
 
   return {
     category,
-    pointsEarned: response.data.pointsEarned,
-    totalPoints:  response.data.totalPoints,
-    scanId:       response.data.scan.id,
-    streak:       response.data.streak,
+    pointsEarned:    response.data.pointsEarned,
+    totalPoints:     response.data.totalPoints,
+    scanId:          response.data.scan.id,
+    streak:          response.data.streak,
+    newAchievements: (response.data.newAchievements ?? []) as NewAchievement[],
     imageUri,
   };
 }
