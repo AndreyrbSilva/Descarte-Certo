@@ -16,11 +16,33 @@ import { useProfileColors } from "../../hooks/useProfileColors";
 import { styles }           from "./profileStyles";
 import {
   IconTrophy, IconTrend, IconRecycle, IconLogout, IconCamera,
+  IconStar, IconCrown, IconMedal, IconFlame, IconTarget,
+  IconShield, IconDiamond, IconRainbow, IconLightning, IconShieldCheck, IconCheck,
 } from "../../components/icons";
+import { fetchAchievements, AchievementData } from "../../services/achievementService";
+import { getTypeColor } from "../../hooks/useTrophyColors";
 
 const GREEN  = "#22c55e";
 const ORANGE = "#f97316";
 const BLUE   = "#3b82f6";
+
+function ProfileTrophyIcon({ icon, color, size }: { icon: string; color: string; size: number }) {
+  switch (icon) {
+    case "star":       return <IconStar color={color} size={size} />;
+    case "recycle":    return <IconRecycle color={color} size={size} />;
+    case "medal":      return <IconMedal type="gold" size={size} />;
+    case "trophy":     return <IconTrophy color={color} size={size} />;
+    case "crown":      return <IconCrown color={color} size={size} />;
+    case "flame":      return <IconFlame outer={color} innerStart={color} innerEnd={color} size={size} />;
+    case "target":     return <IconTarget color={color} size={size} />;
+    case "trend":      return <IconTrend color={color} size={size} />;
+    case "shield":     return <IconShieldCheck color={color} size={size} />;
+    case "diamond":    return <IconDiamond color={color} size={size} />;
+    case "rainbow":    return <IconRainbow color={color} size={size} />;
+    case "lightning":  return <IconLightning color={color} size={size} />;
+    default:           return <IconTrophy color={color} size={size} />;
+  }
+}
 
 const CATEGORY_LABEL: Record<string, string> = {
   plastico: "Plástico", papel: "Papel",
@@ -146,6 +168,8 @@ export function ProfileScreen() {
   const [showLogout,     setShowLogout]     = useState(false);
   const [expanded,       setExpanded]       = useState(false);
   const [timeFilter,     setTimeFilter]     = useState<TimeFilter>("semana");
+  const [recentTrophies, setRecentTrophies] = useState<AchievementData[]>([]);
+  const [trophyStats,    setTrophyStats]    = useState({ total: 0, unlocked: 0 });
 
   const headerAnim  = useRef(new Animated.Value(0)).current;
   const cardAnim    = useRef(new Animated.Value(40)).current;
@@ -182,6 +206,15 @@ export function ProfileScreen() {
       setSchoolRank(data.schoolRank);
       setTurmaRank(data.turmaRank);
     });
+
+    fetchAchievements().then((data) => {
+      const unlocked = data.achievements
+        .filter((a) => a.unlocked && a.unlockedAt)
+        .sort((a, b) => new Date(b.unlockedAt!).getTime() - new Date(a.unlockedAt!).getTime())
+        .slice(0, 4);
+      setRecentTrophies(unlocked);
+      setTrophyStats({ total: data.totalCount, unlocked: data.unlockedCount });
+    }).catch(() => {});
   }, []);
 
   useEffect(() => {
@@ -345,6 +378,59 @@ export function ProfileScreen() {
               <Text style={[styles.rankLabel, { color: colors.subTextColor }]}>Escola</Text>
             </View>
           </View>
+        </Animated.View>
+
+        {/* TROFÉUS RECENTES */}
+        <Animated.View style={[styles.card, {
+          backgroundColor: colors.cardBg,
+          opacity: cardOpacity,
+          transform: [{ translateY: cardAnim }],
+        }]}>
+          <View style={{ flexDirection: "row", alignItems: "center", justifyContent: "space-between", marginBottom: 12 }}>
+            <Text style={[styles.cardTitle, { color: colors.textColor, marginBottom: 0 }]}>Troféus</Text>
+            <Text style={{ color: colors.subTextColor, fontSize: 13, fontWeight: "700" }}>
+              {trophyStats.unlocked}/{trophyStats.total}
+            </Text>
+          </View>
+
+          {recentTrophies.length > 0 ? (
+            <View style={{ gap: 8 }}>
+              {recentTrophies.map((trophy) => {
+                const accentColor = getTypeColor(trophy.type);
+                return (
+                  <View key={trophy.id} style={{ flexDirection: "row", alignItems: "center", gap: 10 }}>
+                    <View style={{
+                      width: 36, height: 36, borderRadius: 18,
+                      backgroundColor: accentColor + "18",
+                      alignItems: "center", justifyContent: "center",
+                    }}>
+                      <ProfileTrophyIcon icon={trophy.icon} color={accentColor} size={18} />
+                    </View>
+                    <View style={{ flex: 1 }}>
+                      <Text style={{ fontSize: 13, fontWeight: "700", color: colors.textColor }}>{trophy.title}</Text>
+                      <Text style={{ fontSize: 10, fontWeight: "500", color: colors.subTextColor }}>{trophy.description}</Text>
+                    </View>
+                    <View style={{ width: 18, height: 18, borderRadius: 9, backgroundColor: accentColor, alignItems: "center", justifyContent: "center" }}>
+                      <IconCheck color="#fff" size={10} />
+                    </View>
+                  </View>
+                );
+              })}
+            </View>
+          ) : (
+            <Text style={{ fontSize: 12, color: colors.subTextColor, textAlign: "center", marginVertical: 8 }}>
+              Nenhum troféu desbloqueado ainda 🏆
+            </Text>
+          )}
+
+          <TouchableOpacity
+            style={{ flexDirection: "row", alignItems: "center", justifyContent: "center", marginTop: 14, gap: 4 }}
+            onPress={() => navigation.navigate("Trophies")}
+            activeOpacity={0.7}
+          >
+            <Text style={{ color: GREEN, fontSize: 13, fontWeight: "700" }}>Ver todos </Text>
+            <Text style={{ color: GREEN, fontSize: 12 }}>›</Text>
+          </TouchableOpacity>
         </Animated.View>
 
         <Animated.View style={[styles.card, {
