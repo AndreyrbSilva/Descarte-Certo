@@ -281,8 +281,8 @@ Aluno abre o app
 - [x] Upload de avatar no Supabase Storage
 - [x] Tela de configurações com trocar tema, verificação de e-mail, troca de e-mail e senha, 2FA TOTP
 - [x] Sistema de tema dark/light persistido com override do sistema
-- [ ] Missões diárias funcionais
-- [ ] Sistema de troféus e conquistas
+- [x] Missões diárias funcionais
+- [x] Sistema de troféus e conquistas (31 troféus: scans, pontos, streak, ranking turma/escola, consistência, diversidade, missões)
 - [ ] Backend de IA (FastAPI + TensorFlow/MobileNet)
 - [ ] Integração do modelo de classificação de resíduos
 - [ ] Recuperação de senha por e-mail
