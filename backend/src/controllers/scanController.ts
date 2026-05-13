@@ -3,6 +3,7 @@ import { z } from "zod";
 import { prisma } from "../lib/prisma";
 import { isBlacklisted } from "../lib/blacklist";
 import { updateMissionProgress } from "./missionController";
+import { checkAndUnlockAchievements } from "./achievementController";
 import jwt from "jsonwebtoken";
 
 const JWT_SECRET = process.env.JWT_SECRET ?? "changeme";
@@ -111,10 +112,18 @@ export async function registerScan(req: FastifyRequest, reply: FastifyReply) {
     updateMissionProgress(userId, category),
   ]);
 
+  // Verifica conquistas desbloqueadas
+  const newAchievements = await checkAndUnlockAchievements(userId);
+
+  // Recalcula pontos se houve bônus de conquistas
+  const finalPoints = newAchievements.length > 0
+    ? (await prisma.userPoints.findUnique({ where: { userId } }))?.total ?? (userPoints?.total ?? points)
+    : (userPoints?.total ?? points);
+
   return reply.status(201).send({
     scan,
     pointsEarned: points,
-    totalPoints:  userPoints?.total ?? points,
+    totalPoints:  finalPoints,
     streak,
     mission: missionUpdate
       ? {
@@ -125,6 +134,7 @@ export async function registerScan(req: FastifyRequest, reply: FastifyReply) {
           reward: missionUpdate.mission.reward,
         }
       : null,
+    newAchievements,
   });
 }
 
