@@ -156,10 +156,10 @@ export const styles = StyleSheet.create({
     gap: 6,
     paddingHorizontal: 20,
     paddingTop: 12,
-    paddingBottom: 4,
+    paddingBottom: 12,
   },
   backText: {
-    fontSize: 15,
+    fontSize: 17,
     fontWeight: "700",
   },
 });
