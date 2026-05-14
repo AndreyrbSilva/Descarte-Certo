@@ -24,9 +24,11 @@ model User {
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
-  scans           Scan[]
-  points          UserPoints?
-  missionProgress UserMissionProgress[]
+  scans            Scan[]
+  points           UserPoints?
+  missionProgress  UserMissionProgress[]
+  achievements     UserAchievement[]
+  rankingSnapshots RankingSnapshot[]
 }
 
 model BlacklistedToken {
@@ -82,4 +84,45 @@ model UserMissionProgress {
   mission DailyMission @relation(fields: [missionId], references: [id])
 
   @@unique([userId, assignedAt])
+}
+
+model Achievement {
+  id          String   @id @default(uuid())
+  key         String   @unique                 // "first_scan", "ranking_turma_top3"
+  title       String                            // "Primeiro Passo"
+  description String                            // "Realize seu primeiro escaneamento"
+  icon        String                            // "star", "trophy", "crown"...
+  type        String                            // "total_scans" | "total_points" | "streak" | "ranking_turma" | "ranking_escola" | "ranking_consistency" | "category_diversity" | "missions_completed"
+  threshold   Int                               // valor necessário (ex: 10 para "10 scans")
+  reward      Int        @default(0)            // pontos bônus ao desbloquear
+  sortOrder   Int        @default(0)            // ordem de exibição
+  createdAt   DateTime   @default(now())
+
+  userAchievements UserAchievement[]
+}
+
+model UserAchievement {
+  id            String    @id @default(uuid())
+  userId        String
+  achievementId String
+  unlockedAt    DateTime  @default(now())
+
+  user        User        @relation(fields: [userId], references: [id])
+  achievement Achievement @relation(fields: [achievementId], references: [id])
+
+  @@unique([userId, achievementId])
+}
+
+model RankingSnapshot {
+  id         String   @id @default(uuid())
+  userId     String
+  scope      String                             // "turma" | "escola"
+  position   Int                                // posição no ranking
+  month      Int                                // 1–12
+  year       Int
+  createdAt  DateTime @default(now())
+
+  user       User     @relation(fields: [userId], references: [id])
+
+  @@unique([userId, scope, month, year])
 }

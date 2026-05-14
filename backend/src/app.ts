@@ -5,7 +5,8 @@ import { authRoutes }    from "./routes/authRoutes";
 import { scanRoutes }    from "./routes/scanRoutes";
 import { rankingRoutes } from "./routes/rankingRoutes";
 import { profileRoutes } from "./routes/profileRoutes";
-import { missionRoutes } from "./routes/missionRoutes";
+import { missionRoutes }     from "./routes/missionRoutes";
+import { achievementRoutes } from "./routes/achievementRoutes";
 
 export const app = Fastify({ logger: true });
 
@@ -25,5 +26,6 @@ app.register(scanRoutes);
 app.register(rankingRoutes);
 app.register(profileRoutes);
 app.register(missionRoutes);
+app.register(achievementRoutes);
 
 app.get("/health", async () => ({ status: "ok" }));

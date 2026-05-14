@@ -1,4 +1,4 @@
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import {
   View, Text, ScrollView, TouchableOpacity,
   Animated, StatusBar, Image,
@@ -11,6 +11,8 @@ import { getStreakColors }        from "../../hooks/streakColors";
 import { useScanResultColors }   from "../../hooks/useScanResultColors";
 import { styles }                from "./scanResultStyles";
 import { IconTrophy, IconRecycle } from "../../components/icons";
+import { AchievementUnlockedModal } from "../../components/modals/AchievementUnlockedModal";
+import type { NewAchievement } from "../../services/achievementService";
 
 const GREEN = "#22c55e";
 
@@ -47,6 +49,34 @@ function streakLevel(streak: number): number {
     else break;
   }
   return level;
+}
+
+// ── Componente para exibir troféus em fila ───────────────
+function AchievementQueue({ achievements }: { achievements: NewAchievement[] }) {
+  const [index, setIndex] = useState(0);
+  const [visible, setVisible] = useState(achievements.length > 0);
+
+  const current = achievements[index] ?? null;
+
+  function handleClose() {
+    const next = index + 1;
+    if (next < achievements.length) {
+      setIndex(next);
+      setTimeout(() => setVisible(true), 300);
+    } else {
+      setVisible(false);
+    }
+  }
+
+  if (!current) return null;
+
+  return (
+    <AchievementUnlockedModal
+      achievement={current}
+      visible={visible}
+      onClose={handleClose}
+    />
+  );
 }
 
 export function ScanResultScreen() {
@@ -207,6 +237,9 @@ export function ScanResultScreen() {
         </Animated.View>
 
       </ScrollView>
+
+      {/* ACHIEVEMENT MODAL — mostra troféus desbloqueados sequencialmente */}
+      <AchievementQueue achievements={result?.newAchievements ?? []} />
     </View>
   );
 }
