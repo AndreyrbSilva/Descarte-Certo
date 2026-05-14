@@ -55,8 +55,8 @@ export function useTrophyColors() {
     dividerColor:  dark ? "#334155" : "#e2e8f0",
     iconBg:        dark ? "#1e293b" : "#f1f5f9",
     progressTrack: dark ? "#334155" : "#e2e8f0",
-    lockedBg:      dark ? "#1e293b" : "#f8fafc",
-    lockedIcon:    dark ? "#475569" : "#cbd5e1",
+    lockedBg:      dark ? "#1e293b" : "#e2e8f0",
+    lockedIcon:    dark ? "#475569" : "#94a3b8",
     statusBar:     dark ? "light-content" : "dark-content" as any,
   };
 }
