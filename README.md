@@ -283,6 +283,7 @@ Aluno abre o app
 - [x] Sistema de tema dark/light persistido com override do sistema
 - [x] Missões diárias funcionais
 - [x] Sistema de troféus e conquistas (31 troféus: scans, pontos, streak, ranking turma/escola, consistência, diversidade, missões)
+- [x] Smooth screen transitions (JS stack navigator, no white flash on back navigation)
 - [ ] Backend de IA (FastAPI + TensorFlow/MobileNet)
 - [ ] Integração do modelo de classificação de resíduos
 - [ ] Recuperação de senha por e-mail
