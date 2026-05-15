@@ -1,14 +1,14 @@
 import { useEffect, useRef, useState } from "react";
 import {
   View, Text, TouchableOpacity,
-  Animated, StatusBar, ActivityIndicator, StyleSheet
+  Animated, StatusBar, ActivityIndicator, StyleSheet, Alert,
 } from "react-native";
 import { CameraView, CameraType, useCameraPermissions } from "expo-camera";
 import * as ImageManipulator from "expo-image-manipulator";
 import * as NavigationBar from "expo-navigation-bar";
 import { useNavigation } from "@react-navigation/native";
 
-import { submitScan }        from "../../services/scanService";
+import { submitScan, NotTrashError } from "../../services/scanService";
 import { useScannerColors }  from "../../hooks/useScannerColors";
 import { styles, FRAME_SIZE } from "./scannerStyles";
 import { IconFlash, IconFlip, IconCheck } from "../../components/icons";
@@ -113,8 +113,12 @@ export function ScannerScreen() {
       const result = await submitScan(cropped.uri);
       navigation.replace("ScanResult", { result, photoUri: cropped.uri, previousStreak });
     } catch (err: any) {
-      const msg = err.response?.data?.error ?? "Erro ao escanear. Tente novamente.";
-      navigation.replace("ScanResult", { error: msg });
+      if (err instanceof NotTrashError) {
+        Alert.alert("Atenção", err.message);
+      } else {
+        const msg = err.response?.data?.error ?? err.message ?? "Erro ao escanear. Tente novamente.";
+        navigation.replace("ScanResult", { error: msg });
+      }
     } finally {
       setLoading(false);
     }

@@ -48,6 +48,20 @@ export const styles = StyleSheet.create({
   rowLabel:    { fontSize: 13 },
   rowValue:    { fontSize: 13, fontWeight: "700" },
 
+  // Barra de certeza
+  confidenceBar: {
+    height: 6,
+    borderRadius: 3,
+    backgroundColor: "#e2e8f0",
+    width: 80,
+    overflow: "hidden",
+    marginLeft: 8,
+  },
+  confidenceBarFill: {
+    height: "100%",
+    borderRadius: 3,
+  },
+
   // botões
   btnPrimary: {
     backgroundColor: GREEN, borderRadius: 14,

@@ -94,6 +94,7 @@ export function ScanResultScreen() {
   const cardOpacity   = useRef(new Animated.Value(0)).current;
   const pointsScale   = useRef(new Animated.Value(0.5)).current;
   const pointsOpacity = useRef(new Animated.Value(0)).current;
+  const confidenceAnim = useRef(new Animated.Value(0)).current;
 
   useEffect(() => {
     NavigationBar.setBackgroundColorAsync(GREEN);
@@ -110,6 +111,15 @@ export function ScanResultScreen() {
         Animated.timing(cardAnim,    { toValue: 0, duration: 350, useNativeDriver: true }),
       ]),
     ]).start();
+
+    if (result?.confidence) {
+      Animated.timing(confidenceAnim, {
+        toValue: result.confidence,
+        duration: 800,
+        delay: 400,
+        useNativeDriver: false,
+      }).start();
+    }
   }, []);
 
   const newStreak   = result?.streak ?? 0;
@@ -140,6 +150,11 @@ export function ScanResultScreen() {
       </View>
     );
   }
+
+  const confValue = result?.confidence ?? 0;
+  let barColor = "#ef4444";
+  if (confValue >= 0.8) barColor = "#22c55e";
+  else if (confValue >= 0.6) barColor = "#eab308";
 
   return (
     <View style={[styles.root, { backgroundColor: colors.cardBg }]}>
@@ -188,6 +203,28 @@ export function ScanResultScreen() {
             <Text style={[styles.rowValue, { color: colors.textColor }]}>
               {CATEGORY_LABEL[result?.category] ?? "--"}
             </Text>
+          </View>
+          <View style={styles.row}>
+            <Text style={[styles.rowLabel, { color: colors.subTextColor }]}>Certeza</Text>
+            <View style={{ flexDirection: "row", alignItems: "center" }}>
+              <Text style={[styles.rowValue, { color: barColor }]}>
+                {Math.round(confValue * 100)}%
+              </Text>
+              <View style={[styles.confidenceBar, { backgroundColor: colors.dividerColor }]}>
+                <Animated.View
+                  style={[
+                    styles.confidenceBarFill,
+                    {
+                      backgroundColor: barColor,
+                      width: confidenceAnim.interpolate({
+                        inputRange: [0, 1],
+                        outputRange: ["0%", "100%"],
+                      }),
+                    },
+                  ]}
+                />
+              </View>
+            </View>
           </View>
           <View style={styles.row}>
             <Text style={[styles.rowLabel, { color: colors.subTextColor }]}>Pontos ganhos</Text>
