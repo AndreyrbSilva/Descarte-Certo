@@ -25,7 +25,7 @@ O Descarte Certo resolve um problema real: crianças não sabem separar o lixo c
 | Banco de dados | Supabase (PostgreSQL) |
 | Autenticação | JWT + bcrypt + AES (matrícula) + TOTP (2FA) |
 | E-mail transacional | Brevo |
-| Backend de IA | Python + FastAPI *(em desenvolvimento)* |
+| Backend de IA | Python + FastAPI (Hospedado no Hugging Face Spaces) |
 
 ---
 
@@ -253,17 +253,18 @@ Ao subir de nível, um overlay animado aparece na HomeScreen com o novo foguinho
 
 ```
 Aluno abre o app
-  → tira foto do resíduo (Expo Camera)
-  → app recorta a região do frame (expo-image-manipulator)
-  → envia categoria para POST /scan                    ← hoje: categoria simulada aleatória
+  → tira foto do resíduo em base64 (Expo Camera)
+  → app recorta a região do frame e mantém o base64 (expo-image-manipulator)
+  → envia para API da IA no Hugging Face (POST /classify)
+  → recebe category e confidence
+  → se confidence < 85%, exibe alerta de "Nenhum resíduo reconhecido"
+  → caso contrário, envia category para backend Node.js (POST /scan)
   → backend valida JWT + blacklist
   → calcula pontos, atualiza UserPoints e computa streak
   → retorna { category, pointsEarned, totalPoints, streak }
-  → app exibe tela de resultado com animação
+  → app exibe tela de resultado com barra de certeza animada
   → ao voltar para Home, detecta level up de streak e exibe overlay
 ```
-
-> **Modo simulado:** enquanto o modelo de IA não está integrado, a categoria é sorteada aleatoriamente no `scanService.ts`. Quando o FastAPI estiver pronto, será necessário apenas substituir essa lógica — o restante do fluxo permanece idêntico.
 
 ---
 
@@ -284,8 +285,8 @@ Aluno abre o app
 - [x] Missões diárias funcionais
 - [x] Sistema de troféus e conquistas (31 troféus: scans, pontos, streak, ranking turma/escola, consistência, diversidade, missões)
 - [x] Smooth screen transitions (JS stack navigator, no white flash on back navigation)
-- [ ] Backend de IA (FastAPI + TensorFlow/MobileNet)
-- [ ] Integração do modelo de classificação de resíduos
+- [x] Backend de IA (FastAPI + TensorFlow/MobileNet)
+- [x] Integração do modelo de classificação de resíduos
 - [ ] Recuperação de senha por e-mail
 - [ ] Painel administrativo
 - [ ] Deploy (Railway + EAS Build)
@@ -301,5 +302,6 @@ Aluno abre o app
 | `AES_SECRET` | `backend/.env` | Chave para criptografar matrículas |
 | `BREVO_API_KEY` | `backend/.env` | API key do Brevo para envio de e-mails |
 | `PORT` | `backend/.env` | Porta do servidor (padrão: 3333) |
+| `AI_API_URL` | `src/services/scanService.ts` | URL da API de classificação de IA |
 
 > Nunca commite o arquivo `.env`. Ele já está no `.gitignore`.

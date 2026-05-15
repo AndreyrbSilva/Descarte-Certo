@@ -19,22 +19,25 @@ export class NotTrashError extends Error {
 
 // ── Tipo do retorno de submitScan ─────────────────────────
 export interface ScanResult {
-  category:        ScanCategory;
-  confidence:      number;
-  pointsEarned:    number;
-  totalPoints:     number;
-  scanId:          string;
-  streak:          number;
+  category: ScanCategory;
+  confidence: number;
+  pointsEarned: number;
+  totalPoints: number;
+  scanId: string;
+  streak: number;
   newAchievements: NewAchievement[];
-  imageUri?:       string;
+  imageUri?: string;
 }
 
 // ── Função principal ──────────────────────────────────────
-export async function submitScan(imageUri: string): Promise<ScanResult> {
-  // 1. Lê a imagem como base64
-  const base64 = await FileSystem.readAsStringAsync(imageUri, {
-    encoding: FileSystem.EncodingType.Base64,
-  });
+export async function submitScan(imageUri: string, base64Str?: string): Promise<ScanResult> {
+  // 1. Usa o base64 passado ou lê a imagem como base64
+  let base64 = base64Str;
+  if (!base64) {
+    base64 = await FileSystem.readAsStringAsync(imageUri, {
+      encoding: FileSystem.EncodingType.Base64,
+    });
+  }
 
   // 2. Envia para a IA
   const aiRes = await fetch(AI_API_URL, {
@@ -48,7 +51,7 @@ export async function submitScan(imageUri: string): Promise<ScanResult> {
   }
 
   const aiData = await aiRes.json();
-  const category   = aiData.category as ScanCategory;
+  const category = aiData.category as ScanCategory;
   const confidence = aiData.confidence as number;
 
   // 3. Valida se é uma categoria válida e se a confiança é suficiente
@@ -62,10 +65,10 @@ export async function submitScan(imageUri: string): Promise<ScanResult> {
   return {
     category,
     confidence,
-    pointsEarned:    response.data.pointsEarned,
-    totalPoints:     response.data.totalPoints,
-    scanId:          response.data.scan.id,
-    streak:          response.data.streak,
+    pointsEarned: response.data.pointsEarned,
+    totalPoints: response.data.totalPoints,
+    scanId: response.data.scan.id,
+    streak: response.data.streak,
     newAchievements: (response.data.newAchievements ?? []) as NewAchievement[],
     imageUri,
   };
