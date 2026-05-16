@@ -7,7 +7,7 @@ export function useSplashColors() {
     explosionColor:  isDark ? "#4ed37e"  : "#86efac",
     titleGreenColor: isDark ? "#082010"  : "#0a3018",
     titleDarkColor:  isDark ? "#111827" : "#f8fafc",
-    taglineColor:    isDark ? "#9ca3af"  : "#6b7280",
+    taglineColor:    isDark ? "#000000"  : "#6b7280",
     ballColor:       isDark ? "#4ade80"  : "#86efac",
   };
 }

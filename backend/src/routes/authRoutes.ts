@@ -3,6 +3,7 @@ import {
   register, login, logout, updateAvatar,
   sendVerifyCode, verifyEmail, changeEmail, confirmChangeEmail,
   changePassword,
+  requestPasswordReset, verifyResetCode, resetPassword,
   setup2FA, verify2FA, disable2FA,
   getMe,
 } from "../controllers/authController";
@@ -33,6 +34,11 @@ export async function authRoutes(app: FastifyInstance) {
 
   // senha
   app.post("/auth/password/change", { preHandler: verifyToken }, changePassword);
+
+  // recuperação de senha (público)
+  app.post("/auth/password/reset/request", requestPasswordReset);
+  app.post("/auth/password/reset/verify",  verifyResetCode);
+  app.post("/auth/password/reset/confirm", resetPassword);
 
   // 2FA
   app.post("/auth/2fa/setup",   { preHandler: verifyToken }, setup2FA);

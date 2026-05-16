@@ -287,7 +287,7 @@ Aluno abre o app
 - [x] Smooth screen transitions (JS stack navigator, no white flash on back navigation)
 - [x] Backend de IA (FastAPI + TensorFlow/MobileNet)
 - [x] Integração do modelo de classificação de resíduos
-- [ ] Recuperação de senha por e-mail
+- [x] Recuperação de senha por e-mail (fluxo completo: envio de código, verificação OTP 6 dígitos, redefinição com medidor de força)
 - [ ] Painel administrativo
 - [ ] Deploy (Railway + EAS Build)
 

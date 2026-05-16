@@ -59,6 +59,22 @@ export async function changePassword(currentPassword: string, newPassword: strin
   await api.post("/auth/password/change", { currentPassword, newPassword, totpCode });
 }
 
+// recuperação de senha
+export async function requestPasswordReset(email: string) {
+  const res = await api.post("/auth/password/reset/request", { email });
+  return res.data;
+}
+
+export async function verifyResetCode(email: string, code: string) {
+  const res = await api.post("/auth/password/reset/verify", { email, code });
+  return res.data;
+}
+
+export async function resetPassword(email: string, code: string, newPassword: string) {
+  const res = await api.post("/auth/password/reset/confirm", { email, code, newPassword });
+  return res.data;
+}
+
 // 2FA
 export async function setup2FA(): Promise<{ qrCode: string; secret: string }> {
   const res = await api.post("/auth/2fa/setup");
