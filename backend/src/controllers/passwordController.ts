@@ -4,7 +4,8 @@ import { z } from "zod";
 import { authenticator } from "otplib";
 import { prisma } from "../lib/prisma";
 import { sendEmailCode } from "../lib/mailer";
-import { getUserFromToken, isPasswordMedium, generateCode, codeExpiry } from "./helpers";
+import { isPasswordMedium, generateCode, codeExpiry } from "./helpers";
+import { getUserFromToken } from "../services/authService";
 
 // ─── password change ─────────────────────────────────────────────────────────
 

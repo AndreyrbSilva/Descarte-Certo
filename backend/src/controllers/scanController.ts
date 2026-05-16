@@ -1,12 +1,10 @@
 import { FastifyRequest, FastifyReply } from "fastify";
 import { z } from "zod";
 import { prisma } from "../lib/prisma";
-import { isBlacklisted } from "../lib/blacklist";
+import { getUserFromToken } from "../services/authService";
+import { computeStreak } from "../services/streakService";
 import { updateMissionProgress } from "./missionController";
 import { checkAndUnlockAchievements } from "./achievementController";
-import jwt from "jsonwebtoken";
-
-const JWT_SECRET = process.env.JWT_SECRET ?? "changeme";
 
 const POINTS_MAP: Record<string, number> = {
   plastico: 10,
@@ -23,65 +21,6 @@ const scanSchema = z.object({
   ),
   imageUrl: z.string().url("URL de imagem inválida.").optional(),
 });
-
-async function getUserFromToken(req: FastifyRequest, reply: FastifyReply) {
-  const authHeader = req.headers.authorization;
-  if (!authHeader?.startsWith("Bearer ")) {
-    reply.status(401).send({ error: "Token não fornecido." });
-    return null;
-  }
-
-  const token = authHeader.split(" ")[1];
-  try {
-    jwt.verify(token, JWT_SECRET);
-  } catch {
-    reply.status(401).send({ error: "Token inválido ou expirado." });
-    return null;
-  }
-
-  const blocked = await isBlacklisted(token);
-  if (blocked) {
-    reply.status(401).send({ error: "Sessão encerrada. Faça login novamente." });
-    return null;
-  }
-
-  const payload = jwt.decode(token) as { sub: string };
-  return payload.sub;
-}
-
-// lógica de streak extraída — reutilizada no registerScan e getStreak
-async function computeStreak(userId: string): Promise<number> {
-  const scans = await prisma.scan.findMany({
-    where:   { userId },
-    orderBy: { createdAt: "desc" },
-    select:  { createdAt: true },
-  });
-
-  if (scans.length === 0) return 0;
-
-  const toDateStr  = (date: Date) => date.toISOString().slice(0, 10);
-  const activeDays = new Set(scans.map((s) => toDateStr(s.createdAt)));
-  const today      = toDateStr(new Date());
-  const yesterday  = toDateStr(new Date(Date.now() - 86_400_000));
-
-  const startDay = activeDays.has(today)
-    ? today
-    : activeDays.has(yesterday)
-    ? yesterday
-    : null;
-
-  if (!startDay) return 0;
-
-  let streak  = 0;
-  let current = new Date(startDay + "T12:00:00Z");
-
-  while (activeDays.has(toDateStr(current))) {
-    streak++;
-    current = new Date(current.getTime() - 86_400_000);
-  }
-
-  return streak;
-}
 
 // POST /scan
 export async function registerScan(req: FastifyRequest, reply: FastifyReply) {

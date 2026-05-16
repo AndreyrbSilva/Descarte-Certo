@@ -2,7 +2,7 @@ import { FastifyRequest, FastifyReply } from "fastify";
 import { authenticator } from "otplib";
 import QRCode from "qrcode";
 import { prisma } from "../lib/prisma";
-import { getUserFromToken } from "./helpers";
+import { getUserFromToken } from "../services/authService";
 
 // POST /auth/2fa/setup — gera secret + QR Code
 export async function setup2FA(req: FastifyRequest, reply: FastifyReply) {

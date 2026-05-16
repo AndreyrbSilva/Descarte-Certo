@@ -1,34 +1,7 @@
 import { FastifyRequest, FastifyReply } from "fastify";
 import { prisma } from "../lib/prisma";
-import { isBlacklisted } from "../lib/blacklist";
-import jwt from "jsonwebtoken";
-
-const JWT_SECRET = process.env.JWT_SECRET ?? "changeme";
-
-async function getUserFromToken(req: FastifyRequest, reply: FastifyReply) {
-  const authHeader = req.headers.authorization;
-  if (!authHeader?.startsWith("Bearer ")) {
-    reply.status(401).send({ error: "Token não fornecido." });
-    return null;
-  }
-
-  const token = authHeader.split(" ")[1];
-  try {
-    jwt.verify(token, JWT_SECRET);
-  } catch {
-    reply.status(401).send({ error: "Token inválido ou expirado." });
-    return null;
-  }
-
-  const blocked = await isBlacklisted(token);
-  if (blocked) {
-    reply.status(401).send({ error: "Sessão encerrada. Faça login novamente." });
-    return null;
-  }
-
-  const payload = jwt.decode(token) as { sub: string };
-  return payload.sub;
-}
+import { getUserFromToken } from "../services/authService";
+import { computeStreak } from "../services/streakService";
 
 // GET /profile/:userId
 export async function getPublicProfile(req: FastifyRequest, reply: FastifyReply) {
@@ -66,21 +39,7 @@ export async function getPublicProfile(req: FastifyRequest, reply: FastifyReply)
   });
   const turmaRank = turmaPoints.findIndex((p) => p.userId === userId) + 1;
 
-  // streak
-  const toDateStr  = (d: Date) => d.toISOString().slice(0, 10);
-  const activeDays = new Set(scans.map((s) => toDateStr(new Date(s.createdAt))));
-  const today      = toDateStr(new Date());
-  const yesterday  = toDateStr(new Date(Date.now() - 86_400_000));
-  const startDay   = activeDays.has(today) ? today : activeDays.has(yesterday) ? yesterday : null;
-
-  let streak  = 0;
-  if (startDay) {
-    let current = new Date(startDay + "T12:00:00Z");
-    while (activeDays.has(toDateStr(current))) {
-      streak++;
-      current = new Date(current.getTime() - 86_400_000);
-    }
-  }
+  const streak = await computeStreak(userId);
 
   return reply.send({
     user:        { ...user },

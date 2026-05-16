@@ -5,7 +5,8 @@ import { z } from "zod";
 import { prisma } from "../lib/prisma";
 import { encrypt, decrypt } from "../lib/crypto";
 import { blacklistToken, isBlacklisted } from "../lib/blacklist";
-import { JWT_SECRET, normalizeTurma, isPasswordMedium, getUserFromToken } from "./helpers";
+import { normalizeTurma, isPasswordMedium } from "./helpers";
+import { JWT_SECRET, getUserFromToken } from "../services/authService";
 
 // ─── schemas ────────────────────────────────────────────────────────────────
 
