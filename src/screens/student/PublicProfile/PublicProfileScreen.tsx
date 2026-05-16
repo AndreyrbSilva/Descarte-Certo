@@ -9,7 +9,7 @@ import { useNavigation, useRoute } from "@react-navigation/native";
 import { fetchPublicProfile } from "../../../services/profileService";
 import { useProfileColors }   from "../../../theme/useProfileColors";
 import { getStreakColors }    from "../../../theme/streakColors";
-import { styles }             from "./profileStyles";
+import { styles }             from "../Profile/profileStyles";
 import {
   IconTrophy, IconTrend, IconRecycle, IconFlame,
 } from "../../../components/icons";
