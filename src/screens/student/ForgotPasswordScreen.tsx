@@ -8,7 +8,7 @@ import {
 import { useNavigation } from "@react-navigation/native";
 
 import { GREEN }          from "../../constants/theme";
-import { IconMail, IconLock, IconEye } from "../../components/icons";
+import { IconMail, IconLock, IconEye, IconMailCheck, IconShieldCheck } from "../../components/icons";
 import { useThemeColors } from "../../hooks/useThemeColors";
 import { styles }         from "./forgotPasswordStyles";
 import {
@@ -337,7 +337,7 @@ export function ForgotPasswordScreen() {
             {step === "code" && (
               <>
                 <View style={styles.sentIcon}>
-                  <Text style={{ fontSize: 36 }}>📧</Text>
+                  <IconMailCheck color={GREEN} size={38} />
                 </View>
 
                 <Text style={[styles.cardTitle, { color: colors.textColor, textAlign: "center" }]}>
@@ -504,7 +504,7 @@ export function ForgotPasswordScreen() {
             {step === "success" && (
               <View style={styles.successContainer}>
                 <View style={styles.successIcon}>
-                  <Text style={{ fontSize: 44 }}>✅</Text>
+                  <IconShieldCheck color={GREEN} size={46} />
                 </View>
                 <Text style={[styles.successTitle, { color: colors.textColor }]}>
                   Senha redefinida!
@@ -513,7 +513,7 @@ export function ForgotPasswordScreen() {
                   Sua senha foi alterada com sucesso.{"\n"}Agora é só entrar com a nova senha 🎉
                 </Text>
                 <TouchableOpacity
-                  style={styles.primaryBtn}
+                  style={[styles.primaryBtn, { alignSelf: "stretch" }]}
                   onPress={() => navigation.navigate("Login")}
                   activeOpacity={0.85}
                 >

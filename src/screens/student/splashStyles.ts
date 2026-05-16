@@ -39,6 +39,6 @@ export const styles = StyleSheet.create({
   tagline: {
     position: "absolute",
     bottom: height * 0.18,
-    fontSize: 10, fontWeight: "600", letterSpacing: 4,
+    fontSize: 15, fontWeight: "600", letterSpacing: 4,
   },
 });
