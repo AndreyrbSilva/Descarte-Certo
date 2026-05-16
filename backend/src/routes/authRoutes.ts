@@ -1,12 +1,8 @@
 import { FastifyInstance } from "fastify";
-import {
-  register, login, logout, updateAvatar,
-  sendVerifyCode, verifyEmail, changeEmail, confirmChangeEmail,
-  changePassword,
-  requestPasswordReset, verifyResetCode, resetPassword,
-  setup2FA, verify2FA, disable2FA,
-  getMe,
-} from "../controllers/authController";
+import { register, login, logout, updateAvatar, getMe } from "../controllers/authController";
+import { sendVerifyCode, verifyEmail, changeEmail, confirmChangeEmail } from "../controllers/emailController";
+import { changePassword, requestPasswordReset, verifyResetCode, resetPassword } from "../controllers/passwordController";
+import { setup2FA, verify2FA, disable2FA } from "../controllers/twoFactorController";
 import { verifyToken } from "../middlewares/authMiddleware";
 
 export async function authRoutes(app: FastifyInstance) {
