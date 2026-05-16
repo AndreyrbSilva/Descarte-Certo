@@ -13,7 +13,7 @@ import * as NavigationBar from "expo-navigation-bar";
 import { useNavigation } from "@react-navigation/native";
 
 import { fetchAchievements, AchievementData } from "../../services/achievementService";
-import { useTrophyColors, getTypeColor, getTypeLabel } from "../../hooks/useTrophyColors";
+import { useTrophyColors, getTypeColor, getTypeLabel } from "../../theme/useTrophyColors";
 import { styles } from "./trophyStyles";
 import {
   IconTrophy, IconStar, IconRecycle, IconMedal, IconCrown,

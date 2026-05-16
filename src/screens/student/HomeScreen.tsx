@@ -13,8 +13,8 @@ import { StreakSheetModal } from "../../components/modals/StreakSheetModal";
 import { useAuthStore }    from "../../store/useAuthStore";
 import { fetchHomeData }   from "../../services/homeService";
 import { fetchDailyMission, DailyMissionData } from "../../services/missionService";
-import { useHomeColors }   from "../../hooks/useHomeColors";
-import { getStreakColors } from "../../hooks/streakColors";
+import { useHomeColors }   from "../../theme/useHomeColors";
+import { getStreakColors } from "../../theme/streakColors";
 import { styles }          from "./homeStyles";
 import {
   IconTrophy, IconTrend, IconCamera, IconCheck,

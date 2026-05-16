@@ -7,9 +7,9 @@ import {
 } from "react-native";
 import { useNavigation } from "@react-navigation/native";
 
-import { GREEN }          from "../../constants/theme";
+import { GREEN }          from "../../theme/colors";
 import { IconMail, IconLock, IconEye, IconMailCheck, IconShieldCheck } from "../../components/icons";
-import { useThemeColors } from "../../hooks/useThemeColors";
+import { useThemeColors } from "../../theme/useThemeColors";
 import { styles }         from "./forgotPasswordStyles";
 import {
   requestPasswordReset,

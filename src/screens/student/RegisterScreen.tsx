@@ -8,10 +8,10 @@ import {
 } from "react-native";
 import { useNavigation, useRoute } from "@react-navigation/native";
 
-import { GREEN }                  from "../../constants/theme";
+import { GREEN }                  from "../../theme/colors";
 import { IconMail, IconLock, IconUser, IconHash, IconBook, IconEye } from "../../components/icons";
 import { useRegisterAnimations }  from "../../hooks/useRegisterAnimations";
-import { useRegisterColors }      from "../../hooks/useRegisterColors";
+import { useRegisterColors }      from "../../theme/useRegisterColors";
 import { styles }                 from "./registerStyles";
 
 type PasswordLevel = {

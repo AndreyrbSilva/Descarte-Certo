@@ -9,7 +9,7 @@ import * as NavigationBar from "expo-navigation-bar";
 import { useNavigation } from "@react-navigation/native";
 
 import { submitScan, NotTrashError } from "../../services/scanService";
-import { useScannerColors }  from "../../hooks/useScannerColors";
+import { useScannerColors }  from "../../theme/useScannerColors";
 import { styles, FRAME_SIZE } from "./scannerStyles";
 import { IconFlash, IconFlip, IconCheck } from "../../components/icons";
 import { useAuthStore } from "../../store/useAuthStore";

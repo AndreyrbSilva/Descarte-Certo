@@ -7,8 +7,8 @@ import * as NavigationBar from "expo-navigation-bar";
 import { useNavigation, useRoute } from "@react-navigation/native";
 
 import { useAuthStore }          from "../../store/useAuthStore";
-import { getStreakColors }        from "../../hooks/streakColors";
-import { useScanResultColors }   from "../../hooks/useScanResultColors";
+import { getStreakColors }        from "../../theme/streakColors";
+import { useScanResultColors }   from "../../theme/useScanResultColors";
 import { styles }                from "./scanResultStyles";
 import { IconTrophy, IconRecycle } from "../../components/icons";
 import { AchievementUnlockedModal } from "../../components/modals/AchievementUnlockedModal";

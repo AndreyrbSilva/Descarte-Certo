@@ -12,7 +12,7 @@ import { useNavigation } from "@react-navigation/native";
 import { useAuthStore }     from "../../store/useAuthStore";
 import { logout }           from "../../services/authService";
 import { fetchProfile, uploadAvatar } from "../../services/profileService";
-import { useProfileColors } from "../../hooks/useProfileColors";
+import { useProfileColors } from "../../theme/useProfileColors";
 import { styles }           from "./profileStyles";
 import {
   IconTrophy, IconTrend, IconRecycle, IconLogout, IconCamera,
@@ -20,7 +20,7 @@ import {
   IconShield, IconDiamond, IconRainbow, IconLightning, IconShieldCheck, IconCheck,
 } from "../../components/icons";
 import { fetchAchievements, AchievementData } from "../../services/achievementService";
-import { getTypeColor } from "../../hooks/useTrophyColors";
+import { getTypeColor } from "../../theme/useTrophyColors";
 
 const GREEN  = "#22c55e";
 const ORANGE = "#f97316";

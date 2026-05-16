@@ -8,10 +8,10 @@ import {
 } from "react-native";
 import { useNavigation, useRoute } from "@react-navigation/native";
 
-import { GREEN }               from "../../constants/theme";
+import { GREEN }               from "../../theme/colors";
 import { IconHash, IconLock, IconEye } from "../../components/icons";
 import { useLoginAnimations }  from "../../hooks/useLoginAnimations";
-import { useThemeColors }      from "../../hooks/useThemeColors";
+import { useThemeColors }      from "../../theme/useThemeColors";
 import { styles }              from "./loginStyles";
 
 export function LoginScreen() {

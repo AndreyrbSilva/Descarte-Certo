@@ -8,9 +8,9 @@ import * as NavigationBar from "expo-navigation-bar";
 import { useFocusEffect, useNavigation } from "@react-navigation/native";
 import { useTheme } from "../../context/ThemeContext";
 
-import { useRankingColors }                              from "../../hooks/useRankingColors";
+import { useRankingColors }                              from "../../theme/useRankingColors";
 import { fetchTurmaRanking, fetchEscolaRanking, RankingEntry } from "../../services/rankingService";
-import { getStreakColors }                               from "../../hooks/streakColors";
+import { getStreakColors }                               from "../../theme/streakColors";
 import { IconFlame, IconCrown, IconMedal }               from "../../components/icons";
 import { styles }                                        from "./rankingStyles";
 

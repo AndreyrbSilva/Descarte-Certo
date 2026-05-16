@@ -9,7 +9,7 @@ import * as NavigationBar from "expo-navigation-bar";
 import { useFocusEffect, useNavigation } from "@react-navigation/native";
 import * as SecureStore from "expo-secure-store";
 
-import { useConfigColors, useAnimatedConfigColors } from "../../hooks/useConfigColors";
+import { useConfigColors, useAnimatedConfigColors } from "../../theme/useConfigColors";
 import { useAuthStore }    from "../../store/useAuthStore";
 import { styles }          from "./configStyles";
 import {

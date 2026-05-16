@@ -7,8 +7,8 @@ import * as NavigationBar from "expo-navigation-bar";
 import { useNavigation, useRoute } from "@react-navigation/native";
 
 import { fetchPublicProfile } from "../../services/profileService";
-import { useProfileColors }   from "../../hooks/useProfileColors";
-import { getStreakColors }    from "../../hooks/streakColors";
+import { useProfileColors }   from "../../theme/useProfileColors";
+import { getStreakColors }    from "../../theme/streakColors";
 import { styles }             from "./profileStyles";
 import {
   IconTrophy, IconTrend, IconRecycle, IconFlame,

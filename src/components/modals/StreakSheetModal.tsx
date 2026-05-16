@@ -5,8 +5,8 @@ import {
 } from "react-native";
 
 import { IconFlame }       from "../icons";
-import { getStreakColors } from "../../hooks/streakColors";
-import { useHomeColors }   from "../../hooks/useHomeColors";
+import { getStreakColors } from "../../theme/streakColors";
+import { useHomeColors }   from "../../theme/useHomeColors";
 
 const MILESTONES = [1, 3, 7, 14, 30, 45, 60, 90, 120];
 

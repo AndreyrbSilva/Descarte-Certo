@@ -11,7 +11,7 @@ import { ConfigScreen }  from "../screens/student/ConfigScreen";
 
 import { IconHome, IconRanking, IconUser, IconConfig, IconCamera } from "../components/icons";
 import { TabBackground } from "../components/navigation/TabBackground";
-import { useTabColors, useAnimatedTabColors } from "../hooks/useTabColors";
+import { useTabColors, useAnimatedTabColors } from "../theme/useTabColors";
 
 const Tab   = createMaterialTopTabNavigator();
 const GREEN = "#22c55e";
