@@ -5,18 +5,20 @@ const client = new BrevoClient({ apiKey: process.env.BREVO_API_KEY ?? "" });
 export async function sendEmailCode(
   to: string,
   code: string,
-  reason: "verify" | "change-email" | "change-password"
+  reason: "verify" | "change-email" | "change-password" | "reset-password"
 ) {
   const subjects: Record<typeof reason, string> = {
     "verify":          "Confirme seu e-mail — Descarte Certo",
     "change-email":    "Alteração de e-mail — Descarte Certo",
     "change-password": "Alteração de senha — Descarte Certo",
+    "reset-password":  "Recuperação de senha — Descarte Certo",
   };
 
   const intros: Record<typeof reason, string> = {
     "verify":          "Para confirmar seu e-mail, use o código abaixo:",
     "change-email":    "Você solicitou a alteração do seu e-mail. Use o código abaixo para confirmar:",
     "change-password": "Você solicitou a alteração da sua senha. Use o código abaixo para confirmar:",
+    "reset-password":  "Você solicitou a recuperação da sua senha. Use o código abaixo para redefinir:",
   };
 
   await client.transactionalEmails.sendTransacEmail({

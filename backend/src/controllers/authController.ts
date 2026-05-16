@@ -355,6 +355,91 @@ export async function changePassword(req: FastifyRequest, reply: FastifyReply) {
   return reply.send({ message: "Senha alterada com sucesso." });
 }
 
+// ─── password reset (público — sem auth) ─────────────────────────────────────
+
+// POST /auth/password/reset/request — body: { email }
+export async function requestPasswordReset(req: FastifyRequest, reply: FastifyReply) {
+  const { email } = req.body as { email: string };
+  if (!email || !z.string().email().safeParse(email).success) {
+    return reply.status(400).send({ error: "E-mail inválido." });
+  }
+
+  const user = await prisma.user.findUnique({ where: { email } });
+  if (!user) {
+    return reply.status(404).send({ error: "Nenhuma conta encontrada com este e-mail." });
+  }
+
+  const code = generateCode();
+  await prisma.user.update({
+    where: { id: user.id },
+    data: { emailCode: `reset::${code}`, emailCodeExpiry: codeExpiry() },
+  });
+
+  await sendEmailCode(user.email, code, "reset-password");
+  return reply.send({ message: "Código enviado para o seu e-mail." });
+}
+
+// POST /auth/password/reset/verify — body: { email, code }
+export async function verifyResetCode(req: FastifyRequest, reply: FastifyReply) {
+  const { email, code } = req.body as { email: string; code: string };
+  if (!email || !code) {
+    return reply.status(400).send({ error: "E-mail e código são obrigatórios." });
+  }
+
+  const user = await prisma.user.findUnique({ where: { email } });
+  if (!user) return reply.status(404).send({ error: "Usuário não encontrado." });
+
+  if (!user.emailCode || !user.emailCode.startsWith("reset::")) {
+    return reply.status(400).send({ error: "Nenhuma solicitação de recuperação pendente." });
+  }
+
+  const savedCode = user.emailCode.replace("reset::", "");
+  if (savedCode !== code) return reply.status(400).send({ error: "Código inválido." });
+
+  if (!user.emailCodeExpiry || user.emailCodeExpiry < new Date()) {
+    return reply.status(400).send({ error: "Código expirado. Solicite um novo." });
+  }
+
+  return reply.send({ message: "Código verificado com sucesso." });
+}
+
+// POST /auth/password/reset/confirm — body: { email, code, newPassword }
+export async function resetPassword(req: FastifyRequest, reply: FastifyReply) {
+  const { email, code, newPassword } = req.body as {
+    email: string; code: string; newPassword: string;
+  };
+
+  if (!email || !code || !newPassword) {
+    return reply.status(400).send({ error: "E-mail, código e nova senha são obrigatórios." });
+  }
+
+  if (!isPasswordMedium(newPassword)) {
+    return reply.status(400).send({ error: "Senha fraca. Use letras maiúsculas, números ou símbolos." });
+  }
+
+  const user = await prisma.user.findUnique({ where: { email } });
+  if (!user) return reply.status(404).send({ error: "Usuário não encontrado." });
+
+  if (!user.emailCode || !user.emailCode.startsWith("reset::")) {
+    return reply.status(400).send({ error: "Nenhuma solicitação de recuperação pendente." });
+  }
+
+  const savedCode = user.emailCode.replace("reset::", "");
+  if (savedCode !== code) return reply.status(400).send({ error: "Código inválido." });
+
+  if (!user.emailCodeExpiry || user.emailCodeExpiry < new Date()) {
+    return reply.status(400).send({ error: "Código expirado. Solicite um novo." });
+  }
+
+  const hashed = await bcrypt.hash(newPassword, 10);
+  await prisma.user.update({
+    where: { id: user.id },
+    data: { password: hashed, emailCode: null, emailCodeExpiry: null },
+  });
+
+  return reply.send({ message: "Senha redefinida com sucesso." });
+}
+
 // ─── 2FA ─────────────────────────────────────────────────────────────────────
 
 // POST /auth/2fa/setup — gera secret + QR Code

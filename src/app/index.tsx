@@ -6,6 +6,7 @@ import { SplashScreen }          from "../screens/student/SplashScreen";
 import { LoginScreen }           from "../screens/student/LoginScreen";
 import { RegisterScreen }        from "../screens/student/RegisterScreen";
 import { RegisterSuccessScreen } from "../screens/student/RegisterSuccessScreen";
+import { ForgotPasswordScreen }  from "../screens/student/ForgotPasswordScreen";
 import { ScanResultScreen }      from "../screens/student/ScanResultScreen";
 import { PublicProfileScreen }   from "../screens/student/PublicProfileScreen";
 import { TrophyScreen }          from "../screens/student/TrophyScreen";
@@ -27,6 +28,7 @@ export function AppNavigator() {
         <Stack.Screen name="Splash"          component={SplashScreen} />
         <Stack.Screen name="Login"           component={LoginScreen}           options={{ cardStyleInterpolator: CardStyleInterpolators.forFadeFromCenter }} />
         <Stack.Screen name="Register"        component={RegisterScreen}        options={{ cardStyleInterpolator: CardStyleInterpolators.forModalPresentationIOS }} />
+        <Stack.Screen name="ForgotPassword"  component={ForgotPasswordScreen}  options={{ cardStyleInterpolator: CardStyleInterpolators.forHorizontalIOS }} />
         <Stack.Screen name="RegisterSuccess" component={RegisterSuccessScreen} options={{ cardStyleInterpolator: CardStyleInterpolators.forFadeFromCenter }} />
         <Stack.Screen name="Tabs"            component={TabNavigator}          options={{ cardStyleInterpolator: CardStyleInterpolators.forFadeFromCenter }} />
         <Stack.Screen name="ScanResult"      component={ScanResultScreen}      options={{ cardStyleInterpolator: CardStyleInterpolators.forHorizontalIOS, gestureEnabled: false }} />

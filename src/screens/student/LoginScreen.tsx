@@ -184,7 +184,7 @@ export function LoginScreen() {
               </Animated.View>
               <Text style={[styles.rememberText, { color: colors.labelColor }]}>Me manter conectado</Text>
             </View>
-            <TouchableOpacity>
+            <TouchableOpacity onPress={() => navigation.navigate("ForgotPassword")}>
               <Text style={styles.forgotText}>Esqueci a senha</Text>
             </TouchableOpacity>
           </View>
