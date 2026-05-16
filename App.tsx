@@ -1,4 +1,4 @@
-import "./src/lib/globals.css";
+import "./src/globals.css";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 
 import { ThemeProvider } from "./src/context/ThemeContext";
