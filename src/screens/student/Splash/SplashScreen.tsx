@@ -3,11 +3,11 @@ import { useEffect } from "react";
 import { View, Text, Animated, Image } from "react-native";
 import { useNavigation } from "@react-navigation/native";
 
-import { useSplashAnimations } from "../../hooks/useSplashAnimations";
-import { useSplashColors }     from "../../theme/useSplashColors";
+import { useSplashAnimations } from "../../../hooks/useSplashAnimations";
+import { useSplashColors }     from "../../../theme/useSplashColors";
 import { styles }              from "./splashStyles";
 import * as SecureStore from "expo-secure-store";
-import { useAuthStore }  from "../../store/useAuthStore";
+import { useAuthStore }  from "../../../store/useAuthStore";
 
 export function SplashScreen() {
   const navigation = useNavigation<any>();
@@ -47,7 +47,7 @@ export function SplashScreen() {
 
       <Animated.View style={[styles.ball, { opacity: anim.ballOpacity, backgroundColor: colors.ballColor, shadowColor: colors.ballColor }]}>
         <Animated.View style={[styles.logoContainer, { opacity: anim.logoOpacity, transform: [{ scale: anim.logoScale }] }]}>
-          <Image source={require("../../../assets/logo.png")} style={styles.logo} resizeMode="contain" />
+          <Image source={require("../../../../assets/logo.png")} style={styles.logo} resizeMode="contain" />
         </Animated.View>
       </Animated.View>
 

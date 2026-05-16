@@ -2,14 +2,14 @@ import { NavigationContainer } from "@react-navigation/native";
 import { createStackNavigator, CardStyleInterpolators, TransitionPresets } from "@react-navigation/stack";
 
 import { useTheme } from "../context/ThemeContext";
-import { SplashScreen }          from "../screens/student/SplashScreen";
-import { LoginScreen }           from "../screens/student/LoginScreen";
-import { RegisterScreen }        from "../screens/student/RegisterScreen";
-import { RegisterSuccessScreen } from "../screens/student/RegisterSuccessScreen";
-import { ForgotPasswordScreen }  from "../screens/student/ForgotPasswordScreen";
-import { ScanResultScreen }      from "../screens/student/ScanResultScreen";
-import { PublicProfileScreen }   from "../screens/student/PublicProfileScreen";
-import { TrophyScreen }          from "../screens/student/TrophyScreen";
+import { SplashScreen }          from "../screens/student/Splash/SplashScreen";
+import { LoginScreen }           from "../screens/student/Login/LoginScreen";
+import { RegisterScreen }        from "../screens/student/Register/RegisterScreen";
+import { RegisterSuccessScreen } from "../screens/student/RegisterSuccess/RegisterSuccessScreen";
+import { ForgotPasswordScreen }  from "../screens/student/ForgotPassword/ForgotPasswordScreen";
+import { ScanResultScreen }      from "../screens/student/ScanResult/ScanResultScreen";
+import { PublicProfileScreen }   from "../screens/student/PublicProfile/PublicProfileScreen";
+import { TrophyScreen }          from "../screens/student/Trophy/TrophyScreen";
 import { TabNavigator }          from "./TabNavigator";
 
 const Stack = createStackNavigator();

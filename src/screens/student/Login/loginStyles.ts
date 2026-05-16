@@ -1,5 +1,5 @@
 import { StyleSheet, Dimensions } from "react-native";
-import { GREEN } from "../../theme/colors";
+import { GREEN } from "../../../theme/colors";
 
 const { height } = Dimensions.get("window");
 export const HEADER_HEIGHT = height * 0.28;

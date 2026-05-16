@@ -12,14 +12,14 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 import * as NavigationBar from "expo-navigation-bar";
 import { useNavigation } from "@react-navigation/native";
 
-import { fetchAchievements, AchievementData } from "../../services/achievementService";
-import { useTrophyColors, getTypeColor, getTypeLabel } from "../../theme/useTrophyColors";
+import { fetchAchievements, AchievementData } from "../../../services/achievementService";
+import { useTrophyColors, getTypeColor, getTypeLabel } from "../../../theme/useTrophyColors";
 import { styles } from "./trophyStyles";
 import {
   IconTrophy, IconStar, IconRecycle, IconMedal, IconCrown,
   IconFlame, IconTarget, IconTrend, IconShield, IconCheck,
   IconDiamond, IconRainbow, IconLightning, IconShieldCheck,
-} from "../../components/icons";
+} from "../../../components/icons";
 
 const GREEN = "#22c55e";
 

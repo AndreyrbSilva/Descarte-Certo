@@ -1,4 +1,4 @@
-import { loginUser } from "../../services/authService";
+import { loginUser } from "../../../services/authService";
 import { useState, useEffect, useRef } from "react";
 import * as NavigationBar from "expo-navigation-bar";
 import {
@@ -8,10 +8,10 @@ import {
 } from "react-native";
 import { useNavigation, useRoute } from "@react-navigation/native";
 
-import { GREEN }               from "../../theme/colors";
-import { IconHash, IconLock, IconEye } from "../../components/icons";
-import { useLoginAnimations }  from "../../hooks/useLoginAnimations";
-import { useThemeColors }      from "../../theme/useThemeColors";
+import { GREEN }               from "../../../theme/colors";
+import { IconHash, IconLock, IconEye } from "../../../components/icons";
+import { useLoginAnimations }  from "../../../hooks/useLoginAnimations";
+import { useThemeColors }      from "../../../theme/useThemeColors";
 import { styles }              from "./loginStyles";
 
 export function LoginScreen() {

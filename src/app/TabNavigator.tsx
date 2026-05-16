@@ -3,11 +3,11 @@ import { createMaterialTopTabNavigator, MaterialTopTabBarProps } from "@react-na
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useRef, useEffect } from "react";
 
-import { HomeScreen }    from "../screens/student/HomeScreen";
-import { RankingScreen } from "../screens/student/RankingScreen";
-import { ScannerScreen } from "../screens/student/ScannerScreen";
-import { ProfileScreen } from "../screens/student/ProfileScreen";
-import { ConfigScreen }  from "../screens/student/ConfigScreen";
+import { HomeScreen }    from "../screens/student/Home/HomeScreen";
+import { RankingScreen } from "../screens/student/Ranking/RankingScreen";
+import { ScannerScreen } from "../screens/student/Scanner/ScannerScreen";
+import { ProfileScreen } from "../screens/student/Profile/ProfileScreen";
+import { ConfigScreen }  from "../screens/student/Config/ConfigScreen";
 
 import { IconHome, IconRanking, IconUser, IconConfig, IconCamera } from "../components/icons";
 import { TabBackground } from "../components/navigation/TabBackground";

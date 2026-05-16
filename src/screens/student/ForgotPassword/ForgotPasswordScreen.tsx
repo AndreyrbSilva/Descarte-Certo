@@ -7,15 +7,15 @@ import {
 } from "react-native";
 import { useNavigation } from "@react-navigation/native";
 
-import { GREEN }          from "../../theme/colors";
-import { IconMail, IconLock, IconEye, IconMailCheck, IconShieldCheck } from "../../components/icons";
-import { useThemeColors } from "../../theme/useThemeColors";
+import { GREEN }          from "../../../theme/colors";
+import { IconMail, IconLock, IconEye, IconMailCheck, IconShieldCheck } from "../../../components/icons";
+import { useThemeColors } from "../../../theme/useThemeColors";
 import { styles }         from "./forgotPasswordStyles";
 import {
   requestPasswordReset,
   verifyResetCode,
   resetPassword,
-} from "../../services/authService";
+} from "../../../services/authService";
 
 type PasswordLevel = {
   level: number;
