@@ -26,13 +26,27 @@ export default {
         foregroundImage: "./assets/logo.png",
         backgroundColor: "#ffffff",
       },
-      edgeToEdgeEnabled: true,
+      edgeToEdgeEnabled: false,
       predictiveBackGestureEnabled: false,
     },
     web: {
       favicon: "./assets/logo.png",
     },
-    plugins: ["expo-secure-store"],
+    plugins: [
+      "expo-secure-store",
+      [
+        "expo-camera",
+        {
+          cameraPermission: "O DescarteCerto precisa acessar sua câmera para escanear itens recicláveis.",
+        },
+      ],
+      [
+        "expo-image-picker",
+        {
+          photosPermission: "O DescarteCerto precisa acessar suas fotos para enviar imagens.",
+        },
+      ],
+    ],
     extra: {
       eas: {
         projectId: "01ef7e17-a591-4817-a69e-70b751d89b4f",
