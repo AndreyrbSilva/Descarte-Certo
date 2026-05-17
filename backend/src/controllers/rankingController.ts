@@ -1,68 +1,7 @@
 import { FastifyRequest, FastifyReply } from "fastify";
 import { prisma } from "../lib/prisma";
-import { isBlacklisted } from "../lib/blacklist";
-import jwt from "jsonwebtoken";
-
-const JWT_SECRET = process.env.JWT_SECRET ?? "changeme";
-
-async function getUserFromToken(req: FastifyRequest, reply: FastifyReply) {
-  const authHeader = req.headers.authorization;
-  if (!authHeader?.startsWith("Bearer ")) {
-    reply.status(401).send({ error: "Token não fornecido." });
-    return null;
-  }
-
-  const token = authHeader.split(" ")[1];
-  try {
-    jwt.verify(token, JWT_SECRET);
-  } catch {
-    reply.status(401).send({ error: "Token inválido ou expirado." });
-    return null;
-  }
-
-  const blocked = await isBlacklisted(token);
-  if (blocked) {
-    reply.status(401).send({ error: "Sessão encerrada. Faça login novamente." });
-    return null;
-  }
-
-  const payload = jwt.decode(token) as { sub: string };
-  return payload.sub;
-}
-
-// streak de um userId — mesma lógica do scanController
-async function computeStreak(userId: string): Promise<number> {
-  const scans = await prisma.scan.findMany({
-    where:   { userId },
-    orderBy: { createdAt: "desc" },
-    select:  { createdAt: true },
-  });
-
-  if (scans.length === 0) return 0;
-
-  const toDateStr  = (d: Date) => d.toISOString().slice(0, 10);
-  const activeDays = new Set(scans.map((s) => toDateStr(s.createdAt)));
-  const today      = toDateStr(new Date());
-  const yesterday  = toDateStr(new Date(Date.now() - 86_400_000));
-
-  const startDay = activeDays.has(today)
-    ? today
-    : activeDays.has(yesterday)
-    ? yesterday
-    : null;
-
-  if (!startDay) return 0;
-
-  let streak  = 0;
-  let current = new Date(startDay + "T12:00:00Z");
-
-  while (activeDays.has(toDateStr(current))) {
-    streak++;
-    current = new Date(current.getTime() - 86_400_000);
-  }
-
-  return streak;
-}
+import { getUserFromToken } from "../services/authService";
+import { computeStreak } from "../services/streakService";
 
 // GET /ranking/me
 export async function getMyRanking(req: FastifyRequest, reply: FastifyReply) {

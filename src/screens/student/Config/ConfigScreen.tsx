@@ -9,8 +9,8 @@ import * as NavigationBar from "expo-navigation-bar";
 import { useFocusEffect, useNavigation } from "@react-navigation/native";
 import * as SecureStore from "expo-secure-store";
 
-import { useConfigColors, useAnimatedConfigColors } from "../../hooks/useConfigColors";
-import { useAuthStore }    from "../../store/useAuthStore";
+import { useConfigColors, useAnimatedConfigColors } from "../../../theme/useConfigColors";
+import { useAuthStore }    from "../../../store/useAuthStore";
 import { styles }          from "./configStyles";
 import {
   sendVerifyCode, verifyEmail,
@@ -18,13 +18,13 @@ import {
   changePassword,
   setup2FA, verify2FA, disable2FA,
   fetchMe, logout,
-} from "../../services/authService";
+} from "../../../services/authService";
 import {
   IconEye, IconLogout, IconMailCheck, IconMailEdit,
   IconMoonStars, IconSun,
   IconResetPass, IconShield, IconSecureLock,
-} from "../../components/icons";
-import { useTheme } from "../../context/ThemeContext";
+} from "../../../components/icons";
+import { useTheme } from "../../../context/ThemeContext";
 
 const GREEN = "#22c55e";
 

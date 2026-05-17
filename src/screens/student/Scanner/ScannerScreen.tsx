@@ -8,11 +8,11 @@ import * as ImageManipulator from "expo-image-manipulator";
 import * as NavigationBar from "expo-navigation-bar";
 import { useNavigation } from "@react-navigation/native";
 
-import { submitScan, NotTrashError } from "../../services/scanService";
-import { useScannerColors }  from "../../hooks/useScannerColors";
+import { submitScan, NotTrashError } from "../../../services/scanService";
+import { useScannerColors }  from "../../../theme/useScannerColors";
 import { styles, FRAME_SIZE } from "./scannerStyles";
-import { IconFlash, IconFlip, IconCheck } from "../../components/icons";
-import { useAuthStore } from "../../store/useAuthStore";
+import { IconFlash, IconFlip, IconCheck } from "../../../components/icons";
+import { useAuthStore } from "../../../store/useAuthStore";
 
 const GREEN = "#22c55e";
 

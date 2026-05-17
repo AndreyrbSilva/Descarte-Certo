@@ -1,7 +1,7 @@
 import { useEffect, useRef } from "react";
 import { View, Text, Animated, Easing, StyleSheet, Dimensions } from "react-native";
 import { useNavigation } from "@react-navigation/native";
-import { GREEN } from "../../constants/theme";
+import { GREEN } from "../../../theme/colors";
 
 const { width, height } = Dimensions.get("window");
 const CIRCLE = 90;

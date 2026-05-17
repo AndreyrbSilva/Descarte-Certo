@@ -4,7 +4,7 @@ import {
   TouchableWithoutFeedback, Animated,
 } from "react-native";
 
-import { useHomeColors } from "../../hooks/useHomeColors";
+import { useHomeColors } from "../../theme/useHomeColors";
 import {
   IconStar, IconRecycle, IconMedal, IconTrophy, IconCrown,
   IconFlame, IconTarget, IconTrend, IconShield,

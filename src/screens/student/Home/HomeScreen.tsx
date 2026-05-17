@@ -8,18 +8,18 @@ import * as NavigationBar      from "expo-navigation-bar";
 import { useNavigation }       from "@react-navigation/native";
 import { useFocusEffect }      from "@react-navigation/native";
 import { useColorScheme }      from "react-native";
-import { StreakSheetModal } from "../../components/modals/StreakSheetModal";
+import { StreakSheetModal } from "../../../components/modals/StreakSheetModal";
 
-import { useAuthStore }    from "../../store/useAuthStore";
-import { fetchHomeData }   from "../../services/homeService";
-import { fetchDailyMission, DailyMissionData } from "../../services/missionService";
-import { useHomeColors }   from "../../hooks/useHomeColors";
-import { getStreakColors } from "../../hooks/streakColors";
+import { useAuthStore }    from "../../../store/useAuthStore";
+import { fetchHomeData }   from "../../../services/homeService";
+import { fetchDailyMission, DailyMissionData } from "../../../services/missionService";
+import { useHomeColors }   from "../../../theme/useHomeColors";
+import { getStreakColors } from "../../../theme/streakColors";
 import { styles }          from "./homeStyles";
 import {
   IconTrophy, IconTrend, IconCamera, IconCheck,
   IconTarget, IconBulb, IconRecycle, IconRanking, IconStar, IconFlame,
-} from "../../components/icons";
+} from "../../../components/icons";
 
 const GREEN  = "#22c55e";
 const ORANGE = "#f97316";
@@ -426,7 +426,7 @@ export function HomeScreen() {
             </View>
           </View>
           <Image
-            source={require("../../../assets/planet.png")}
+            source={require("../../../../assets/planet.png")}
             style={styles.planetImg}
             resizeMode="contain"
           />

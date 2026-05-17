@@ -1,7 +1,7 @@
 import * as FileSystem from "expo-file-system/legacy";
 import * as SecureStore from "expo-secure-store";
 import { decode } from "base64-arraybuffer";
-import { supabase } from "../lib/supabase";
+import { supabase } from "./supabase";
 import { api } from "./api";
 import { useAuthStore } from "../store/useAuthStore";
 

@@ -33,30 +33,62 @@ O Descarte Certo resolve um problema real: crianças não sabem separar o lixo c
 
 ```
 descarte-certo/
-├── src/                        # App mobile (React Native)
+├── src/                            # App mobile (React Native)
+│   ├── app/                        # Navegação (Stack + Tab)
+│   │   ├── index.tsx               # Stack Navigator principal
+│   │   └── TabNavigator.tsx
 │   ├── components/
-│   │   ├── icons/              # Ícones customizados SVG-based
-│   │   └── modals/             # Modais reutilizáveis (StreakSheetModal)
+│   │   ├── icons/                  # 36 ícones customizados SVG + barrel export
+│   │   ├── modals/                 # Modais reutilizáveis
+│   │   └── navigation/             # TabBackground
 │   ├── context/
-│   │   └── ThemeContext.tsx    # Contexto global de tema (dark/light/system)
-│   ├── hooks/                  # Hooks de animação e cores por tela
-│   ├── lib/
-│   │   ├── streakColors.ts     # Mapeamento de cores por nível de streak
-│   │   └── themeStorage.ts     # Persistência da preferência de tema
-│   ├── screens/
-│   │   └── student/            # Fluxo do aluno
-│   ├── services/               # Chamadas à API
-│   ├── store/                  # Zustand (estado global)
-│   └── app/                    # Navegação (Stack + Tab)
-├── backend/                    # API Node.js
+│   │   └── ThemeContext.tsx        # Contexto global de tema (dark/light/system)
+│   ├── screens/student/            # Telas agrupadas por feature
+│   │   ├── Home/                   # HomeScreen + homeStyles
+│   │   ├── Login/                  # LoginScreen + loginStyles + useLoginAnimations
+│   │   ├── Register/               # RegisterScreen + registerStyles + useRegisterAnimations
+│   │   ├── Splash/                 # SplashScreen + splashStyles + useSplashAnimations
+│   │   ├── Profile/                # ProfileScreen + profileStyles
+│   │   ├── PublicProfile/          # PublicProfileScreen
+│   │   ├── Ranking/                # RankingScreen + rankingStyles
+│   │   ├── Scanner/                # ScannerScreen + scannerStyles
+│   │   ├── ScanResult/             # ScanResultScreen + scanResultStyles
+│   │   ├── Config/                 # ConfigScreen + configStyles
+│   │   ├── Trophy/                 # TrophyScreen + trophyStyles
+│   │   ├── ForgotPassword/         # ForgotPasswordScreen + forgotPasswordStyles
+│   │   └── RegisterSuccess/        # RegisterSuccessScreen
+│   ├── services/                   # Chamadas à API (com barrel export index.ts)
+│   │   ├── api.ts                  # Axios client (URL via env var)
+│   │   ├── authService.ts          # Auth, email, senha, 2FA
+│   │   ├── scanService.ts          # Scan + integração com IA
+│   │   ├── profileService.ts       # Perfil + upload avatar
+│   │   ├── rankingService.ts       # Ranking turma/escola
+│   │   ├── homeService.ts          # Dados da Home
+│   │   ├── achievementService.ts   # Conquistas
+│   │   ├── missionService.ts       # Missões diárias
+│   │   └── supabase.ts             # Client Supabase
+│   ├── store/                      # Zustand (estado global, com barrel export)
+│   │   └── useAuthStore.ts
+│   └── theme/                      # Design system centralizado (com barrel export)
+│       ├── colors.ts               # Tokens semânticos (brand, accent, palette light/dark)
+│       ├── storage.ts              # Persistência de tema (AsyncStorage)
+│       ├── streakColors.ts         # Cores por nível de streak
+│       ├── use*Colors.ts           # Hooks de cor por tela (11 hooks)
+│       └── index.ts                # Barrel export
+├── backend/                        # API Node.js
 │   ├── prisma/
 │   │   ├── schema.prisma
+│   │   ├── seed.ts
 │   │   └── migrations/
 │   └── src/
-│       ├── controllers/
-│       ├── lib/                # prisma.ts, crypto.ts, blacklist.ts, mailer.ts
-│       ├── middlewares/
-│       └── routes/
+│       ├── controllers/            # Handlers HTTP (auth, email, password, 2FA, scan, etc.)
+│       ├── services/               # Lógica de negócio compartilhada
+│       │   ├── authService.ts      # getUserFromToken, JWT_SECRET
+│       │   ├── streakService.ts    # computeStreak
+│       │   └── rankingService.ts   # getUserRankingPosition
+│       ├── lib/                    # prisma.ts, crypto.ts, blacklist.ts, mailer.ts
+│       ├── middlewares/            # authMiddleware (verifyToken)
+│       └── routes/                 # Definição de rotas Fastify
 └── README.md
 ```
 
@@ -88,15 +120,13 @@ cd descarte-certo
 npm install
 ```
 
-Crie o arquivo `src/services/api.ts` e configure o `baseURL` com o IP da máquina onde o backend estará rodando:
+No arquivo `.env` na raiz, configure a variável `API_URL` com o IP da máquina onde o backend estará rodando:
 
-```ts
-export const api = axios.create({
-  baseURL: "http://SEU_IP_LOCAL:3333",
-});
+```env
+API_URL=http://SEU_IP_LOCAL:3333
 ```
 
-> **Atenção:** use o IP da rede local (ex: `192.168.0.107`), não `localhost`. O dispositivo físico precisa estar na mesma rede que o backend.
+> **Atenção:** use o IP da rede local (ex: `192.168.0.107`), não `localhost`. O dispositivo físico precisa estar na mesma rede que o backend. A URL é carregada automaticamente via `expo-constants`.
 
 ### 3. Backend
 
@@ -288,6 +318,7 @@ Aluno abre o app
 - [x] Backend de IA (FastAPI + TensorFlow/MobileNet)
 - [x] Integração do modelo de classificação de resíduos
 - [x] Recuperação de senha por e-mail (fluxo completo: envio de código, verificação OTP 6 dígitos, redefinição com medidor de força)
+- [x] Refatoração estrutural (design system, barrel exports, services layer, feature folders, env vars)
 - [ ] Painel administrativo
 - [ ] Deploy (Railway + EAS Build)
 
@@ -297,11 +328,13 @@ Aluno abre o app
 
 | Variável | Onde | Descrição |
 |---|---|---|
+| `SUPABASE_URL` | `.env` (raiz) | URL do projeto Supabase |
+| `SUPABASE_ANON_KEY` | `.env` (raiz) | Chave anônima do Supabase |
+| `API_URL` | `.env` (raiz) | URL base da API backend (ex: `http://192.168.0.101:3333`) |
 | `DATABASE_URL` | `backend/.env` | Connection string do Supabase |
 | `JWT_SECRET` | `backend/.env` | Chave para assinar tokens JWT |
 | `AES_SECRET` | `backend/.env` | Chave para criptografar matrículas |
 | `BREVO_API_KEY` | `backend/.env` | API key do Brevo para envio de e-mails |
 | `PORT` | `backend/.env` | Porta do servidor (padrão: 3333) |
-| `AI_API_URL` | `src/services/scanService.ts` | URL da API de classificação de IA |
 
 > Nunca commite o arquivo `.env`. Ele já está no `.gitignore`.
