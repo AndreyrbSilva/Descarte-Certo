@@ -6,6 +6,9 @@ export default {
     slug: "descarte-certo",
     version: "1.0.0",
     orientation: "portrait",
+    updates: {
+      fallbackToCacheTimeout: 0,
+    },
     icon: "./assets/logo.png",
     userInterfaceStyle: "automatic",
     newArchEnabled: false,
