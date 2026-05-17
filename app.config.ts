@@ -51,9 +51,9 @@ export default {
       eas: {
         projectId: "01ef7e17-a591-4817-a69e-70b751d89b4f",
       },
-      supabaseUrl:     process.env.SUPABASE_URL,
-      supabaseAnonKey: process.env.SUPABASE_ANON_KEY,
-      apiUrl:          process.env.API_URL,
+      supabaseUrl:     process.env.SUPABASE_URL     || "https://yuqexdhsnbzeqkfvclvx.supabase.co",
+      supabaseAnonKey: process.env.SUPABASE_ANON_KEY || "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inl1cWV4ZGhzbmJ6ZXFrZnZjbHZ4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzcxNDY2MjUsImV4cCI6MjA5MjcyMjYyNX0.MyZczpdTudfT4kEln8x2DmLUmco8d_S99-XZtTJ-WkM",
+      apiUrl:          process.env.API_URL           || "https://descarte-certo-production.up.railway.app",
     },
   },
 };
