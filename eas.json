@@ -10,7 +10,6 @@
     },
     "preview": {
       "distribution": "internal",
-      "artifactName": "DescarteCerto-v1.0.0",
       "android": {
         "buildType": "apk"
       }
