@@ -22,9 +22,11 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
     loadThemePreference().then(setPreference);
   }, []);
 
-  async function setTheme(theme: ThemePreference) {
+  function setTheme(theme: ThemePreference) {
     setPreference(theme);
-    await saveThemePreference(theme);
+    setTimeout(() => {
+      saveThemePreference(theme).catch(() => {});
+    }, 100);
   }
 
   const isDark =

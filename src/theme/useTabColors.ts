@@ -16,8 +16,9 @@ const COLORS = {
 };
 
 /** Cores estáticas (string) — para props que não aceitam Animated */
-export function useTabColors() {
-  const { isDark: dark } = useTheme();
+export function useTabColors(overrideIsDark?: boolean) {
+  const { isDark: contextIsDark } = useTheme();
+  const dark = overrideIsDark !== undefined ? overrideIsDark : contextIsDark;
   return {
     tabBg:    dark ? COLORS.dark.tabBg    : COLORS.light.tabBg,
     border:   dark ? COLORS.dark.border   : COLORS.light.border,
@@ -27,8 +28,9 @@ export function useTabColors() {
 }
 
 /** Cores animadas — transição suave de 350ms */
-export function useAnimatedTabColors() {
-  const { isDark } = useTheme();
+export function useAnimatedTabColors(overrideIsDark?: boolean) {
+  const { isDark: contextIsDark } = useTheme();
+  const isDark = overrideIsDark !== undefined ? overrideIsDark : contextIsDark;
   const anim = useRef(new Animated.Value(isDark ? 1 : 0)).current;
 
   useEffect(() => {

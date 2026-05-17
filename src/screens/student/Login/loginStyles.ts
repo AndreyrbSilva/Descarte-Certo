@@ -22,7 +22,7 @@ export const styles = StyleSheet.create({
     color: "#ffffff", letterSpacing: -0.5,
   },
   appTagline: {
-    fontSize: 9, fontWeight: "600",
+    fontSize: 12, fontWeight: "600",
     letterSpacing: 3.5, color: "rgba(255,255,255,0.65)", marginTop: 6,
   },
   card: {

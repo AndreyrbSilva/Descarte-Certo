@@ -1,7 +1,7 @@
 import { View, TouchableOpacity, StyleSheet, Animated, Text } from "react-native";
 import { createMaterialTopTabNavigator, MaterialTopTabBarProps } from "@react-navigation/material-top-tabs";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { useRef, useEffect } from "react";
+import { useRef, useEffect, useState } from "react";
 
 import { HomeScreen }    from "../screens/student/Home/HomeScreen";
 import { RankingScreen } from "../screens/student/Ranking/RankingScreen";
@@ -12,6 +12,7 @@ import { ConfigScreen }  from "../screens/student/Config/ConfigScreen";
 import { IconHome, IconRanking, IconUser, IconConfig, IconCamera } from "../components/icons";
 import { TabBackground } from "../components/navigation/TabBackground";
 import { useTabColors, useAnimatedTabColors } from "../theme/useTabColors";
+import { useTheme } from "../context/ThemeContext";
 
 const Tab   = createMaterialTopTabNavigator();
 const GREEN = "#22c55e";
@@ -114,8 +115,22 @@ function CustomTabBar({ state, descriptors, navigation, position, colors, aColor
 }
 
 export function TabNavigator() {
-  const colors  = useTabColors();
-  const aColors = useAnimatedTabColors();
+  const { isDark: globalIsDark } = useTheme();
+  const [localIsDark, setLocalIsDark] = useState(globalIsDark);
+
+  useEffect(() => {
+    setLocalIsDark(globalIsDark);
+  }, [globalIsDark]);
+
+  useEffect(() => {
+    import("react-native").then(({ DeviceEventEmitter }) => {
+      const sub = DeviceEventEmitter.addListener("onThemeToggle", setLocalIsDark);
+      return () => sub.remove();
+    });
+  }, []);
+
+  const colors  = useTabColors(localIsDark);
+  const aColors = useAnimatedTabColors(localIsDark);
   const insets  = useSafeAreaInsets();
 
   return (
