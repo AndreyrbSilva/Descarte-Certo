@@ -15,7 +15,7 @@ export async function fetchProfile() {
   return {
     totalPoints: pointsRes.data.total,
     scans:       historyRes.data.scans,
-    totalScans:  historyRes.data.scans.length,
+    totalScans:  historyRes.data.totalCount ?? historyRes.data.scans.length,
     schoolRank:  rankingRes.data.schoolRank,
     turmaRank:   rankingRes.data.turmaRank,
   };

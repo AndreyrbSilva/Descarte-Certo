@@ -17,14 +17,15 @@ export async function getPublicProfile(req: FastifyRequest, reply: FastifyReply)
 
   if (!user) return reply.status(404).send({ error: "Usuário não encontrado." });
 
-  const [userPoints, scans, allPoints, turmaUsers] = await Promise.all([
+  const [userPoints, scans, totalScansCount, allPoints, turmaUsers] = await Promise.all([
     prisma.userPoints.findUnique({ where: { userId } }),
     prisma.scan.findMany({
       where:   { userId },
       orderBy: { createdAt: "desc" },
-      take:    20,
+      take:    50, // Aumentado um pouco para os filtros de tempo funcionarem melhor
       select:  { id: true, category: true, points: true, createdAt: true },
     }),
+    prisma.scan.count({ where: { userId } }),
     prisma.userPoints.findMany({ orderBy: { total: "desc" }, select: { userId: true } }),
     prisma.user.findMany({ where: { turma: user.turma }, select: { id: true } }),
   ]);
@@ -44,7 +45,7 @@ export async function getPublicProfile(req: FastifyRequest, reply: FastifyReply)
   return reply.send({
     user:        { ...user },
     totalPoints: userPoints?.total ?? 0,
-    totalScans:  scans.length,
+    totalScans:  totalScansCount,
     scans,
     schoolRank:  schoolRank === 0 ? null : schoolRank,
     turmaRank:   turmaRank  === 0 ? null : turmaRank,
