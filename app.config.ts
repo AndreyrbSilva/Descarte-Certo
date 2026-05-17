@@ -6,11 +6,11 @@ export default {
     slug: "descarte-certo",
     version: "1.0.0",
     orientation: "portrait",
-    icon: "./assets/icon.png",
+    icon: "./assets/logo.png",
     userInterfaceStyle: "automatic",
     newArchEnabled: false,
     splash: {
-      image: "./assets/splash-icon.png",
+      image: "./assets/logo.png",
       resizeMode: "contain",
       backgroundColor: "#ffffff",
     },
@@ -18,18 +18,22 @@ export default {
       supportsTablet: true,
     },
     android: {
+      package: "com.dreeam.descartecerto",
       adaptiveIcon: {
-        foregroundImage: "./assets/adaptive-icon.png",
+        foregroundImage: "./assets/logo.png",
         backgroundColor: "#ffffff",
       },
       edgeToEdgeEnabled: true,
       predictiveBackGestureEnabled: false,
     },
     web: {
-      favicon: "./assets/favicon.png",
+      favicon: "./assets/logo.png",
     },
     plugins: ["expo-secure-store"],
     extra: {
+      eas: {
+        projectId: "01ef7e17-a591-4817-a69e-70b751d89b4f",
+      },
       supabaseUrl:     process.env.SUPABASE_URL,
       supabaseAnonKey: process.env.SUPABASE_ANON_KEY,
       apiUrl:          process.env.API_URL,
