@@ -11,7 +11,7 @@ export default {
     },
     icon: "./assets/logo.png",
     userInterfaceStyle: "automatic",
-    newArchEnabled: false,
+    newArchEnabled: true,
     splash: {
       image: "./assets/logo.png",
       resizeMode: "contain",
