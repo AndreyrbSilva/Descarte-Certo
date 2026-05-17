@@ -23,6 +23,19 @@ export async function listUsers(req: FastifyRequest, reply: FastifyReply) {
       avatarUrl: true,
       emailVerified: true,
       createdAt: true,
+      scans: {
+        select: {
+          id: true,
+          category: true,
+          points: true,
+          createdAt: true,
+        }
+      },
+      points: {
+        select: {
+          total: true
+        }
+      }
     },
     orderBy: { createdAt: "desc" },
   });
