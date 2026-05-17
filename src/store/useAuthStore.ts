@@ -5,6 +5,7 @@ interface User {
   name:             string;
   email:            string;
   turma?:           string;
+  role?:            "STUDENT" | "TEACHER" | "ADMIN";
   avatarUrl?:       string;
   emailVerified?:   boolean;
   twoFactorEnabled?: boolean;

@@ -3,7 +3,7 @@ import { useEffect } from "react";
 import { View, Text, Animated, Image } from "react-native";
 import { useNavigation } from "@react-navigation/native";
 
-import { useSplashAnimations } from "../../../hooks/useSplashAnimations";
+import { useSplashAnimations } from "./useSplashAnimations";
 import { useSplashColors }     from "../../../theme/useSplashColors";
 import { styles }              from "./splashStyles";
 import * as SecureStore from "expo-secure-store";
@@ -28,7 +28,12 @@ export function SplashScreen() {
     if (token && userRaw && rememberMe === "true") {
       const user = JSON.parse(userRaw);
       useAuthStore.getState().setAuth(user, token);
-      navigation.replace("Tabs");
+
+      if (user.role === "ADMIN") {
+        navigation.replace("Admin");
+      } else {
+        navigation.replace("Tabs");
+      }
     } else {
       await SecureStore.deleteItemAsync("token");
       await SecureStore.deleteItemAsync("user");

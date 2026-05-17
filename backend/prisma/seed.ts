@@ -1,7 +1,10 @@
 import { PrismaClient } from "@prisma/client";
 import { PrismaPg } from "@prisma/adapter-pg";
 import pg from "pg";
+import bcrypt from "bcryptjs";
 import "dotenv/config";
+
+import { encrypt } from "../src/lib/crypto";
 
 const pool = new pg.Pool({
   connectionString: process.env.DATABASE_URL!,
@@ -222,6 +225,34 @@ async function main() {
   }
 
   console.log(`✅ ${created} troféus criados, ${skipped} já existiam.`);
+
+  // ── Admin user seed ─────────────────────────────────────────
+  console.log("\n👤 Checking admin user...");
+
+  const existingAdmin = await prisma.user.findFirst({
+    where: { role: "ADMIN" },
+  });
+
+  if (!existingAdmin) {
+    const adminPassword = await bcrypt.hash("admin123", 10);
+    const adminMatricula = encrypt("000000");
+
+    await prisma.user.create({
+      data: {
+        name:      "Administrador",
+        matricula: adminMatricula,
+        email:     "admin@descartecerto.com",
+        password:  adminPassword,
+        turma:     "ADM",
+        role:      "ADMIN",
+      },
+    });
+
+    console.log("✅ Admin criado (matrícula: 000000, senha: admin123)");
+    console.log("⚠️  IMPORTANTE: Troque a senha do admin após o primeiro login!");
+  } else {
+    console.log(`⏭️  Admin já existe (${existingAdmin.email}). Pulando.`);
+  }
 }
 
 main()
