@@ -17,7 +17,7 @@ export async function getPublicProfile(req: FastifyRequest, reply: FastifyReply)
 
   if (!user) return reply.status(404).send({ error: "Usuário não encontrado." });
 
-  const [userPoints, scans, totalScansCount, allPoints, turmaUsers] = await Promise.all([
+  const [userPoints, scans, totalScansCount, allPoints, turmaUsers, userUnlocks, totalAchievements] = await Promise.all([
     prisma.userPoints.findUnique({ where: { userId } }),
     prisma.scan.findMany({
       where:   { userId },
@@ -28,6 +28,8 @@ export async function getPublicProfile(req: FastifyRequest, reply: FastifyReply)
     prisma.scan.count({ where: { userId } }),
     prisma.userPoints.findMany({ orderBy: { total: "desc" }, select: { userId: true } }),
     prisma.user.findMany({ where: { turma: user.turma }, select: { id: true } }),
+    prisma.userAchievement.findMany({ where: { userId }, include: { achievement: true }, orderBy: { unlockedAt: "desc" } }),
+    prisma.achievement.count(),
   ]);
 
   const schoolRank = allPoints.findIndex((p) => p.userId === userId) + 1;
@@ -42,6 +44,14 @@ export async function getPublicProfile(req: FastifyRequest, reply: FastifyReply)
 
   const streak = await computeStreak(userId);
 
+  const recentTrophies = userUnlocks.slice(0, 4).map((ua) => ({
+    id: ua.achievement.id,
+    title: ua.achievement.title,
+    description: ua.achievement.description,
+    icon: ua.achievement.icon,
+    type: ua.achievement.type,
+  }));
+
   return reply.send({
     user:        { ...user },
     totalPoints: userPoints?.total ?? 0,
@@ -50,5 +60,10 @@ export async function getPublicProfile(req: FastifyRequest, reply: FastifyReply)
     schoolRank:  schoolRank === 0 ? null : schoolRank,
     turmaRank:   turmaRank  === 0 ? null : turmaRank,
     streak,
+    trophyStats: {
+      unlocked: userUnlocks.length,
+      total: totalAchievements,
+    },
+    recentTrophies,
   });
 }

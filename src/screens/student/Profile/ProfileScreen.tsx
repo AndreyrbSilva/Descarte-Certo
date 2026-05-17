@@ -26,7 +26,7 @@ const GREEN  = "#22c55e";
 const ORANGE = "#f97316";
 const BLUE   = "#3b82f6";
 
-function ProfileTrophyIcon({ icon, color, size }: { icon: string; color: string; size: number }) {
+export function ProfileTrophyIcon({ icon, color, size }: { icon: string; color: string; size: number }) {
   switch (icon) {
     case "star":       return <IconStar color={color} size={size} />;
     case "recycle":    return <IconRecycle color={color} size={size} />;
