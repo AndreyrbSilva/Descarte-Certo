@@ -104,6 +104,7 @@ export async function login(req: FastifyRequest, reply: FastifyReply) {
       name:             user.name,
       email:            user.email,
       turma:            user.turma,
+      role:             user.role,
       avatarUrl:        user.avatarUrl,
       emailVerified:    user.emailVerified,
       twoFactorEnabled: user.twoFactorEnabled,
@@ -153,7 +154,7 @@ export async function getMe(req: FastifyRequest, reply: FastifyReply) {
   const user = await prisma.user.findUnique({
     where:  { id: userId },
     select: {
-      id: true, name: true, email: true, turma: true,
+      id: true, name: true, email: true, turma: true, role: true,
       avatarUrl: true, emailVerified: true, twoFactorEnabled: true,
     },
   });

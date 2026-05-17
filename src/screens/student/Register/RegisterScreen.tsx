@@ -10,7 +10,7 @@ import { useNavigation, useRoute } from "@react-navigation/native";
 
 import { GREEN }                  from "../../../theme/colors";
 import { IconMail, IconLock, IconUser, IconHash, IconBook, IconEye } from "../../../components/icons";
-import { useRegisterAnimations }  from "../../../hooks/useRegisterAnimations";
+import { useRegisterAnimations }  from "./useRegisterAnimations";
 import { useRegisterColors }      from "../../../theme/useRegisterColors";
 import { styles }                 from "./registerStyles";
 

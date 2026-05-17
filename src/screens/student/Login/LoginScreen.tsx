@@ -10,7 +10,7 @@ import { useNavigation, useRoute } from "@react-navigation/native";
 
 import { GREEN }               from "../../../theme/colors";
 import { IconHash, IconLock, IconEye } from "../../../components/icons";
-import { useLoginAnimations }  from "../../../hooks/useLoginAnimations";
+import { useLoginAnimations }  from "./useLoginAnimations";
 import { useThemeColors }      from "../../../theme/useThemeColors";
 import { styles }              from "./loginStyles";
 
@@ -33,8 +33,13 @@ export function LoginScreen() {
     try {
       setLoading(true);
       setError("");
-      await loginUser({ matricula, password, rememberMe });
-      navigation.replace("Tabs");
+      const { user } = await loginUser({ matricula, password, rememberMe });
+
+      if (user.role === "ADMIN") {
+        navigation.replace("Admin");
+      } else {
+        navigation.replace("Tabs");
+      }
     } catch (err: any) {
       const msg = err.response?.data?.error ?? "Erro ao entrar. Tente novamente.";
       setError(msg);
