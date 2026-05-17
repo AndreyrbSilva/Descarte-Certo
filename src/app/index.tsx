@@ -28,7 +28,7 @@ export function AppNavigator() {
       }}>
         <Stack.Screen name="Splash"          component={SplashScreen} />
         <Stack.Screen name="Login"           component={LoginScreen}           options={{ cardStyleInterpolator: CardStyleInterpolators.forFadeFromCenter }} />
-        <Stack.Screen name="Register"        component={RegisterScreen}        options={{ cardStyleInterpolator: CardStyleInterpolators.forModalPresentationIOS }} />
+        <Stack.Screen name="Register"        component={RegisterScreen}        options={{ cardStyleInterpolator: CardStyleInterpolators.forHorizontalIOS }} />
         <Stack.Screen name="ForgotPassword"  component={ForgotPasswordScreen}  options={{ cardStyleInterpolator: CardStyleInterpolators.forHorizontalIOS }} />
         <Stack.Screen name="RegisterSuccess" component={RegisterSuccessScreen} options={{ cardStyleInterpolator: CardStyleInterpolators.forFadeFromCenter }} />
         <Stack.Screen name="Tabs"            component={TabNavigator}          options={{ cardStyleInterpolator: CardStyleInterpolators.forFadeFromCenter }} />

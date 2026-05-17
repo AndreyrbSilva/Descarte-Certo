@@ -28,8 +28,9 @@ const COLORS = {
  * Hook original — retorna cores estáticas (string).
  * Mantido para compatibilidade com componentes que não precisam de animação.
  */
-export function useConfigColors() {
-  const { isDark: dark } = useTheme();
+export function useConfigColors(overrideIsDark?: boolean) {
+  const { isDark: contextIsDark } = useTheme();
+  const dark = overrideIsDark !== undefined ? overrideIsDark : contextIsDark;
   return {
     bg:           dark ? COLORS.dark.bg           : COLORS.light.bg,
     cardBg:       dark ? COLORS.dark.cardBg       : COLORS.light.cardBg,
@@ -48,8 +49,9 @@ export function useConfigColors() {
  * Usa Animated.Value (0 = light, 1 = dark) + interpolateColor.
  * Use com Animated.View / Animated.Text.
  */
-export function useAnimatedConfigColors() {
-  const { isDark } = useTheme();
+export function useAnimatedConfigColors(overrideIsDark?: boolean) {
+  const { isDark: contextIsDark } = useTheme();
+  const isDark = overrideIsDark !== undefined ? overrideIsDark : contextIsDark;
   const anim = useRef(new Animated.Value(isDark ? 1 : 0)).current;
 
   useEffect(() => {

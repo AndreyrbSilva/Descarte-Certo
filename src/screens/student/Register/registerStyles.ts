@@ -35,9 +35,9 @@ export const styles = StyleSheet.create({
     letterSpacing: -0.5,
   },
   headerSub: {
-    fontSize: 11,
+    fontSize: 12,
     fontWeight: "600",
-    letterSpacing: 3,
+    letterSpacing: 4,
     color: "rgba(255,255,255,0.65)",
     marginTop: 4,
   },

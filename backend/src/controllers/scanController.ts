@@ -82,13 +82,16 @@ export async function getScanHistory(req: FastifyRequest, reply: FastifyReply) {
   const userId = await getUserFromToken(req, reply);
   if (!userId) return;
 
-  const scans = await prisma.scan.findMany({
-    where:   { userId },
-    orderBy: { createdAt: "desc" },
-    take:    20,
-  });
+  const [scans, totalCount] = await Promise.all([
+    prisma.scan.findMany({
+      where:   { userId },
+      orderBy: { createdAt: "desc" },
+      take:    50,
+    }),
+    prisma.scan.count({ where: { userId } }),
+  ]);
 
-  return reply.send({ scans });
+  return reply.send({ scans, totalCount });
 }
 
 // GET /scan/points

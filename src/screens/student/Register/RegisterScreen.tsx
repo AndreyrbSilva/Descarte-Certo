@@ -143,7 +143,7 @@ export function RegisterScreen() {
             <View style={[styles.inputWrapper, { backgroundColor: colors.inputBg, borderColor: nomeFocus ? GREEN : colors.inputBorder }]}>
               <IconUser color={nomeFocus ? GREEN : colors.iconColor} />
               <TextInput
-                style={[styles.input, { color: colors.textColor }]}
+                style={[styles.input, { color: colors.textColor, paddingLeft: 12 }]}
                 placeholder="Ex: João da Silva"
                 placeholderTextColor={colors.subTextColor}
                 value={nome}

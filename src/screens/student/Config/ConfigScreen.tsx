@@ -29,38 +29,32 @@ import { useTheme } from "../../../context/ThemeContext";
 const GREEN = "#22c55e";
 
 // ─── botão toggle ─────────────────────────────────────────────────
-function ThemeToggle() {
-  const aColors       = useAnimatedConfigColors();
-  const { isDark, setTheme } = useTheme();
-  // Dois valores separados: posição usa native driver, cor usa JS driver
-  const thumbAnim     = useRef(new Animated.Value(isDark ? 1 : 0)).current;
-  const colorAnim     = useRef(new Animated.Value(isDark ? 1 : 0)).current;
+function ThemeToggle({ isDark, onToggle, aColors }: { 
+  isDark: boolean; 
+  onToggle: () => void;
+  aColors: ReturnType<typeof useAnimatedConfigColors>;
+}) {
+  const thumbAnim = useRef(new Animated.Value(isDark ? 1 : 0)).current;
+  const colorAnim = useRef(new Animated.Value(isDark ? 1 : 0)).current;
 
-  function toggle() {
-    const next = isDark ? "light" : "dark";
-    const toValue = next === "dark" ? 1 : 0;
+  useEffect(() => {
     Animated.spring(thumbAnim, {
-      toValue,
-      tension:   120,
-      friction:  8,
+      toValue: isDark ? 1 : 0,
+      tension: 120,
+      friction: 8,
       useNativeDriver: true,
     }).start();
+    
     Animated.timing(colorAnim, {
-      toValue,
+      toValue: isDark ? 1 : 0,
       duration: 350,
       useNativeDriver: false,
     }).start();
-    setTheme(next);
-  }
+  }, [isDark]);
 
   const thumbX = thumbAnim.interpolate({
     inputRange:  [0, 1],
     outputRange: [2, 26],
-  });
-
-  const trackBg = colorAnim.interpolate({
-    inputRange:  [0, 1],
-    outputRange: ["#e2e8f0", "#334155"],
   });
 
   const sunOpacity = colorAnim.interpolate({
@@ -76,7 +70,7 @@ function ThemeToggle() {
   return (
     <TouchableOpacity
       style={[styles.item, { paddingVertical: 14 }]}
-      onPress={toggle}
+      onPress={onToggle}
       activeOpacity={0.8}
     >
       {/* ícone */}
@@ -100,12 +94,12 @@ function ThemeToggle() {
       </View>
 
       {/* toggle customizado */}
-      <TouchableOpacity onPress={toggle} activeOpacity={0.8}>
+      <TouchableOpacity onPress={onToggle} activeOpacity={0.8}>
         <Animated.View style={{
           width:        52,
           height:       28,
           borderRadius: 14,
-          backgroundColor: trackBg,
+          backgroundColor: aColors.dividerColor,
           justifyContent: "center",
           padding:      2,
         }}>
@@ -391,15 +385,14 @@ function QRModal({ visible, qrCode, secret, onConfirm, onClose, loading }: {
   );
 }
 
-// ─── item de lista ────────────────────────────────────────────────────────────
-function Item({ icon, label, sub, onPress, danger }: {
+function Item({ icon, label, sub, onPress, danger, aColors }: {
   icon:   React.ReactNode;
   label:  string;
   sub?:   string;
   onPress: () => void;
   danger?: boolean;
+  aColors: ReturnType<typeof useAnimatedConfigColors>;
 }) {
-  const aColors = useAnimatedConfigColors();
   return (
     <TouchableOpacity style={styles.item} onPress={onPress} activeOpacity={0.7}>
       <Animated.View style={[styles.itemIconWrap, { backgroundColor: aColors.iconBg }]}>
@@ -419,8 +412,20 @@ function Item({ icon, label, sub, onPress, danger }: {
 // ─── tela principal ───────────────────────────────────────────────────────────
 export function ConfigScreen() {
   const navigation   = useNavigation<any>();
-  const colors       = useConfigColors();
-  const aColors      = useAnimatedConfigColors();
+  const { isDark: globalIsDark, setTheme } = useTheme();
+  const [localIsDark, setLocalIsDark] = useState(globalIsDark);
+
+  useEffect(() => {
+    setLocalIsDark(globalIsDark);
+  }, [globalIsDark]);
+
+  const colors       = useConfigColors(localIsDark);
+  const aColors      = useAnimatedConfigColors(localIsDark);
+
+  useEffect(() => {
+    NavigationBar.setBackgroundColorAsync(colors.bg);
+    NavigationBar.setButtonStyleAsync(localIsDark ? "light" : "dark");
+  }, [colors.bg, localIsDark]);
   const user         = useAuthStore((s) => s.user);
   const setUser      = useAuthStore((s) => s.setUser);
   const headerOpacity = useRef(new Animated.Value(0)).current;
@@ -429,7 +434,17 @@ export function ConfigScreen() {
   const [success, setSuccess] = useState("");
   const [loading, setLoading] = useState(false);
   const [showLogout, setShowLogout] = useState(false);
-  const { isDark, setTheme } = useTheme();
+
+  function handleToggleTheme() {
+    const next = !localIsDark;
+    setLocalIsDark(next);
+    import("react-native").then(({ DeviceEventEmitter }) => {
+      DeviceEventEmitter.emit("onThemeToggle", next);
+    });
+    setTimeout(() => {
+      setTheme(next ? "dark" : "light");
+    }, 400); // Wait for the local animation (350ms) to finish before the heavy global re-render
+  }
 
   // modais
 type ModalType =
@@ -636,7 +651,7 @@ type ModalType =
         {/* TEMA */}
         <Animated.Text style={[styles.sectionLabel, { color: aColors.sectionLabel }]}>Aparência</Animated.Text>
         <Animated.View style={[styles.section, { backgroundColor: aColors.cardBg, marginBottom: 18 }]}>
-          <ThemeToggle />
+          <ThemeToggle isDark={localIsDark} onToggle={handleToggleTheme} aColors={aColors} />
         </Animated.View>
 
         {/* SEÇÃO EMAIL */}
@@ -649,6 +664,7 @@ type ModalType =
                 label="Confirmar e-mail"
                 sub="Verifique sua caixa de entrada"
                 onPress={handleSendVerify}
+                aColors={aColors}
               />
               <Animated.View style={[styles.divider, { backgroundColor: aColors.dividerColor }]} />
             </>
@@ -658,6 +674,7 @@ type ModalType =
             label="Alterar e-mail"
             sub={twoFactorEnabled ? "Requer código do autenticador" : undefined}
             onPress={() => setModal("change-email")}
+            aColors={aColors}
           />
         </Animated.View>
 
@@ -669,6 +686,7 @@ type ModalType =
             label="Alterar senha"
             sub={twoFactorEnabled ? "Requer código do autenticador" : undefined}
             onPress={() => setModal("change-password")}
+            aColors={aColors}
           />
           <Animated.View style={[styles.divider, { backgroundColor: aColors.dividerColor }]} />
           <Item
@@ -676,6 +694,7 @@ type ModalType =
             label={twoFactorEnabled ? "2FA ativo" : "Ativar autenticação 2FA"}
             sub={twoFactorEnabled ? "Toque para desativar" : "Proteja sua conta com TOTP"}
             onPress={twoFactorEnabled ? () => setModal("2fa-disable") : handleSetup2FA}
+            aColors={aColors}
           />
         </Animated.View>
 
