@@ -10,6 +10,7 @@ import { ForgotPasswordScreen }  from "../screens/student/ForgotPassword/ForgotP
 import { ScanResultScreen }      from "../screens/student/ScanResult/ScanResultScreen";
 import { PublicProfileScreen }   from "../screens/student/PublicProfile/PublicProfileScreen";
 import { TrophyScreen }          from "../screens/student/Trophy/TrophyScreen";
+import { AdminScreen }           from "../screens/admin/AdminScreen";
 import { TabNavigator }          from "./TabNavigator";
 
 const Stack = createStackNavigator();
@@ -31,6 +32,7 @@ export function AppNavigator() {
         <Stack.Screen name="ForgotPassword"  component={ForgotPasswordScreen}  options={{ cardStyleInterpolator: CardStyleInterpolators.forHorizontalIOS }} />
         <Stack.Screen name="RegisterSuccess" component={RegisterSuccessScreen} options={{ cardStyleInterpolator: CardStyleInterpolators.forFadeFromCenter }} />
         <Stack.Screen name="Tabs"            component={TabNavigator}          options={{ cardStyleInterpolator: CardStyleInterpolators.forFadeFromCenter }} />
+        <Stack.Screen name="Admin"           component={AdminScreen}           options={{ cardStyleInterpolator: CardStyleInterpolators.forFadeFromCenter }} />
         <Stack.Screen name="ScanResult"      component={ScanResultScreen}      options={{ cardStyleInterpolator: CardStyleInterpolators.forHorizontalIOS, gestureEnabled: false }} />
         <Stack.Screen name="PublicProfile"   component={PublicProfileScreen}   options={{ cardStyleInterpolator: CardStyleInterpolators.forHorizontalIOS }} />
         <Stack.Screen name="Trophies"        component={TrophyScreen}          options={{ cardStyleInterpolator: CardStyleInterpolators.forHorizontalIOS }} />
