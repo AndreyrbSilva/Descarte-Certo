@@ -15,7 +15,7 @@ export default {
     splash: {
       image: "./assets/logo.png",
       resizeMode: "contain",
-      backgroundColor: "#ffffff",
+      backgroundColor: "#064e3b",
     },
     ios: {
       supportsTablet: true,
@@ -24,7 +24,7 @@ export default {
       package: "com.dreeam.descartecerto",
       adaptiveIcon: {
         foregroundImage: "./assets/logo.png",
-        backgroundColor: "#ffffff",
+        backgroundColor: "#064e3b",
       },
       edgeToEdgeEnabled: false,
       predictiveBackGestureEnabled: false,
