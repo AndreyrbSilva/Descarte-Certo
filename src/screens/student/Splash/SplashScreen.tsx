@@ -3,7 +3,7 @@ import { useEffect } from "react";
 import { View, Text, Animated, Image } from "react-native";
 import { useNavigation } from "@react-navigation/native";
 
-import { useSplashAnimations } from "./useSplashAnimations";
+import { useSplashAnimations } from "./hooks/useSplashAnimations";
 import { useSplashColors }     from "../../../theme/useSplashColors";
 import { styles }              from "./splashStyles";
 import * as SecureStore from "expo-secure-store";

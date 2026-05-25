@@ -10,7 +10,7 @@ import { useNavigation, useRoute } from "@react-navigation/native";
 
 import { GREEN }               from "../../../theme/colors";
 import { IconHash, IconLock, IconEye } from "../../../components/icons";
-import { useLoginAnimations }  from "./useLoginAnimations";
+import { useLoginAnimations }  from "./hooks/useLoginAnimations";
 import { useThemeColors }      from "../../../theme/useThemeColors";
 import { styles }              from "./loginStyles";
 
