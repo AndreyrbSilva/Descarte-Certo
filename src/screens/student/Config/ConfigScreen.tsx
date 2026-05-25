@@ -1,417 +1,28 @@
-import { useEffect, useRef, useState, useCallback } from "react";
+import { useEffect, useState } from "react";
 import {
   View, Text, TouchableOpacity,
-  Animated, StatusBar, Modal, TextInput,
-  ActivityIndicator, Image, StyleSheet,
+  Animated, StatusBar,
 } from "react-native";
 import { ScrollView } from "react-native-gesture-handler";
 import * as NavigationBar from "expo-navigation-bar";
-import { useFocusEffect, useNavigation } from "@react-navigation/native";
-import * as SecureStore from "expo-secure-store";
 
 import { useConfigColors, useAnimatedConfigColors } from "../../../theme/useConfigColors";
-import { useAuthStore }    from "../../../store/useAuthStore";
-import { styles }          from "./configStyles";
+import { useTheme } from "../../../context/ThemeContext";
+import { styles }   from "./configStyles";
 import {
-  sendVerifyCode, verifyEmail,
-  changeEmail, confirmChangeEmail,
-  changePassword,
-  setup2FA, verify2FA, disable2FA,
-  fetchMe, logout,
-} from "../../../services/authService";
-import {
-  IconEye, IconLogout, IconMailCheck, IconMailEdit,
-  IconMoonStars, IconSun,
+  IconMailCheck, IconMailEdit,
   IconResetPass, IconShield, IconSecureLock,
 } from "../../../components/icons";
-import { useTheme } from "../../../context/ThemeContext";
 
-const GREEN = "#22c55e";
+import { useConfigData }  from "./hooks/useConfigData";
+import { ThemeToggle }    from "./components/ThemeToggle";
+import { ConfigItem }     from "./components/ConfigItem";
+import { CodeModal }      from "./modals/CodeModal";
+import { InputModal }     from "./modals/InputModal";
+import { QRModal }        from "./modals/QRModal";
+import { LogoutModal }    from "./modals/LogoutModal";
 
-// ─── botão toggle ─────────────────────────────────────────────────
-function ThemeToggle({ isDark, onToggle, aColors }: { 
-  isDark: boolean; 
-  onToggle: () => void;
-  aColors: ReturnType<typeof useAnimatedConfigColors>;
-}) {
-  const thumbAnim = useRef(new Animated.Value(isDark ? 1 : 0)).current;
-  const colorAnim = useRef(new Animated.Value(isDark ? 1 : 0)).current;
-
-  useEffect(() => {
-    Animated.spring(thumbAnim, {
-      toValue: isDark ? 1 : 0,
-      tension: 120,
-      friction: 8,
-      useNativeDriver: true,
-    }).start();
-    
-    Animated.timing(colorAnim, {
-      toValue: isDark ? 1 : 0,
-      duration: 350,
-      useNativeDriver: false,
-    }).start();
-  }, [isDark]);
-
-  const thumbX = thumbAnim.interpolate({
-    inputRange:  [0, 1],
-    outputRange: [2, 26],
-  });
-
-  const sunOpacity = colorAnim.interpolate({
-    inputRange: [0, 1],
-    outputRange: [1, 0],
-  });
-
-  const moonOpacity = colorAnim.interpolate({
-    inputRange: [0, 1],
-    outputRange: [0, 1],
-  });
-
-  return (
-    <TouchableOpacity
-      style={[styles.item, { paddingVertical: 14 }]}
-      onPress={onToggle}
-      activeOpacity={0.8}
-    >
-      {/* ícone */}
-      <Animated.View style={[styles.itemIconWrap, { backgroundColor: aColors.iconBg }]}>
-        <Animated.View style={{ position: "absolute", opacity: moonOpacity }}>
-          <IconMoonStars size={20} color="#e2e8f0" />
-        </Animated.View>
-        <Animated.View style={{ position: "absolute", opacity: sunOpacity }}>
-          <IconSun size={20} color="#000000" />
-        </Animated.View>
-      </Animated.View>
-
-      {/* texto */}
-      <View style={styles.itemText}>
-        <Animated.Text style={[styles.itemLabel, { color: aColors.textColor }]}>
-          {isDark ? "Tema escuro" : "Tema claro"}
-        </Animated.Text>
-        <Animated.Text style={[styles.itemSub, { color: aColors.subTextColor }]}>
-          {isDark ? "Usando modo escuro" : "Usando modo claro"}
-        </Animated.Text>
-      </View>
-
-      {/* toggle customizado */}
-      <TouchableOpacity onPress={onToggle} activeOpacity={0.8}>
-        <Animated.View style={{
-          width:        52,
-          height:       28,
-          borderRadius: 14,
-          backgroundColor: aColors.dividerColor,
-          justifyContent: "center",
-          padding:      2,
-        }}>
-          <Animated.View style={{
-            width:        24,
-            height:       24,
-            borderRadius: 12,
-            backgroundColor: "#fff",
-            transform:    [{ translateX: thumbX }],
-            alignItems:   "center",
-            justifyContent: "center",
-            shadowColor:  "#000",
-            shadowOffset: { width: 0, height: 1 },
-            shadowOpacity: 0.15,
-            shadowRadius: 2,
-            elevation:    2,
-          }}>
-            <Animated.View style={{ position: "absolute", opacity: moonOpacity }}>
-              <IconMoonStars size={14} color="#334155" />
-            </Animated.View>
-            <Animated.View style={{ position: "absolute", opacity: sunOpacity }}>
-              <IconSun size={14} color="#000000" />
-            </Animated.View>
-          </Animated.View>
-        </Animated.View>
-      </TouchableOpacity>
-    </TouchableOpacity>
-  );
-}
-
-// ─── modal genérico de código ─────────────────────────────────────────────────
-function CodeModal({ visible, title, subtitle, onConfirm, onClose, loading }: {
-  visible:   boolean;
-  title:     string;
-  subtitle:  string;
-  onConfirm: (code: string) => void;
-  onClose:   () => void;
-  loading:   boolean;
-}) {
-  const colors = useConfigColors();
-  const [code,  setCode]  = useState("");
-  const [error, setError] = useState("");
-
-  useEffect(() => { if (!visible) { setCode(""); setError(""); } }, [visible]);
-
-  async function handleConfirm() {
-    setError("");
-    try {
-      await onConfirm(code);
-    } catch (e: any) {
-      setError(e.response?.data?.error ?? "Código inválido.");
-    }
-  }
-
-  return (
-    <Modal transparent visible={visible} animationType="fade" onRequestClose={onClose}>
-      <View style={modalStyles.backdrop}>
-        <View style={[modalStyles.card, { backgroundColor: colors.cardBg }]}>
-          <Text style={[modalStyles.title, { color: colors.textColor }]}>{title}</Text>
-          <Text style={[modalStyles.sub,   { color: colors.subTextColor }]}>{subtitle}</Text>
-          <TextInput
-            style={[modalStyles.input, { borderColor: colors.dividerColor, color: colors.textColor }]}
-            placeholder="000000"
-            placeholderTextColor={colors.subTextColor}
-            keyboardType="number-pad"
-            maxLength={6}
-            value={code}
-            onChangeText={setCode}
-            autoFocus
-          />
-          {error ? (
-            <View style={{ backgroundColor: "#fee2e2", borderRadius: 10, padding: 10, marginTop: 10 }}>
-              <Text style={{ color: "#ef4444", fontSize: 13, fontWeight: "700" }}>{error}</Text>
-            </View>
-          ) : null}
-          <TouchableOpacity
-            style={[modalStyles.btn, { backgroundColor: GREEN, opacity: loading ? 0.7 : 1 }]}
-            onPress={handleConfirm}
-            disabled={loading}
-          >
-            {loading
-              ? <ActivityIndicator color="#fff" />
-              : <Text style={modalStyles.btnText}>Confirmar</Text>
-            }
-          </TouchableOpacity>
-          <TouchableOpacity onPress={onClose} style={{ marginTop: 12 }}>
-            <Text style={{ color: colors.subTextColor, fontSize: 13, textAlign: "center" }}>Cancelar</Text>
-          </TouchableOpacity>
-        </View>
-      </View>
-    </Modal>
-  );
-}
-
-// ─── modal de input genérico ──────────────────────────────────────────────────
-function InputModal({ visible, title, subtitle, placeholder, onConfirm, onClose, loading, secureText, extraField, showTotp }: {
-  visible:     boolean;
-  title:       string;
-  subtitle:    string;
-  placeholder: string;
-  onConfirm:   (value: string, extra?: string, totp?: string) => void;
-  onClose:     () => void;
-  loading:     boolean;
-  secureText?: boolean;
-  extraField?: { placeholder: string; label: string };
-  showTotp?:   boolean;
-}) {
-  const colors = useConfigColors();
-  const [value,     setValue]     = useState("");
-  const [extra,     setExtra]     = useState("");
-  const [totp,      setTotp]      = useState("");
-  const [showPass1, setShowPass1] = useState(false);
-  const [showPass2, setShowPass2] = useState(false);
-  const [error,     setError]     = useState("");
-
-  useEffect(() => {
-    if (!visible) { setValue(""); setExtra(""); setTotp(""); setError(""); }
-  }, [visible]);
-
-  async function handleConfirm() {
-    setError("");
-    try {
-      await onConfirm(value, extra || undefined, totp || undefined);
-    } catch (e: any) {
-      setError(e.response?.data?.error ?? "Erro. Tente novamente.");
-    }
-  }
-
-  return (
-    <Modal transparent visible={visible} animationType="fade" onRequestClose={onClose}>
-      <View style={modalStyles.backdrop}>
-        <View style={[modalStyles.card, { backgroundColor: colors.cardBg }]}>
-          <Text style={[modalStyles.title, { color: colors.textColor }]}>{title}</Text>
-          <Text style={[modalStyles.sub,   { color: colors.subTextColor }]}>{subtitle}</Text>
-
-          {/* campo principal */}
-          <View style={{ position: "relative" }}>
-            <TextInput
-              style={[modalStyles.input, { borderColor: colors.dividerColor, color: colors.textColor, paddingRight: secureText ? 44 : 14 }]}
-              placeholder={placeholder}
-              placeholderTextColor={colors.subTextColor}
-              secureTextEntry={secureText && !showPass1}
-              value={value}
-              onChangeText={setValue}
-              autoFocus
-            />
-            {secureText && (
-              <TouchableOpacity
-                onPress={() => setShowPass1((p) => !p)}
-                style={{ position: "absolute", right: 12, top: 13 }}
-              >
-                <IconEye color={colors.subTextColor} off={!showPass1} />
-              </TouchableOpacity>
-            )}
-          </View>
-
-          {/* campo extra (nova senha) */}
-          {extraField && (
-            <View style={{ position: "relative", marginTop: 10 }}>
-              <TextInput
-                style={[modalStyles.input, { borderColor: colors.dividerColor, color: colors.textColor, paddingRight: 44 }]}
-                placeholder={extraField.placeholder}
-                placeholderTextColor={colors.subTextColor}
-                secureTextEntry={!showPass2}
-                value={extra}
-                onChangeText={setExtra}
-              />
-              <TouchableOpacity
-                onPress={() => setShowPass2((p) => !p)}
-                style={{ position: "absolute", right: 12, top: 13 }}
-              >
-                <IconEye color={colors.subTextColor} off={!showPass2} />
-              </TouchableOpacity>
-            </View>
-          )}
-
-          {/* campo TOTP — aparece quando 2FA está ativo */}
-          {showTotp && (
-            <TextInput
-              style={[modalStyles.input, { borderColor: colors.dividerColor, color: colors.textColor, marginTop: 10 }]}
-              placeholder="Código do autenticador (6 dígitos)"
-              placeholderTextColor={colors.subTextColor}
-              keyboardType="number-pad"
-              maxLength={6}
-              value={totp}
-              onChangeText={setTotp}
-            />
-          )}
-
-          {/* erro inline */}
-          {error ? (
-            <View style={{ backgroundColor: "#fee2e2", borderRadius: 10, padding: 10, marginTop: 10 }}>
-              <Text style={{ color: "#ef4444", fontSize: 13, fontWeight: "700" }}>{error}</Text>
-            </View>
-          ) : null}
-
-          <TouchableOpacity
-            style={[modalStyles.btn, { backgroundColor: GREEN, opacity: loading ? 0.7 : 1 }]}
-            onPress={handleConfirm}
-            disabled={loading}
-          >
-            {loading
-              ? <ActivityIndicator color="#fff" />
-              : <Text style={modalStyles.btnText}>Confirmar</Text>
-            }
-          </TouchableOpacity>
-          <TouchableOpacity onPress={onClose} style={{ marginTop: 12 }}>
-            <Text style={{ color: colors.subTextColor, fontSize: 13, textAlign: "center" }}>Cancelar</Text>
-          </TouchableOpacity>
-        </View>
-      </View>
-    </Modal>
-  );
-}
-
-// ─── modal QR Code 2FA ────────────────────────────────────────────────────────
-function QRModal({ visible, qrCode, secret, onConfirm, onClose, loading }: {
-  visible:   boolean;
-  qrCode:    string;
-  secret:    string;
-  onConfirm: (code: string) => void;
-  onClose:   () => void;
-  loading:   boolean;
-}) {
-  const colors = useConfigColors();
-  const [code, setCode] = useState("");
-
-  useEffect(() => { if (!visible) setCode(""); }, [visible]);
-
-  return (
-    <Modal transparent visible={visible} animationType="fade" onRequestClose={onClose}>
-      <View style={modalStyles.backdrop}>
-        <ScrollView contentContainerStyle={{ flexGrow: 1, justifyContent: "center", padding: 24 }}>
-          <View style={[modalStyles.card, { backgroundColor: colors.cardBg }]}>
-            <Text style={[modalStyles.title, { color: colors.textColor }]}>
-              Ativar autenticação de dois fatores
-            </Text>
-            <Text style={[modalStyles.sub, { color: colors.subTextColor }]}>
-              Escaneie o QR Code abaixo com o Google Authenticator ou similar.
-            </Text>
-
-            {qrCode ? (
-              <Image
-                source={{ uri: qrCode }}
-                style={{ width: 180, height: 180, alignSelf: "center", marginVertical: 16 }}
-              />
-            ) : (
-              <ActivityIndicator color={GREEN} style={{ marginVertical: 24 }} />
-            )}
-
-            <Text style={[{ fontSize: 11, textAlign: "center", marginBottom: 16 }, { color: colors.subTextColor }]}>
-              Ou insira manualmente: {"\n"}
-              <Text style={{ fontWeight: "800", letterSpacing: 2, color: colors.textColor }}>{secret}</Text>
-            </Text>
-
-            <TextInput
-              style={[modalStyles.input, { borderColor: colors.dividerColor, color: colors.textColor }]}
-              placeholder="Código do aplicativo"
-              placeholderTextColor={colors.subTextColor}
-              keyboardType="number-pad"
-              maxLength={6}
-              value={code}
-              onChangeText={setCode}
-            />
-
-            <TouchableOpacity
-              style={[modalStyles.btn, { backgroundColor: GREEN, opacity: loading ? 0.7 : 1 }]}
-              onPress={() => onConfirm(code)}
-              disabled={loading}
-            >
-              {loading
-                ? <ActivityIndicator color="#fff" />
-                : <Text style={modalStyles.btnText}>Verificar e ativar</Text>
-              }
-            </TouchableOpacity>
-            <TouchableOpacity onPress={onClose} style={{ marginTop: 12 }}>
-              <Text style={{ color: colors.subTextColor, fontSize: 13, textAlign: "center" }}>Cancelar</Text>
-            </TouchableOpacity>
-          </View>
-        </ScrollView>
-      </View>
-    </Modal>
-  );
-}
-
-function Item({ icon, label, sub, onPress, danger, aColors }: {
-  icon:   React.ReactNode;
-  label:  string;
-  sub?:   string;
-  onPress: () => void;
-  danger?: boolean;
-  aColors: ReturnType<typeof useAnimatedConfigColors>;
-}) {
-  return (
-    <TouchableOpacity style={styles.item} onPress={onPress} activeOpacity={0.7}>
-      <Animated.View style={[styles.itemIconWrap, { backgroundColor: aColors.iconBg }]}>
-        {icon}
-      </Animated.View>
-      <View style={styles.itemText}>
-        <Animated.Text style={[styles.itemLabel, { color: danger ? aColors.dangerColor : aColors.textColor }]}>
-          {label}
-        </Animated.Text>
-        {sub && <Animated.Text style={[styles.itemSub, { color: aColors.subTextColor }]}>{sub}</Animated.Text>}
-      </View>
-      <Animated.Text style={[styles.chevron, { color: aColors.subTextColor }]}>›</Animated.Text>
-    </TouchableOpacity>
-  );
-}
-
-// ─── tela principal ───────────────────────────────────────────────────────────
 export function ConfigScreen() {
-  const navigation   = useNavigation<any>();
   const { isDark: globalIsDark, setTheme } = useTheme();
   const [localIsDark, setLocalIsDark] = useState(globalIsDark);
 
@@ -419,21 +30,15 @@ export function ConfigScreen() {
     setLocalIsDark(globalIsDark);
   }, [globalIsDark]);
 
-  const colors       = useConfigColors(localIsDark);
-  const aColors      = useAnimatedConfigColors(localIsDark);
+  const colors  = useConfigColors(localIsDark);
+  const aColors = useAnimatedConfigColors(localIsDark);
 
   useEffect(() => {
     NavigationBar.setBackgroundColorAsync(colors.bg);
     NavigationBar.setButtonStyleAsync(localIsDark ? "light" : "dark");
   }, [colors.bg, localIsDark]);
-  const user         = useAuthStore((s) => s.user);
-  const setUser      = useAuthStore((s) => s.setUser);
-  const headerOpacity = useRef(new Animated.Value(0)).current;
 
-  const [error,   setError]   = useState("");
-  const [success, setSuccess] = useState("");
-  const [loading, setLoading] = useState(false);
-  const [showLogout, setShowLogout] = useState(false);
+  const data = useConfigData(colors);
 
   function handleToggleTheme() {
     const next = !localIsDark;
@@ -443,163 +48,8 @@ export function ConfigScreen() {
     });
     setTimeout(() => {
       setTheme(next ? "dark" : "light");
-    }, 400); // Wait for the local animation (350ms) to finish before the heavy global re-render
+    }, 400);
   }
-
-  // modais
-type ModalType =
-  | "verify-code"
-  | "change-email"
-  | "change-email-code"
-  | "change-password"
-  | "change-password-code" 
-  | "2fa-qr"
-  | "2fa-disable"
-  | null;
-
-  const [modal, setModal] = useState<ModalType>(null);
-
-  const [qrCode,  setQrCode]  = useState("");
-  const [secret,  setSecret]  = useState("");
-  const [pending2FAEmail, setPending2FAEmail] = useState("");
-
-  useFocusEffect(
-    useCallback(() => {
-      NavigationBar.setBackgroundColorAsync(colors.bg);
-      NavigationBar.setButtonStyleAsync("dark");
-
-      Animated.timing(headerOpacity, { toValue: 1, duration: 400, useNativeDriver: true }).start();
-
-      // sincroniza dados atuais
-      fetchMe().then((u) => {
-        setUser({
-          email:            u.email,
-          emailVerified:    u.emailVerified,
-          twoFactorEnabled: u.twoFactorEnabled,
-        });
-      }).catch(() => {});
-    }, [])
-  );
-
-  function feedback(msg: string, isError = false) {
-    if (isError) setError(msg);
-    else setSuccess(msg);
-    setTimeout(() => { setError(""); setSuccess(""); }, 3500);
-  }
-
-  // ── email: enviar código de verificação
-  async function handleSendVerify() {
-    setLoading(true);
-    try {
-      await sendVerifyCode();
-      setModal("verify-code");
-    } catch (e: any) {
-      feedback(e.response?.data?.error ?? "Erro ao enviar código.", true);
-    } finally { setLoading(false); }
-  }
-
-  // ── email: confirmar verificação
-  async function handleVerifyEmail(code: string) {
-    setLoading(true);
-    try {
-      await verifyEmail(code);
-      setUser({ emailVerified: true });
-      await SecureStore.setItemAsync("user", JSON.stringify({ ...user, emailVerified: true }));
-      setModal(null);
-      feedback("E-mail confirmado com sucesso!");
-    } catch (e: any) {
-      feedback(e.response?.data?.error ?? "Código inválido.", true);
-    } finally { setLoading(false); }
-  }
-
-  // ── email: iniciar alteração
-  async function handleChangeEmail(newEmail: string, totpCode?: string) {
-    setLoading(true);
-    try {
-      await changeEmail(newEmail, totpCode);
-      setPending2FAEmail(newEmail);
-      setModal("change-email-code");
-    } catch (e: any) {
-      feedback(e.response?.data?.error ?? "Erro ao alterar e-mail.", true);
-    } finally { setLoading(false); }
-  }
-
-  // ── email: confirmar alteração
-  async function handleConfirmChangeEmail(code: string) {
-    setLoading(true);
-    try {
-      await confirmChangeEmail(code);
-      setUser({ email: pending2FAEmail, emailVerified: true });
-      await SecureStore.setItemAsync("user", JSON.stringify({ ...user, email: pending2FAEmail, emailVerified: true }));
-      setModal(null);
-      feedback("E-mail alterado com sucesso!");
-    } catch (e: any) {
-      feedback(e.response?.data?.error ?? "Código inválido.", true);
-    } finally { setLoading(false); }
-  }
-
-  // ── senha: alterar
-  async function handleChangePassword(currentPassword: string, newPass?: string, totpCode?: string) {
-    setLoading(true);
-    try {
-      await changePassword(currentPassword, newPass ?? "", totpCode);
-      setModal(null);
-      feedback("Senha alterada com sucesso!");
-    } catch (e: any) {
-      throw e;
-    } finally { setLoading(false); }
-  }
-
-  // ── 2FA: configurar
-  async function handleSetup2FA() {
-    setLoading(true);
-    try {
-      const data = await setup2FA();
-      setQrCode(data.qrCode);
-      setSecret(data.secret);
-      setModal("2fa-qr");
-    } catch (e: any) {
-      feedback(e.response?.data?.error ?? "Erro ao configurar 2FA.", true);
-    } finally { setLoading(false); }
-  }
-
-  // ── 2FA: confirmar ativação
-  async function handleVerify2FA(code: string) {
-    setLoading(true);
-    try {
-      await verify2FA(code);
-      setUser({ twoFactorEnabled: true });
-      await SecureStore.setItemAsync("user", JSON.stringify({ ...user, twoFactorEnabled: true }));
-      setModal(null);
-      feedback("2FA ativado com sucesso!");
-    } catch (e: any) {
-      feedback(e.response?.data?.error ?? "Código inválido.", true);
-    } finally { setLoading(false); }
-  }
-
-  // ── 2FA: desativar
-  async function handleDisable2FA(code: string) {
-    setLoading(true);
-    try {
-      await disable2FA(code);
-      setUser({ twoFactorEnabled: false });
-      await SecureStore.setItemAsync("user", JSON.stringify({ ...user, twoFactorEnabled: false }));
-      setModal(null);
-      feedback("2FA desativado.");
-    } catch (e: any) {
-      feedback(e.response?.data?.error ?? "Código inválido.", true);
-    } finally { setLoading(false); }
-  }
-
-  // ── logout
-  async function confirmLogout() {
-    setShowLogout(false);
-    await logout();
-    navigation.replace("Login");
-  }
-
-  const emailVerified    = user?.emailVerified    ?? false;
-  const twoFactorEnabled = user?.twoFactorEnabled ?? false;
 
   return (
     <Animated.View style={[styles.root, { backgroundColor: aColors.bg }]}>
@@ -608,7 +58,7 @@ type ModalType =
       <ScrollView contentContainerStyle={styles.scroll} showsVerticalScrollIndicator={false}>
 
         {/* HEADER */}
-        <Animated.View style={[styles.header, { opacity: headerOpacity }]}>
+        <Animated.View style={[styles.header, { opacity: data.headerOpacity }]}>
           <Animated.Text style={[styles.headerTitle, { color: aColors.textColor }]}>Configurações</Animated.Text>
           <Animated.Text style={[styles.headerSub,   { color: aColors.subTextColor }]}>
             Gerencie sua conta
@@ -616,14 +66,14 @@ type ModalType =
         </Animated.View>
 
         {/* FEEDBACK */}
-        {(error || success) && (
+        {(data.error || data.success) && (
           <View style={{
             marginHorizontal: 20, marginBottom: 16,
             borderRadius: 12, padding: 14,
-            backgroundColor: error ? "#fee2e2" : "#dcfce7",
+            backgroundColor: data.error ? "#fee2e2" : "#dcfce7",
           }}>
-            <Text style={{ color: error ? "#ef4444" : "#16a34a", fontWeight: "700", fontSize: 13 }}>
-              {error || success}
+            <Text style={{ color: data.error ? "#ef4444" : "#16a34a", fontWeight: "700", fontSize: 13 }}>
+              {data.error || data.success}
             </Text>
           </View>
         )}
@@ -633,21 +83,21 @@ type ModalType =
           <View style={styles.emailRow}>
             <View style={styles.emailInfo}>
               <Animated.Text style={[styles.emailLabel, { color: aColors.subTextColor }]}>E-mail da conta</Animated.Text>
-              <Animated.Text style={[styles.emailValue, { color: aColors.textColor }]}>{user?.email ?? "..."}</Animated.Text>
+              <Animated.Text style={[styles.emailValue, { color: aColors.textColor }]}>{data.user?.email ?? "..."}</Animated.Text>
             </View>
             <View style={[styles.verifiedBadge, {
-              backgroundColor: emailVerified ? "#dcfce7" : "#fef9c3",
+              backgroundColor: data.emailVerified ? "#dcfce7" : "#fef9c3",
             }]}>
-              <Text style={{ fontSize: 12 }}>{emailVerified ? "✓" : "!"}</Text>
+              <Text style={{ fontSize: 12 }}>{data.emailVerified ? "✓" : "!"}</Text>
               <Text style={[styles.verifiedText, {
-                color: emailVerified ? "#16a34a" : "#ca8a04",
+                color: data.emailVerified ? "#16a34a" : "#ca8a04",
               }]}>
-                {emailVerified ? "Confirmado" : "Pendente"}
+                {data.emailVerified ? "Confirmado" : "Pendente"}
               </Text>
             </View>
           </View>
         </Animated.View>
-        
+
         {/* TEMA */}
         <Animated.Text style={[styles.sectionLabel, { color: aColors.sectionLabel }]}>Aparência</Animated.Text>
         <Animated.View style={[styles.section, { backgroundColor: aColors.cardBg, marginBottom: 18 }]}>
@@ -657,23 +107,23 @@ type ModalType =
         {/* SEÇÃO EMAIL */}
         <Animated.Text style={[styles.sectionLabel, { color: aColors.sectionLabel }]}>E-mail</Animated.Text>
         <Animated.View style={[styles.section, { backgroundColor: aColors.cardBg }]}>
-          {!emailVerified && (
+          {!data.emailVerified && (
             <>
-              <Item
+              <ConfigItem
                 icon={<IconMailCheck color="#ca8a04" size={25} />}
                 label="Confirmar e-mail"
                 sub="Verifique sua caixa de entrada"
-                onPress={handleSendVerify}
+                onPress={data.handleSendVerify}
                 aColors={aColors}
               />
               <Animated.View style={[styles.divider, { backgroundColor: aColors.dividerColor }]} />
             </>
           )}
-          <Item
+          <ConfigItem
             icon={<IconMailEdit color="#3b82f6" size={25} />}
             label="Alterar e-mail"
-            sub={twoFactorEnabled ? "Requer código do autenticador" : undefined}
-            onPress={() => setModal("change-email")}
+            sub={data.twoFactorEnabled ? "Requer código do autenticador" : undefined}
+            onPress={() => data.setModal("change-email")}
             aColors={aColors}
           />
         </Animated.View>
@@ -681,29 +131,29 @@ type ModalType =
         {/* SEÇÃO SEGURANÇA */}
         <Animated.Text style={[styles.sectionLabel, { color: aColors.sectionLabel }]}>Segurança</Animated.Text>
         <Animated.View style={[styles.section, { backgroundColor: aColors.cardBg }]}>
-          <Item
+          <ConfigItem
             icon={<IconResetPass color="#7c3aed" size={25} />}
             label="Alterar senha"
-            sub={twoFactorEnabled ? "Requer código do autenticador" : undefined}
-            onPress={() => setModal("change-password")}
+            sub={data.twoFactorEnabled ? "Requer código do autenticador" : undefined}
+            onPress={() => data.setModal("change-password")}
             aColors={aColors}
           />
           <Animated.View style={[styles.divider, { backgroundColor: aColors.dividerColor }]} />
-          <Item
-            icon={twoFactorEnabled ? <IconShield color="#16a34a" size={22} /> : <IconSecureLock color="#22c55e" size={22} />}
-            label={twoFactorEnabled ? "2FA ativo" : "Ativar autenticação 2FA"}
-            sub={twoFactorEnabled ? "Toque para desativar" : "Proteja sua conta com TOTP"}
-            onPress={twoFactorEnabled ? () => setModal("2fa-disable") : handleSetup2FA}
+          <ConfigItem
+            icon={data.twoFactorEnabled ? <IconShield color="#16a34a" size={22} /> : <IconSecureLock color="#22c55e" size={22} />}
+            label={data.twoFactorEnabled ? "2FA ativo" : "Ativar autenticação 2FA"}
+            sub={data.twoFactorEnabled ? "Toque para desativar" : "Proteja sua conta com TOTP"}
+            onPress={data.twoFactorEnabled ? () => data.setModal("2fa-disable") : data.handleSetup2FA}
             aColors={aColors}
           />
         </Animated.View>
 
         {/* LOGOUT */}
         <TouchableOpacity
-            style={styles.logoutBtn}
-            onPress={() => setShowLogout(true)}
-            activeOpacity={0.7}
-          >
+          style={styles.logoutBtn}
+          onPress={() => data.setShowLogout(true)}
+          activeOpacity={0.7}
+        >
           <Text style={styles.logoutText}>Sair da conta</Text>
         </TouchableOpacity>
 
@@ -711,225 +161,74 @@ type ModalType =
 
       {/* MODAIS */}
       <CodeModal
-        visible={modal === "verify-code"}
+        visible={data.modal === "verify-code"}
         title="Confirmar e-mail"
         subtitle="Digite o código que enviamos para o seu e-mail."
-        onConfirm={handleVerifyEmail}
-        onClose={() => setModal(null)}
-        loading={loading}
+        onConfirm={data.handleVerifyEmail}
+        onClose={() => data.setModal(null)}
+        loading={data.loading}
       />
 
       <InputModal
-        visible={modal === "change-email"}
+        visible={data.modal === "change-email"}
         title="Alterar e-mail"
-        subtitle={twoFactorEnabled
+        subtitle={data.twoFactorEnabled
           ? "Informe o novo e-mail e o código do autenticador."
           : "Informe o novo e-mail."}
         placeholder="Novo e-mail"
-        showTotp={twoFactorEnabled}
-        onConfirm={(newEmail, _, totp) => handleChangeEmail(newEmail, totp)}
-        onClose={() => setModal(null)}
-        loading={loading}
+        showTotp={data.twoFactorEnabled}
+        onConfirm={(newEmail, _, totp) => data.handleChangeEmail(newEmail, totp)}
+        onClose={() => data.setModal(null)}
+        loading={data.loading}
       />
 
       <CodeModal
-        visible={modal === "change-email-code"}
+        visible={data.modal === "change-email-code"}
         title="Confirmar novo e-mail"
-        subtitle={`Digite o código enviado para ${pending2FAEmail}.`}
-        onConfirm={handleConfirmChangeEmail}
-        onClose={() => setModal(null)}
-        loading={loading}
+        subtitle={`Digite o código enviado para ${data.pending2FAEmail}.`}
+        onConfirm={data.handleConfirmChangeEmail}
+        onClose={() => data.setModal(null)}
+        loading={data.loading}
       />
 
       <InputModal
-        visible={modal === "change-password"}
+        visible={data.modal === "change-password"}
         title="Alterar senha"
-        subtitle={twoFactorEnabled
+        subtitle={data.twoFactorEnabled
           ? "Informe a senha atual, a nova senha e o código do autenticador."
           : "Informe a senha atual e a nova senha."}
         placeholder="Senha atual"
         extraField={{ placeholder: "Nova senha", label: "Nova senha" }}
         secureText
-        showTotp={twoFactorEnabled}
-        onConfirm={(current, newPass, totp) => handleChangePassword(current, newPass, totp)}
-        onClose={() => setModal(null)}
-        loading={loading}
+        showTotp={data.twoFactorEnabled}
+        onConfirm={(current, newPass, totp) => data.handleChangePassword(current, newPass, totp)}
+        onClose={() => data.setModal(null)}
+        loading={data.loading}
       />
 
       <QRModal
-        visible={modal === "2fa-qr"}
-        qrCode={qrCode}
-        secret={secret}
-        onConfirm={handleVerify2FA}
-        onClose={() => setModal(null)}
-        loading={loading}
+        visible={data.modal === "2fa-qr"}
+        qrCode={data.qrCode}
+        secret={data.secret}
+        onConfirm={data.handleVerify2FA}
+        onClose={() => data.setModal(null)}
+        loading={data.loading}
       />
 
       <CodeModal
-        visible={modal === "2fa-disable"}
+        visible={data.modal === "2fa-disable"}
         title="Desativar 2FA"
         subtitle="Digite o código do seu aplicativo autenticador para desativar."
-        onConfirm={handleDisable2FA}
-        onClose={() => setModal(null)}
-        loading={loading}
+        onConfirm={data.handleDisable2FA}
+        onClose={() => data.setModal(null)}
+        loading={data.loading}
       />
 
-      <Modal
-        visible={showLogout}
-        transparent
-        animationType="fade"
-        onRequestClose={() => setShowLogout(false)}
-      >
-        <View
-          style={{
-            flex: 1,
-            backgroundColor: "rgba(0,0,0,0.5)",
-            alignItems: "center",
-            justifyContent: "center",
-            padding: 32,
-          }}
-        >
-          <View
-            style={[
-              {
-                width: "100%",
-                borderRadius: 24,
-                padding: 24,
-                alignItems: "center",
-              },
-              { backgroundColor: colors.cardBg },
-            ]}
-          >
-            <View
-              style={{
-                width: 56,
-                height: 56,
-                borderRadius: 28,
-                backgroundColor: "#fee2e2",
-                alignItems: "center",
-                justifyContent: "center",
-                marginBottom: 16,
-              }}
-            >
-              <IconLogout color="#ef4444" size={28} />
-            </View>
-
-            <Text
-              style={[
-                {
-                  fontSize: 20,
-                  fontWeight: "800",
-                  marginBottom: 8,
-                },
-                { color: colors.textColor },
-              ]}
-            >
-              Sair da conta?
-            </Text>
-
-            <Text
-              style={[
-                {
-                  fontSize: 14,
-                  textAlign: "center",
-                  marginBottom: 24,
-                },
-                { color: colors.subTextColor },
-              ]}
-            >
-              Você precisará entrar novamente para acessar o app.
-            </Text>
-
-            <TouchableOpacity
-              style={{
-                width: "100%",
-                paddingVertical: 14,
-                borderRadius: 14,
-                backgroundColor: "#ef4444",
-                alignItems: "center",
-                marginBottom: 10,
-              }}
-              onPress={confirmLogout}
-            >
-              <Text
-                style={{
-                  color: "#fff",
-                  fontWeight: "800",
-                  fontSize: 15,
-                }}
-              >
-                Sair
-              </Text>
-            </TouchableOpacity>
-
-            <TouchableOpacity
-              style={{
-                width: "100%",
-                paddingVertical: 14,
-                borderRadius: 14,
-                borderWidth: 1.5,
-                borderColor: colors.dividerColor,
-                alignItems: "center",
-              }}
-              onPress={() => setShowLogout(false)}
-            >
-              <Text
-                style={{
-                  fontWeight: "700",
-                  fontSize: 15,
-                  color: colors.textColor,
-                }}
-              >
-                Cancelar
-              </Text>
-            </TouchableOpacity>
-          </View>
-        </View>
-      </Modal>
+      <LogoutModal
+        visible={data.showLogout}
+        onConfirm={data.confirmLogout}
+        onClose={() => data.setShowLogout(false)}
+      />
     </Animated.View>
   );
 }
-
-const modalStyles = StyleSheet.create({
-  backdrop: {
-    flex:            1,
-    backgroundColor: "rgba(0,0,0,0.5)",
-    alignItems:      "center",
-    justifyContent:  "center",
-    padding:         24,
-  },
-  card: {
-    width:        "100%",
-    borderRadius: 24,
-    padding:      24,
-  },
-  title: {
-    fontSize:      20,
-    fontWeight:    "900",
-    marginBottom:  8,
-    letterSpacing: -0.4,
-  },
-  sub: {
-    fontSize:     13,
-    marginBottom: 20,
-    lineHeight:   18,
-  },
-  input: {
-    borderWidth:   1.5,
-    borderRadius:  12,
-    paddingHorizontal: 14,
-    paddingVertical:   12,
-    fontSize:      15,
-  },
-  btn: {
-    borderRadius:   14,
-    paddingVertical: 14,
-    alignItems:     "center",
-    marginTop:      16,
-  },
-  btnText: {
-    color:      "#fff",
-    fontWeight: "800",
-    fontSize:   15,
-  },
-});

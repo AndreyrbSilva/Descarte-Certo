@@ -1,55 +1,21 @@
-import { useEffect, useRef, useState } from "react";
+import { useState } from "react";
 import {
   View, Text, ScrollView, TouchableOpacity,
   Animated, StatusBar, Image,
 } from "react-native";
-import * as NavigationBar from "expo-navigation-bar";
-import { useNavigation, useRoute } from "@react-navigation/native";
 
-import { useAuthStore }          from "../../../store/useAuthStore";
-import { getStreakColors }        from "../../../theme/streakColors";
-import { useScanResultColors }   from "../../../theme/useScanResultColors";
-import { styles }                from "./scanResultStyles";
+import { useScanResultColors } from "../../../theme/useScanResultColors";
+import { styles }              from "./scanResultStyles";
 import { IconTrophy, IconRecycle } from "../../../components/icons";
 import { AchievementUnlockedModal } from "../../../components/modals/AchievementUnlockedModal";
 import type { NewAchievement } from "../../../services/achievementService";
 
+import {
+  useScanResultData,
+  CATEGORY_LABEL, CATEGORY_TIP, CATEGORY_BIN,
+} from "./hooks/useScanResultData";
+
 const GREEN = "#22c55e";
-
-const CATEGORY_LABEL: Record<string, string> = {
-  plastico: "Plástico ♻️",
-  papel:    "Papel 📄",
-  metal:    "Metal 🥫",
-  organico: "Orgânico 🍃",
-  vidro:    "Vidro 🫙",
-};
-
-const CATEGORY_TIP: Record<string, string> = {
-  plastico: "Plásticos levam até 400 anos para se decompor. Reciclar faz toda a diferença!",
-  papel:    "Uma tonelada de papel reciclado salva 20 árvores!",
-  metal:    "O alumínio pode ser reciclado infinitas vezes sem perder qualidade!",
-  organico: "Lixo orgânico pode virar adubo e ajudar a natureza a crescer!",
-  vidro:    "O vidro pode ser reciclado infinitas vezes sem perder qualidade!",
-};
-
-const CATEGORY_BIN: Record<string, { color: string; label: string }> = {
-  plastico: { color: "#ef4444", label: "Lixeira Vermelha" },
-  papel:    { color: "#3b82f6", label: "Lixeira Azul" },
-  metal:    { color: "#eab308", label: "Lixeira Amarela" },
-  organico: { color: "#92400e", label: "Lixeira Marrom" },
-  vidro:    { color: "#22c55e", label: "Lixeira Verde" },
-};
-
-const STREAK_THRESHOLDS = [0, 1, 3, 7, 14, 21, 30, 45, 60, 90, 120];
-
-function streakLevel(streak: number): number {
-  let level = 0;
-  for (const t of STREAK_THRESHOLDS) {
-    if (streak >= t) level = t;
-    else break;
-  }
-  return level;
-}
 
 // ── Componente para exibir troféus em fila ───────────────
 function AchievementQueue({ achievements }: { achievements: NewAchievement[] }) {
@@ -80,58 +46,10 @@ function AchievementQueue({ achievements }: { achievements: NewAchievement[] }) 
 }
 
 export function ScanResultScreen() {
-  const navigation   = useNavigation<any>();
-  const route        = useRoute<any>();
-  const colors       = useScanResultColors();
-  const setStreak    = useAuthStore((s) => s.setStreak);
-  const setLeveledUp = useAuthStore((s) => s.setLeveledUp);
-  const prevStreak   = useAuthStore((s) => s.streak);
+  const colors = useScanResultColors();
+  const d      = useScanResultData();
 
-  const { result, photoUri, error } = route.params ?? {};
-
-  const headerAnim    = useRef(new Animated.Value(0)).current;
-  const cardAnim      = useRef(new Animated.Value(60)).current;
-  const cardOpacity   = useRef(new Animated.Value(0)).current;
-  const pointsScale   = useRef(new Animated.Value(0.5)).current;
-  const pointsOpacity = useRef(new Animated.Value(0)).current;
-  const confidenceAnim = useRef(new Animated.Value(0)).current;
-
-  useEffect(() => {
-    NavigationBar.setBackgroundColorAsync(GREEN);
-    NavigationBar.setButtonStyleAsync("light");
-
-    Animated.sequence([
-      Animated.timing(headerAnim,    { toValue: 1, duration: 400, useNativeDriver: true }),
-      Animated.parallel([
-        Animated.spring(pointsScale,   { toValue: 1, tension: 120, friction: 6, useNativeDriver: true }),
-        Animated.timing(pointsOpacity, { toValue: 1, duration: 300, useNativeDriver: true }),
-      ]),
-      Animated.parallel([
-        Animated.timing(cardOpacity, { toValue: 1, duration: 350, useNativeDriver: true }),
-        Animated.timing(cardAnim,    { toValue: 0, duration: 350, useNativeDriver: true }),
-      ]),
-    ]).start();
-
-    if (result?.confidence) {
-      Animated.timing(confidenceAnim, {
-        toValue: result.confidence,
-        duration: 800,
-        delay: 400,
-        useNativeDriver: false,
-      }).start();
-    }
-  }, []);
-
-  const newStreak   = result?.streak ?? 0;
-  const leveledUp   = streakLevel(newStreak) > streakLevel(prevStreak);
-
-  function goHome() {
-    setStreak(newStreak);
-    if (leveledUp) setLeveledUp(true);
-    navigation.navigate("Tabs", { screen: "Home" });
-  }
-
-  if (error) {
+  if (d.error) {
     return (
       <View style={[styles.root, {
         backgroundColor: colors.cardBg,
@@ -142,19 +60,14 @@ export function ScanResultScreen() {
           Algo deu errado
         </Text>
         <Text style={{ fontSize: 14, textAlign: "center", marginBottom: 32, color: colors.subTextColor }}>
-          {error}
+          {d.error}
         </Text>
-        <TouchableOpacity style={styles.btnPrimary} onPress={() => navigation.goBack()}>
+        <TouchableOpacity style={styles.btnPrimary} onPress={() => d.navigation.goBack()}>
           <Text style={styles.btnPrimaryText}>TENTAR NOVAMENTE</Text>
         </TouchableOpacity>
       </View>
     );
   }
-
-  const confValue = result?.confidence ?? 0;
-  let barColor = "#ef4444";
-  if (confValue >= 0.8) barColor = "#22c55e";
-  else if (confValue >= 0.6) barColor = "#eab308";
 
   return (
     <View style={[styles.root, { backgroundColor: colors.cardBg }]}>
@@ -163,15 +76,15 @@ export function ScanResultScreen() {
       <ScrollView contentContainerStyle={styles.scroll} showsVerticalScrollIndicator={false}>
 
         {/* HEADER VERDE */}
-        <Animated.View style={[styles.header, { opacity: headerAnim }]}>
+        <Animated.View style={[styles.header, { opacity: d.headerAnim }]}>
           <View style={styles.iconWrap}>
             <IconRecycle color="#fff" size={36} />
           </View>
           <Animated.View style={[styles.pointsBadge, {
-            transform: [{ scale: pointsScale }],
-            opacity:   pointsOpacity,
+            transform: [{ scale: d.pointsScale }],
+            opacity:   d.pointsOpacity,
           }]}>
-            <Text style={styles.pointsEarned}>+{result?.pointsEarned ?? 0}</Text>
+            <Text style={styles.pointsEarned}>+{d.result?.pointsEarned ?? 0}</Text>
           </Animated.View>
           <Text style={styles.pointsLabel}>pontos ganhos!</Text>
         </Animated.View>
@@ -179,21 +92,21 @@ export function ScanResultScreen() {
         {/* CARD RESULTADO */}
         <Animated.View style={[styles.card, {
           backgroundColor: colors.cardBg,
-          opacity:   cardOpacity,
-          transform: [{ translateY: cardAnim }],
+          opacity:   d.cardOpacity,
+          transform: [{ translateY: d.cardAnim }],
         }]}>
           <Text style={[styles.cardTitle, { color: colors.textColor }]}>
-            Boa, é um {CATEGORY_LABEL[result?.category] ?? "Resíduo"}!
+            Boa, é um {CATEGORY_LABEL[d.result?.category] ?? "Resíduo"}!
           </Text>
 
-          {photoUri ? (
-            <Image source={{ uri: photoUri }} style={styles.photo} resizeMode="cover" />
+          {d.photoUri ? (
+            <Image source={{ uri: d.photoUri }} style={styles.photo} resizeMode="cover" />
           ) : (
             <Text style={{ color: "red" }}>sem foto</Text>
           )}
 
           <Text style={[styles.cardSub, { color: colors.subTextColor, marginTop: 12 }]}>
-            {CATEGORY_TIP[result?.category] ?? "Continue reciclando!"}
+            {CATEGORY_TIP[d.result?.category] ?? "Continue reciclando!"}
           </Text>
 
           <View style={[styles.divider, { backgroundColor: colors.dividerColor }]} />
@@ -201,22 +114,22 @@ export function ScanResultScreen() {
           <View style={styles.row}>
             <Text style={[styles.rowLabel, { color: colors.subTextColor }]}>Categoria</Text>
             <Text style={[styles.rowValue, { color: colors.textColor }]}>
-              {CATEGORY_LABEL[result?.category] ?? "--"}
+              {CATEGORY_LABEL[d.result?.category] ?? "--"}
             </Text>
           </View>
           <View style={styles.row}>
             <Text style={[styles.rowLabel, { color: colors.subTextColor }]}>Certeza</Text>
             <View style={{ flexDirection: "row", alignItems: "center" }}>
-              <Text style={[styles.rowValue, { color: barColor }]}>
-                {Math.round(confValue * 100)}%
+              <Text style={[styles.rowValue, { color: d.barColor }]}>
+                {Math.round(d.confValue * 100)}%
               </Text>
               <View style={[styles.confidenceBar, { backgroundColor: colors.dividerColor }]}>
                 <Animated.View
                   style={[
                     styles.confidenceBarFill,
                     {
-                      backgroundColor: barColor,
-                      width: confidenceAnim.interpolate({
+                      backgroundColor: d.barColor,
+                      width: d.confidenceAnim.interpolate({
                         inputRange: [0, 1],
                         outputRange: ["0%", "100%"],
                       }),
@@ -228,25 +141,25 @@ export function ScanResultScreen() {
           </View>
           <View style={styles.row}>
             <Text style={[styles.rowLabel, { color: colors.subTextColor }]}>Pontos ganhos</Text>
-            <Text style={[styles.rowValue, { color: GREEN }]}>+{result?.pointsEarned ?? 0}</Text>
+            <Text style={[styles.rowValue, { color: GREEN }]}>+{d.result?.pointsEarned ?? 0}</Text>
           </View>
           <View style={styles.row}>
             <Text style={[styles.rowLabel, { color: colors.subTextColor }]}>Total acumulado</Text>
             <View style={{ flexDirection: "row", alignItems: "center", gap: 4 }}>
               <IconTrophy color={GREEN} size={14} />
-              <Text style={[styles.rowValue, { color: GREEN }]}>{result?.totalPoints ?? 0} pts</Text>
+              <Text style={[styles.rowValue, { color: GREEN }]}>{d.result?.totalPoints ?? 0} pts</Text>
             </View>
           </View>
-          {CATEGORY_BIN[result?.category] && (
+          {CATEGORY_BIN[d.result?.category] && (
             <View style={styles.row}>
               <Text style={[styles.rowLabel, { color: colors.subTextColor }]}>Descartar em</Text>
               <View style={{ flexDirection: "row", alignItems: "center", gap: 6 }}>
                 <View style={{
                   width: 12, height: 12, borderRadius: 6,
-                  backgroundColor: CATEGORY_BIN[result?.category]?.color,
+                  backgroundColor: CATEGORY_BIN[d.result?.category]?.color,
                 }} />
                 <Text style={[styles.rowValue, { color: colors.textColor }]}>
-                  {CATEGORY_BIN[result?.category]?.label}
+                  {CATEGORY_BIN[d.result?.category]?.label}
                 </Text>
               </View>
             </View>
@@ -256,7 +169,7 @@ export function ScanResultScreen() {
 
           <TouchableOpacity
             style={styles.btnPrimary}
-            onPress={() => navigation.navigate("Tabs", { screen: "Scanner" })}
+            onPress={() => d.navigation.navigate("Tabs", { screen: "Scanner" })}
             activeOpacity={0.85}
           >
             <Text style={styles.btnPrimaryText}>ESCANEAR MAIS</Text>
@@ -264,7 +177,7 @@ export function ScanResultScreen() {
 
           <TouchableOpacity
             style={[styles.btnSecondary, { borderColor: colors.dividerColor }]}
-            onPress={goHome}
+            onPress={d.goHome}
             activeOpacity={0.7}
           >
             <Text style={[styles.btnSecondaryText, { color: colors.textColor }]}>
@@ -276,7 +189,7 @@ export function ScanResultScreen() {
       </ScrollView>
 
       {/* ACHIEVEMENT MODAL — mostra troféus desbloqueados sequencialmente */}
-      <AchievementQueue achievements={result?.newAchievements ?? []} />
+      <AchievementQueue achievements={d.result?.newAchievements ?? []} />
     </View>
   );
 }
