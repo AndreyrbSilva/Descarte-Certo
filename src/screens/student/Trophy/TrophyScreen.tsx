@@ -9,17 +9,17 @@ if (Platform.OS === "android" && UIManager.setLayoutAnimationEnabledExperimental
 }
 import { ScrollView } from "react-native-gesture-handler";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import * as NavigationBar from "expo-navigation-bar";
-import { useNavigation } from "@react-navigation/native";
 
-import { fetchAchievements, AchievementData } from "../../../services/achievementService";
-import { useTrophyColors, getTypeColor, getTypeLabel } from "../../../theme/useTrophyColors";
+import { AchievementData } from "../../../services/achievementService";
+import { getTypeColor, getTypeLabel } from "../../../theme/useTrophyColors";
 import { styles } from "./trophyStyles";
 import {
   IconTrophy, IconStar, IconRecycle, IconMedal, IconCrown,
   IconFlame, IconTarget, IconTrend, IconShield, IconCheck,
   IconDiamond, IconRainbow, IconLightning, IconShieldCheck,
 } from "../../../components/icons";
+
+import { useTrophyData } from "./hooks/useTrophyData";
 
 const GREEN = "#22c55e";
 
@@ -46,14 +46,9 @@ function TrophyIcon({ icon, color, size, locked }: {
 }
 
 const SECTION_ORDER = [
-  "total_scans",
-  "total_points",
-  "streak",
-  "ranking_turma",
-  "ranking_escola",
-  "ranking_consistency",
-  "category_diversity",
-  "missions_completed",
+  "total_scans", "total_points", "streak",
+  "ranking_turma", "ranking_escola", "ranking_consistency",
+  "category_diversity", "missions_completed",
 ];
 
 const SECTION_ICONS: Record<string, string> = {
@@ -75,11 +70,7 @@ function formatDate(iso: string) {
 
 // ── TrophyCard com animação por item ────────────────────
 function TrophyCard({ trophy, section, colors, index, expanded }: {
-  trophy: AchievementData;
-  section: any;
-  colors: any;
-  index: number;
-  expanded: boolean;
+  trophy: AchievementData; section: any; colors: any; index: number; expanded: boolean;
 }) {
   const cardOpacity = useRef(new Animated.Value(1)).current;
   const cardY      = useRef(new Animated.Value(0)).current;
@@ -87,31 +78,13 @@ function TrophyCard({ trophy, section, colors, index, expanded }: {
   useEffect(() => {
     if (expanded) {
       Animated.parallel([
-        Animated.timing(cardOpacity, {
-          toValue: 1,
-          duration: 250,
-          delay: index * 40,
-          useNativeDriver: true,
-        }),
-        Animated.timing(cardY, {
-          toValue: 0,
-          duration: 250,
-          delay: index * 40,
-          useNativeDriver: true,
-        }),
+        Animated.timing(cardOpacity, { toValue: 1, duration: 250, delay: index * 40, useNativeDriver: true }),
+        Animated.timing(cardY,       { toValue: 0, duration: 250, delay: index * 40, useNativeDriver: true }),
       ]).start();
     } else {
       Animated.parallel([
-        Animated.timing(cardOpacity, {
-          toValue: 0,
-          duration: 150,
-          useNativeDriver: true,
-        }),
-        Animated.timing(cardY, {
-          toValue: 12,
-          duration: 150,
-          useNativeDriver: true,
-        }),
+        Animated.timing(cardOpacity, { toValue: 0, duration: 150, useNativeDriver: true }),
+        Animated.timing(cardY,       { toValue: 12, duration: 150, useNativeDriver: true }),
       ]).start();
     }
   }, [expanded]);
@@ -127,44 +100,24 @@ function TrophyCard({ trophy, section, colors, index, expanded }: {
         backgroundColor: isUnlocked ? colors.cardBg : colors.lockedBg,
         opacity: isUnlocked ? 1 : 0.7,
       }]}>
-
-        {/* Ícone */}
         <View style={[styles.trophyIconWrap, {
-          backgroundColor: isUnlocked
-            ? section.color + "18"
-            : colors.progressTrack,
+          backgroundColor: isUnlocked ? section.color + "18" : colors.progressTrack,
         }]}>
-          <TrophyIcon
-            icon={trophy.icon}
-            color={section.color}
-            size={24}
-            locked={!isUnlocked}
-          />
+          <TrophyIcon icon={trophy.icon} color={section.color} size={24} locked={!isUnlocked} />
         </View>
-
-        {/* Info */}
         <View style={styles.trophyInfo}>
-          <Text style={[styles.trophyTitle, {
-            color: isUnlocked ? colors.textColor : colors.subTextColor,
-          }]}>
+          <Text style={[styles.trophyTitle, { color: isUnlocked ? colors.textColor : colors.subTextColor }]}>
             {trophy.title}
           </Text>
-          <Text style={[styles.trophyDesc, { color: colors.subTextColor }]}>
-            {trophy.description}
-          </Text>
+          <Text style={[styles.trophyDesc, { color: colors.subTextColor }]}>{trophy.description}</Text>
           {!isUnlocked && (
             <View style={{ marginTop: 4 }}>
               <View style={[styles.miniTrack, { backgroundColor: colors.progressTrack }]}>
-                <View style={[styles.miniBar, {
-                  width: `${pct}%`,
-                  backgroundColor: section.color,
-                }]} />
+                <View style={[styles.miniBar, { width: `${pct}%`, backgroundColor: section.color }]} />
               </View>
             </View>
           )}
         </View>
-
-        {/* Right side */}
         <View style={styles.trophyRight}>
           {isUnlocked ? (
             <>
@@ -184,9 +137,7 @@ function TrophyCard({ trophy, section, colors, index, expanded }: {
               </Text>
               {trophy.reward > 0 && (
                 <View style={[styles.rewardBadge, { backgroundColor: section.color + "22" }]}>
-                  <Text style={[styles.rewardText, { color: section.color }]}>
-                    +{trophy.reward}
-                  </Text>
+                  <Text style={[styles.rewardText, { color: section.color }]}>+{trophy.reward}</Text>
                 </View>
               )}
             </>
@@ -202,9 +153,9 @@ function CollapsibleSection({ section, colors }: { section: any; colors: any }) 
   const [expanded, setExpanded] = useState(true);
   const sectionUnlocked = section.items.filter((a: any) => a.unlocked).length;
 
-  const rotateAnim    = useRef(new Animated.Value(1)).current;
+  const rotateAnim     = useRef(new Animated.Value(1)).current;
   const contentOpacity = useRef(new Animated.Value(1)).current;
-  const contentHeight  = useRef(new Animated.Value(1)).current; // 0=fechado, 1=aberto
+  const contentHeight  = useRef(new Animated.Value(1)).current;
   const [measuredHeight, setMeasuredHeight] = useState(0);
   const [hasLayout, setHasLayout]           = useState(false);
 
@@ -213,52 +164,28 @@ function CollapsibleSection({ section, colors }: { section: any; colors: any }) 
     setExpanded(opening);
 
     Animated.parallel([
-      Animated.timing(rotateAnim, {
-        toValue: opening ? 1 : 0,
-        duration: 280,
-        useNativeDriver: true,
-      }),
-      Animated.timing(contentOpacity, {
-        toValue: opening ? 1 : 0,
-        duration: opening ? 300 : 180,
-        useNativeDriver: false,
-      }),
-      Animated.timing(contentHeight, {
-        toValue: opening ? 1 : 0,
-        duration: 280,
-        useNativeDriver: false,
-      }),
+      Animated.timing(rotateAnim,     { toValue: opening ? 1 : 0, duration: 280, useNativeDriver: true }),
+      Animated.timing(contentOpacity, { toValue: opening ? 1 : 0, duration: opening ? 300 : 180, useNativeDriver: false }),
+      Animated.timing(contentHeight,  { toValue: opening ? 1 : 0, duration: 280, useNativeDriver: false }),
     ]).start();
   }
 
-  const rotate = rotateAnim.interpolate({
-    inputRange: [0, 1],
-    outputRange: ["0deg", "90deg"],
-  });
-
-  const animatedHeight = contentHeight.interpolate({
-    inputRange: [0, 1],
-    outputRange: [0, measuredHeight],
-  });
+  const rotate = rotateAnim.interpolate({ inputRange: [0, 1], outputRange: ["0deg", "90deg"] });
+  const animatedHeight = contentHeight.interpolate({ inputRange: [0, 1], outputRange: [0, measuredHeight] });
 
   return (
     <View>
-      {/* Header da seção */}
       <TouchableOpacity
         style={[styles.sectionHeader, {
           backgroundColor: section.color + "15",
-          paddingHorizontal: 16,
-          paddingVertical: 12,
-          borderRadius: 16,
-          marginBottom: 12,
+          paddingHorizontal: 16, paddingVertical: 12,
+          borderRadius: 16, marginBottom: 12,
         }]}
         activeOpacity={0.7}
         onPress={toggle}
       >
         <TrophyIcon icon={section.icon} color={section.color} size={22} />
-        <Text style={[styles.sectionTitle, { color: colors.textColor }]}>
-          {section.label}
-        </Text>
+        <Text style={[styles.sectionTitle, { color: colors.textColor }]}>{section.label}</Text>
         <Text style={[styles.sectionCount, { color: section.color }]}>
           {sectionUnlocked}/{section.items.length}
         </Text>
@@ -267,31 +194,19 @@ function CollapsibleSection({ section, colors }: { section: any; colors: any }) 
         </Animated.View>
       </TouchableOpacity>
 
-      {/* Container com altura animada */}
       <Animated.View style={{
         height: hasLayout ? animatedHeight : undefined,
         opacity: contentOpacity,
         overflow: "hidden",
       }}>
-        {/* View oculta apenas para medir a altura real dos cards */}
         <View
           onLayout={(e) => {
             const h = e.nativeEvent.layout.height;
-            if (h > 0 && !hasLayout) {
-              setMeasuredHeight(h);
-              setHasLayout(true);
-            }
+            if (h > 0 && !hasLayout) { setMeasuredHeight(h); setHasLayout(true); }
           }}
         >
           {section.items.map((trophy: AchievementData, index: number) => (
-            <TrophyCard
-              key={trophy.id}
-              trophy={trophy}
-              section={section}
-              colors={colors}
-              index={index}
-              expanded={expanded}
-            />
+            <TrophyCard key={trophy.id} trophy={trophy} section={section} colors={colors} index={index} expanded={expanded} />
           ))}
         </View>
       </Animated.View>
@@ -301,59 +216,26 @@ function CollapsibleSection({ section, colors }: { section: any; colors: any }) 
 
 // ── TrophyScreen principal ──────────────────────────────
 export function TrophyScreen() {
-  const navigation = useNavigation<any>();
-  const colors     = useTrophyColors();
-  const insets     = useSafeAreaInsets();
-
-  const [achievements, setAchievements]   = useState<AchievementData[]>([]);
-  const [totalCount, setTotalCount]       = useState(0);
-  const [unlockedCount, setUnlockedCount] = useState(0);
-
-  const headerOpacity = useRef(new Animated.Value(0)).current;
-  const headerY       = useRef(new Animated.Value(20)).current;
-  const listOpacity   = useRef(new Animated.Value(0)).current;
-  const listY         = useRef(new Animated.Value(30)).current;
-
-  useEffect(() => {
-    NavigationBar.setBackgroundColorAsync(colors.bg);
-
-    Animated.stagger(150, [
-      Animated.parallel([
-        Animated.timing(headerOpacity, { toValue: 1, duration: 400, useNativeDriver: true }),
-        Animated.timing(headerY,       { toValue: 0, duration: 400, useNativeDriver: true }),
-      ]),
-      Animated.parallel([
-        Animated.timing(listOpacity, { toValue: 1, duration: 350, useNativeDriver: true }),
-        Animated.timing(listY,       { toValue: 0, duration: 350, useNativeDriver: true }),
-      ]),
-    ]).start();
-
-    fetchAchievements().then((data) => {
-      setAchievements(data.achievements);
-      setTotalCount(data.totalCount);
-      setUnlockedCount(data.unlockedCount);
-    });
-  }, []);
-
-  const progressPct = totalCount > 0 ? (unlockedCount / totalCount) * 100 : 0;
+  const data   = useTrophyData();
+  const insets = useSafeAreaInsets();
 
   const sections = SECTION_ORDER.map((type) => ({
     type,
     label: getTypeLabel(type),
     icon:  SECTION_ICONS[type] ?? "trophy",
     color: getTypeColor(type),
-    items: achievements.filter((a) => a.type === type),
+    items: data.achievements.filter((a) => a.type === type),
   })).filter((s) => s.items.length > 0);
 
   return (
-    <View style={[styles.root, { backgroundColor: colors.bg }]}>
-      <StatusBar barStyle={colors.statusBar} backgroundColor={colors.bg} />
+    <View style={[styles.root, { backgroundColor: data.colors.bg }]}>
+      <StatusBar barStyle={data.colors.statusBar} backgroundColor={data.colors.bg} />
 
       {/* Botão Voltar */}
       <TouchableOpacity
         style={[styles.backBtn, { paddingTop: Math.max(insets.top, 12) + 16 }]}
         activeOpacity={0.7}
-        onPress={() => navigation.goBack()}
+        onPress={() => data.navigation.goBack()}
       >
         <Text style={{ color: GREEN, fontSize: 28, fontWeight: "700", marginTop: -2 }}>‹</Text>
         <Text style={[styles.backText, { color: GREEN }]}>Voltar</Text>
@@ -363,42 +245,39 @@ export function TrophyScreen() {
         contentContainerStyle={[styles.scroll, { paddingBottom: 120 }]}
         showsVerticalScrollIndicator={false}
       >
-        {/* ── Header ────────────────────────────── */}
+        {/* Header */}
         <Animated.View style={[styles.header, {
-          opacity: headerOpacity,
-          transform: [{ translateY: headerY }],
+          opacity: data.headerOpacity,
+          transform: [{ translateY: data.headerY }],
         }]}>
           <View style={[styles.headerIconWrap, { backgroundColor: GREEN + "18" }]}>
             <IconTrophy color={GREEN} size={32} />
           </View>
-          <Text style={[styles.headerTitle, { color: colors.textColor }]}>
-            Troféus
-          </Text>
-          <Text style={[styles.headerSub, { color: colors.subTextColor }]}>
-            {unlockedCount} de {totalCount} desbloqueados
+          <Text style={[styles.headerTitle, { color: data.colors.textColor }]}>Troféus</Text>
+          <Text style={[styles.headerSub, { color: data.colors.subTextColor }]}>
+            {data.unlockedCount} de {data.totalCount} desbloqueados
           </Text>
 
-          {/* Barra de progresso geral */}
           <View style={styles.progressBarWrap}>
-            <View style={[styles.progressTrack, { backgroundColor: colors.progressTrack }]}>
+            <View style={[styles.progressTrack, { backgroundColor: data.colors.progressTrack }]}>
               <View style={[styles.progressBar, {
-                width: `${progressPct}%`,
+                width: `${data.progressPct}%`,
                 backgroundColor: GREEN,
               }]} />
             </View>
-            <Text style={[styles.progressLabel, { color: colors.subTextColor }]}>
-              {Math.round(progressPct)}%
+            <Text style={[styles.progressLabel, { color: data.colors.subTextColor }]}>
+              {Math.round(data.progressPct)}%
             </Text>
           </View>
         </Animated.View>
 
-        {/* ── Seções por tipo ───────────────────── */}
+        {/* Seções por tipo */}
         <Animated.View style={{
-          opacity: listOpacity,
-          transform: [{ translateY: listY }],
+          opacity: data.listOpacity,
+          transform: [{ translateY: data.listY }],
         }}>
           {sections.map((section) => (
-            <CollapsibleSection key={section.type} section={section} colors={colors} />
+            <CollapsibleSection key={section.type} section={section} colors={data.colors} />
           ))}
         </Animated.View>
       </ScrollView>
