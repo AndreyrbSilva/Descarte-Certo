@@ -1,133 +1,22 @@
-import { useEffect, useRef, useState } from "react";
 import {
   View, Text, TouchableOpacity,
-  Animated, StatusBar, ActivityIndicator, StyleSheet, Alert,
+  Animated, StatusBar, ActivityIndicator, StyleSheet,
 } from "react-native";
-import { CameraView, CameraType, useCameraPermissions } from "expo-camera";
-import * as ImageManipulator from "expo-image-manipulator";
-import * as NavigationBar from "expo-navigation-bar";
-import { useNavigation } from "@react-navigation/native";
+import { CameraView } from "expo-camera";
 
-import { submitScan, NotTrashError } from "../../../services/scanService";
-import { useScannerColors }  from "../../../theme/useScannerColors";
-import { styles, FRAME_SIZE } from "./scannerStyles";
+import { styles } from "./scannerStyles";
 import { IconFlash, IconFlip, IconCheck } from "../../../components/icons";
-import { useAuthStore } from "../../../store/useAuthStore";
+
+import { useScannerData } from "./hooks/useScannerData";
 
 const GREEN = "#22c55e";
 
 export function ScannerScreen() {
-  const navigation            = useNavigation<any>();
-  const colors                = useScannerColors();
-  const [permission, request] = useCameraPermissions();
-  const [facing,   setFacing]  = useState<CameraType>("back");
-  const [flash,    setFlash]   = useState(false);
-  const [loading,  setLoading] = useState(false);
-  const previousStreak = useAuthStore((s) => s.streak);
+  const d = useScannerData();
 
-  const cameraRef = useRef<CameraView>(null);
-  const scanAnim  = useRef(new Animated.Value(0)).current;
-  const frameAnim = useRef(new Animated.Value(0)).current;
-  const [capturing, setCapturing] = useState(false);
+  if (!d.permission) return <View style={styles.root} />;
 
-  const scaleAnim = useRef(new Animated.Value(1)).current;
-  const overlayAnim = useRef(new Animated.Value(0)).current;
-
-  useEffect(() => {
-    NavigationBar.setBackgroundColorAsync("#000000");
-    NavigationBar.setButtonStyleAsync("light");
-
-    Animated.timing(frameAnim, {
-      toValue: 1, duration: 400, useNativeDriver: true,
-    }).start();
-
-    Animated.loop(
-      Animated.sequence([
-        Animated.timing(scanAnim, {
-          toValue: FRAME_SIZE - 4,
-          duration: 2000,
-          useNativeDriver: true,
-        }),
-        Animated.timing(scanAnim, {
-          toValue: 0,
-          duration: 2000,
-          useNativeDriver: true,
-        }),
-      ])
-    ).start();
-  }, []);
-
-  async function handleCapture() {
-    if (loading || !cameraRef.current) return;
-
-    try {
-      setLoading(true);
-
-      // tira a foto
-      setCapturing(true);
-
-      Animated.spring(scaleAnim, {
-        toValue: 0.9,
-        useNativeDriver: true,
-      }).start();
-
-      Animated.timing(overlayAnim, {
-        toValue: 1,
-        duration: 120,
-        useNativeDriver: true,
-      }).start();
-
-      const photo = await cameraRef.current.takePictureAsync({
-        quality: 0.8,
-        shutterSound: false,
-        base64: true,
-      });
-
-      // volta ao normal
-      Animated.parallel([
-        Animated.spring(scaleAnim, {
-          toValue: 1,
-          useNativeDriver: true,
-        }),
-        Animated.timing(overlayAnim, {
-          toValue: 0,
-          duration: 200,
-          useNativeDriver: true,
-        }),
-      ]).start();
-
-      setCapturing(false);
-      if (!photo) throw new Error("Falha ao capturar foto.");
-
-      // calcula o crop proporcional ao frame
-      const { width: photoW, height: photoH } = photo;
-      const cropSize   = Math.min(photoW, photoH) * 0.72;
-      const originX    = (photoW - cropSize) / 2;
-      const originY    = (photoH - cropSize) / 2;
-
-      const cropped = await ImageManipulator.manipulateAsync(
-        photo.uri,
-        [{ crop: { originX, originY, width: cropSize, height: cropSize } }],
-        { compress: 0.8, format: ImageManipulator.SaveFormat.JPEG, base64: true }
-      );
-
-      const result = await submitScan(cropped.uri, cropped.base64);
-      navigation.replace("ScanResult", { result, photoUri: cropped.uri, previousStreak });
-    } catch (err: any) {
-      if (err instanceof NotTrashError) {
-        Alert.alert("Atenção", err.message);
-      } else {
-        const msg = err.response?.data?.error ?? err.message ?? "Erro ao escanear. Tente novamente.";
-        navigation.replace("ScanResult", { error: msg });
-      }
-    } finally {
-      setLoading(false);
-    }
-  }
-
-  if (!permission) return <View style={styles.root} />;
-
-  if (!permission.granted) {
+  if (!d.permission.granted) {
     return (
       <View style={[styles.root, { alignItems: "center", justifyContent: "center", padding: 32 }]}>
         <Text style={{ color: "#fff", fontSize: 16, textAlign: "center", marginBottom: 20 }}>
@@ -135,7 +24,7 @@ export function ScannerScreen() {
         </Text>
         <TouchableOpacity
           style={[styles.captureBtn, { width: "100%", height: 52, borderRadius: 14 }]}
-          onPress={request}
+          onPress={d.request}
         >
           <Text style={{ color: "#fff", fontWeight: "800" }}>Permitir câmera</Text>
         </TouchableOpacity>
@@ -148,16 +37,16 @@ export function ScannerScreen() {
       <StatusBar barStyle="light-content" backgroundColor="#000" />
 
       <CameraView
-        ref={cameraRef}
+        ref={d.cameraRef}
         style={styles.camera}
-        facing={facing}
-        enableTorch={flash}
+        facing={d.facing}
+        enableTorch={d.flash}
       >
         <View style={styles.overlay}>
 
           {/* topo */}
           <View style={styles.topBar}>
-            <TouchableOpacity style={styles.backBtn} onPress={() => navigation.replace("Tabs")}>
+            <TouchableOpacity style={styles.backBtn} onPress={() => d.navigation.replace("Tabs")}>
                 <Text style={{ color: "#fff", fontSize: 30, includeFontPadding: false, textAlignVertical: "center", marginTop: -7 }}>←</Text>
             </TouchableOpacity>
             <View style={{ alignItems: "center" }}>
@@ -168,18 +57,18 @@ export function ScannerScreen() {
           </View>
 
           {/* frame de mira */}
-          <Animated.View style={[styles.frame, { opacity: frameAnim }]}>
+          <Animated.View style={[styles.frame, { opacity: d.frameAnim }]}>
             <View style={[styles.corner, styles.cornerTL, { borderColor: GREEN }]} />
             <View style={[styles.corner, styles.cornerTR, { borderColor: GREEN }]} />
             <View style={[styles.corner, styles.cornerBL, { borderColor: GREEN }]} />
             <View style={[styles.corner, styles.cornerBR, { borderColor: GREEN }]} />
 
             <Animated.View style={[styles.scanLine, {
-              transform: [{ translateY: scanAnim }],
+              transform: [{ translateY: d.scanAnim }],
             }]} />
 
             <Text style={styles.frameHint}>
-              {loading ? "Analisando..." : "Centralize o item no quadro"}
+              {d.loading ? "Analisando..." : "Centralize o item no quadro"}
             </Text>
           </Animated.View>
 
@@ -187,20 +76,20 @@ export function ScannerScreen() {
           <View style={styles.bottomBar}>
             <TouchableOpacity
               style={styles.sideBtn}
-              onPress={() => setFlash(!flash)}
+              onPress={d.toggleFlash}
               activeOpacity={0.7}
             >
-              <IconFlash color={flash ? GREEN : "#fff"} size={22} />
+              <IconFlash color={d.flash ? GREEN : "#fff"} size={22} />
             </TouchableOpacity>
 
-            <Animated.View style={{ transform: [{ scale: scaleAnim }] }}>
+            <Animated.View style={{ transform: [{ scale: d.scaleAnim }] }}>
               <TouchableOpacity
                 style={styles.captureBtn}
-                onPress={handleCapture}
-                disabled={loading}
+                onPress={d.handleCapture}
+                disabled={d.loading}
                 activeOpacity={0.85}
               >
-              {loading
+              {d.loading
                 ? <ActivityIndicator color="#22c55e" size="large" />
                 : <View style={styles.captureBtnInner}>
                     <IconCheck color={GREEN} size={28} />
@@ -211,7 +100,7 @@ export function ScannerScreen() {
 
             <TouchableOpacity
               style={styles.sideBtn}
-              onPress={() => setFacing(facing === "back" ? "front" : "back")}
+              onPress={d.toggleFacing}
               activeOpacity={0.7}
             >
               <IconFlip color="#fff" size={22} />
@@ -224,7 +113,7 @@ export function ScannerScreen() {
           style={{
             ...StyleSheet.absoluteFillObject,
             backgroundColor: "#000",
-            opacity: overlayAnim.interpolate({
+            opacity: d.overlayAnim.interpolate({
               inputRange: [0, 1],
               outputRange: [0, 0.25],
             }),
