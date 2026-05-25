@@ -33,7 +33,7 @@ function TrophyIcon({ icon, color, size, locked }: {
     case "recycle":   return <IconRecycle color={c} size={size} />;
     case "medal":     return <IconMedal type="gold" size={size} />;
     case "trophy":    return <IconTrophy color={c} size={size} />;
-    case "crown":     return <IconCrown color={c} size={size} />;
+    case "crown":     return <IconCrown size={size} />;
     case "flame":     return <IconFlame outer={c} innerStart={c} innerEnd={c} size={size} />;
     case "target":    return <IconTarget color={c} size={size} />;
     case "trend":     return <IconTrend color={c} size={size} />;

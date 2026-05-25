@@ -7,7 +7,7 @@ import { ScrollView } from "react-native-gesture-handler";
 import { useNavigation } from "@react-navigation/native";
 
 import { useProfileColors } from "../../../theme/useProfileColors";
-import { styles }           from "./profileStyles";
+import { styles } from "./profileStyles";
 import {
   IconTrophy, IconTrend, IconRecycle, IconLogout, IconCamera,
   IconStar, IconCrown, IconMedal, IconFlame, IconTarget,
@@ -17,9 +17,9 @@ import { getTypeColor } from "../../../theme/useTrophyColors";
 
 import { useProfileData, FILTERS, formatDate } from "./hooks/useProfileData";
 
-const GREEN  = "#22c55e";
+const GREEN = "#22c55e";
 const ORANGE = "#f97316";
-const BLUE   = "#3b82f6";
+const BLUE = "#3b82f6";
 
 const CATEGORY_LABEL: Record<string, string> = {
   plastico: "Plástico", papel: "Papel",
@@ -33,28 +33,28 @@ const CATEGORY_COLOR: Record<string, string> = {
 
 export function ProfileTrophyIcon({ icon, color, size }: { icon: string; color: string; size: number }) {
   switch (icon) {
-    case "star":       return <IconStar color={color} size={size} />;
-    case "recycle":    return <IconRecycle color={color} size={size} />;
-    case "medal":      return <IconMedal type="gold" size={size} />;
-    case "trophy":     return <IconTrophy color={color} size={size} />;
-    case "crown":      return <IconCrown color={color} size={size} />;
-    case "flame":      return <IconFlame outer={color} innerStart={color} innerEnd={color} size={size} />;
-    case "target":     return <IconTarget color={color} size={size} />;
-    case "trend":      return <IconTrend color={color} size={size} />;
-    case "shield":     return <IconShieldCheck color={color} size={size} />;
-    case "diamond":    return <IconDiamond color={color} size={size} />;
-    case "rainbow":    return <IconRainbow color={color} size={size} />;
-    case "lightning":  return <IconLightning color={color} size={size} />;
-    default:           return <IconTrophy color={color} size={size} />;
+    case "star": return <IconStar color={color} size={size} />;
+    case "recycle": return <IconRecycle color={color} size={size} />;
+    case "medal": return <IconMedal type="gold" size={size} />;
+    case "trophy": return <IconTrophy color={color} size={size} />;
+    case "crown": return <IconCrown color={color} size={size} />;
+    case "flame": return <IconFlame outer={color} innerStart={color} innerEnd={color} size={size} />;
+    case "target": return <IconTarget color={color} size={size} />;
+    case "trend": return <IconTrend color={color} size={size} />;
+    case "shield": return <IconShieldCheck color={color} size={size} />;
+    case "diamond": return <IconDiamond color={color} size={size} />;
+    case "rainbow": return <IconRainbow color={color} size={size} />;
+    case "lightning": return <IconLightning color={color} size={size} />;
+    default: return <IconTrophy color={color} size={size} />;
   }
 }
 
 function useChipAnims(activeKey: string, chipBg: string, dividerColor: string) {
   type TF = "hoje" | "3dias" | "semana";
   const anims = useRef<Record<TF, Animated.Value>>({
-    hoje:    new Animated.Value(0),
+    hoje: new Animated.Value(0),
     "3dias": new Animated.Value(0),
-    semana:  new Animated.Value(1),
+    semana: new Animated.Value(1),
   }).current;
 
   useEffect(() => {
@@ -73,20 +73,20 @@ function useChipAnims(activeKey: string, chipBg: string, dividerColor: string) {
 }
 
 function useListAnim(filterKey: string) {
-  const opacity    = useRef(new Animated.Value(1)).current;
+  const opacity = useRef(new Animated.Value(1)).current;
   const translateY = useRef(new Animated.Value(0)).current;
-  const isFirst    = useRef(true);
+  const isFirst = useRef(true);
 
   useEffect(() => {
     if (isFirst.current) { isFirst.current = false; return; }
 
     Animated.parallel([
-      Animated.timing(opacity,    { toValue: 0, duration: 110, useNativeDriver: true }),
+      Animated.timing(opacity, { toValue: 0, duration: 110, useNativeDriver: true }),
       Animated.timing(translateY, { toValue: -6, duration: 110, useNativeDriver: true }),
     ]).start(() => {
       translateY.setValue(6);
       Animated.parallel([
-        Animated.timing(opacity,    { toValue: 1, duration: 160, useNativeDriver: true }),
+        Animated.timing(opacity, { toValue: 1, duration: 160, useNativeDriver: true }),
         Animated.timing(translateY, { toValue: 0, duration: 160, useNativeDriver: true }),
       ]).start();
     });
@@ -97,12 +97,12 @@ function useListAnim(filterKey: string) {
 
 export function ProfileScreen() {
   const navigation = useNavigation<any>();
-  const colors     = useProfileColors();
-  const data       = useProfileData();
+  const colors = useProfileColors();
+  const data = useProfileData();
   const borderColor = colors.dividerColor;
 
   const chipAnims = useChipAnims(data.timeFilter, colors.chipBg, colors.dividerColor);
-  const listAnim  = useListAnim(data.timeFilter);
+  const listAnim = useListAnim(data.timeFilter);
 
   return (
     <View style={[styles.root, { backgroundColor: colors.bg }]}>
