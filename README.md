@@ -6,6 +6,7 @@
 [![Node.js](https://img.shields.io/badge/Node.js-Fastify-000?style=flat&logo=nodedotjs)](https://fastify.dev)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5-000?style=flat&logo=typescript)](https://typescriptlang.org)
 [![Supabase](https://img.shields.io/badge/Supabase-PostgreSQL-000?style=flat&logo=supabase)](https://supabase.com)
+[![Backend Tests](https://github.com/AndreyrbSilva/descarte-certo/actions/workflows/test.yml/badge.svg)](https://github.com/AndreyrbSilva/descarte-certo/actions/workflows/test.yml)
 
 ---
 
