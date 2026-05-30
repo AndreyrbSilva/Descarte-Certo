@@ -61,8 +61,6 @@ export async function registerScan(req: FastifyRequest, reply: FastifyReply) {
 
   return reply.status(201).send({
     scan,
-    category,
-    confidence,
     pointsEarned: points,
     totalPoints:  finalPoints,
     streak,
