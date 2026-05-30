@@ -6,8 +6,8 @@ export type ScanCategory = "plastico" | "papel" | "metal" | "organico" | "vidro"
 
 const VALID_CATEGORIES: ScanCategory[] = ["plastico", "papel", "metal", "organico", "vidro"];
 
-const AI_API_URL = "https://thedree-descarte-certo-api.hf.space/classify";
-const CONFIDENCE_THRESHOLD = 0.5;
+// Lê a URL do .env ou usa o fallback caso não exista (Opção A)
+const AI_API_URL = process.env.EXPO_PUBLIC_AI_API_URL || "https://thedree-descarte-certo-api.hf.space/classify";
 
 // ── Erro customizado para confiança baixa ────────────────
 export class NotTrashError extends Error {
@@ -39,7 +39,7 @@ export async function submitScan(imageUri: string, base64Str?: string): Promise<
     });
   }
 
-  // 2. Envia para a IA
+  // 2. Envia para a IA (v2 — com análise de entropia e flag is_trash)
   const aiRes = await fetch(AI_API_URL, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
@@ -53,9 +53,10 @@ export async function submitScan(imageUri: string, base64Str?: string): Promise<
   const aiData = await aiRes.json();
   const category = aiData.category as ScanCategory;
   const confidence = aiData.confidence as number;
+  const isTrash = aiData.is_trash as boolean;
 
-  // 3. Valida se é uma categoria válida e se a confiança é suficiente
-  if (!VALID_CATEGORIES.includes(category) || confidence < CONFIDENCE_THRESHOLD) {
+  // 3. Valida usando o flag is_trash da API v2
+  if (!isTrash || !VALID_CATEGORIES.includes(category)) {
     throw new NotTrashError();
   }
 
@@ -73,3 +74,4 @@ export async function submitScan(imageUri: string, base64Str?: string): Promise<
     imageUri,
   };
 }
+
