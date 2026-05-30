@@ -31,6 +31,8 @@ export function SplashScreen() {
 
       if (user.role === "ADMIN") {
         navigation.replace("Admin");
+      } else if (user.role === "TEACHER") {
+        navigation.replace("Teacher");
       } else {
         navigation.replace("Tabs");
       }
