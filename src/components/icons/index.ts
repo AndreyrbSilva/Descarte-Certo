@@ -32,3 +32,5 @@ export { IconDiamond }     from "./IconDiamond";
 export { IconRainbow }     from "./IconRainbow";
 export { IconShieldCheck } from "./IconShieldCheck";
 export { IconLightning }   from "./IconLightning";
+export { IconBin }         from "./IconBin";
+export { IconCelebrate }   from "./IconCelebrate";
