@@ -320,9 +320,9 @@ Aluno abre o app
 - [x] Integração do modelo de classificação de resíduos
 - [x] Recuperação de senha por e-mail (fluxo completo: envio de código, verificação OTP 6 dígitos, redefinição com medidor de força)
 - [x] Refatoração estrutural (design system, barrel exports, services layer, feature folders, env vars)
-- [ ] Tela de Admin (em andamento)
-- [ ] Tela de Professor (em andamento)
-- [ ] Deploy (Railway + EAS Build)
+- [x] Tela de Admin
+- [x] Tela de Professor
+- [x] Deploy (Railway + EAS Build)
 
 ---
 
