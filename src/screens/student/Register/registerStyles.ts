@@ -8,7 +8,6 @@ export const styles = StyleSheet.create({
   root:     { flexGrow: 1 },
   header: {
     height: HEADER_HEIGHT,
-    backgroundColor: GREEN,
     alignItems: "center",
     justifyContent: "center",
     paddingBottom: 10,

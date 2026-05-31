@@ -11,7 +11,6 @@ export const styles = StyleSheet.create({
   header: {
     width: "100%",
     height: height * 0.40,
-    backgroundColor: GREEN,
     alignItems: "center",
     justifyContent: "center",
     paddingBottom: 20,

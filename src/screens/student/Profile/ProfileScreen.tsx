@@ -14,6 +14,7 @@ import {
   IconShield, IconDiamond, IconRainbow, IconLightning, IconShieldCheck, IconCheck,
 } from "../../../components/icons";
 import { getTypeColor } from "../../../theme/useTrophyColors";
+import { AnimatedHeroHeader } from "../../../components/layout/AnimatedHeroHeader";
 
 import { useProfileData, FILTERS, formatDate } from "./hooks/useProfileData";
 
@@ -113,52 +114,54 @@ export function ProfileScreen() {
         showsVerticalScrollIndicator={false}
       >
 
-        <Animated.View style={[styles.header, { backgroundColor: GREEN, opacity: data.headerAnim }]}>
-          <TouchableOpacity onPress={data.handlePickPhoto} activeOpacity={0.85} disabled={data.uploadingPhoto}>
-            <View
-              style={{
-                width: 96, height: 96, borderRadius: 48,
-                borderWidth: 3, borderColor,
-                alignItems: "center", marginBottom: 12, justifyContent: "center",
-              }}
-            >
-              <View style={[styles.avatarWrap, { backgroundColor: ORANGE }]}>
-                {data.photoUri
-                  ? <Image source={{ uri: data.photoUri }} style={styles.avatarImg} />
-                  : <Text style={styles.avatarText}>{data.initial}</Text>
-                }
-                {data.uploadingPhoto && (
-                  <View style={styles.avatarOverlay}>
-                    <ActivityIndicator color="#fff" size="small" />
-                  </View>
-                )}
+        <Animated.View style={{ opacity: data.headerAnim }}>
+          <AnimatedHeroHeader style={styles.header}>
+            <TouchableOpacity onPress={data.handlePickPhoto} activeOpacity={0.85} disabled={data.uploadingPhoto} style={{ alignSelf: 'center' }}>
+              <View
+                style={{
+                  width: 96, height: 96, borderRadius: 48,
+                  borderWidth: 3, borderColor,
+                  alignItems: "center", marginBottom: 12, justifyContent: "center",
+                }}
+              >
+                <View style={[styles.avatarWrap, { backgroundColor: ORANGE }]}>
+                  {data.photoUri
+                    ? <Image source={{ uri: data.photoUri }} style={styles.avatarImg} />
+                    : <Text style={styles.avatarText}>{data.initial}</Text>
+                  }
+                  {data.uploadingPhoto && (
+                    <View style={styles.avatarOverlay}>
+                      <ActivityIndicator color="#fff" size="small" />
+                    </View>
+                  )}
+                </View>
               </View>
-            </View>
-            <View style={styles.cameraIcon}>
-              <IconCamera color="#fff" size={14} />
-            </View>
-          </TouchableOpacity>
+              <View style={styles.cameraIcon}>
+                <IconCamera color="#fff" size={14} />
+              </View>
+            </TouchableOpacity>
 
-          <Text style={styles.userName}>{data.fullName}</Text>
-          <Text style={styles.userTurma}>{data.user?.turma ?? ""} • Descarte Certo</Text>
+            <Text style={styles.userName}>{data.fullName}</Text>
+            <Text style={styles.userTurma}>{data.user?.turma ?? ""} • Descarte Certo</Text>
 
-          <View style={styles.levelBadge}>
-            <IconTrophy color="#fff" size={14} />
-            <Text style={styles.levelText}>{data.levelInfo.currentName}</Text>
-          </View>
-
-          <View style={styles.xpBarWrap}>
-            <View style={styles.xpBarBg}>
-              <Animated.View style={[styles.xpBarFill, { width: data.xpWidth }]} />
+            <View style={styles.levelBadge}>
+              <IconTrophy color="#fff" size={14} />
+              <Text style={styles.levelText}>{data.levelInfo.currentName}</Text>
             </View>
-            {data.levelInfo.isMax ? (
-              <Text style={styles.xpLabel}>Nível máximo!</Text>
-            ) : (
-              <Text style={styles.xpLabel}>
-                {data.levelInfo.pointsInLevel}/{data.levelInfo.pointsToNext} → {data.levelInfo.nextName}
-              </Text>
-            )}
-          </View>
+
+            <View style={styles.xpBarWrap}>
+              <View style={styles.xpBarBg}>
+                <Animated.View style={[styles.xpBarFill, { width: data.xpWidth }]} />
+              </View>
+              {data.levelInfo.isMax ? (
+                <Text style={styles.xpLabel}>Nível máximo!</Text>
+              ) : (
+                <Text style={styles.xpLabel}>
+                  {data.levelInfo.pointsInLevel}/{data.levelInfo.pointsToNext} → {data.levelInfo.nextName}
+                </Text>
+              )}
+            </View>
+          </AnimatedHeroHeader>
         </Animated.View>
 
         <Animated.View style={[styles.statsRow, { opacity: data.cardOpacity, transform: [{ translateY: data.cardAnim }] }]}>

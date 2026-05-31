@@ -34,3 +34,4 @@ export { IconShieldCheck } from "./IconShieldCheck";
 export { IconLightning }   from "./IconLightning";
 export { IconBin }         from "./IconBin";
 export { IconCelebrate }   from "./IconCelebrate";
+export { IconLeaf }        from "./IconLeaf";

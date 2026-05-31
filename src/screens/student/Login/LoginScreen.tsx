@@ -13,6 +13,7 @@ import { IconHash, IconLock, IconEye } from "../../../components/icons";
 import { useLoginAnimations }  from "./hooks/useLoginAnimations";
 import { useThemeColors }      from "../../../theme/useThemeColors";
 import { styles }              from "./loginStyles";
+import { AnimatedHeroHeader }  from "../../../components/layout/AnimatedHeroHeader";
 
 export function LoginScreen() {
   const navigation = useNavigation<any>();
@@ -106,16 +107,18 @@ export function LoginScreen() {
         showsVerticalScrollIndicator={false}
       >
         {/* HEADER */}
-        <Animated.View style={[styles.header, { opacity: anim.headerOpacity }]}>
-          <Animated.View
-            style={[styles.logoArea, { opacity: anim.logoAnim, transform: [{ scale: anim.logoAnim }] }]}
-          >
-            <View style={styles.appNameRow}>
-              <Text style={styles.appNameDark}>Descarte</Text>
-              <Text style={styles.appNameWhite}> Certo</Text>
-            </View>
-            <Text style={styles.appTagline}>RECICLE • PONTUE • TRANSFORME</Text>
-          </Animated.View>
+        <Animated.View style={{ opacity: anim.headerOpacity }}>
+          <AnimatedHeroHeader style={styles.header}>
+            <Animated.View
+              style={[styles.logoArea, { opacity: anim.logoAnim, transform: [{ scale: anim.logoAnim }] }]}
+            >
+              <View style={styles.appNameRow}>
+                <Text style={styles.appNameDark}>Descarte</Text>
+                <Text style={styles.appNameWhite}> Certo</Text>
+              </View>
+              <Text style={styles.appTagline}>RECICLE • PONTUE • TRANSFORME</Text>
+            </Animated.View>
+          </AnimatedHeroHeader>
         </Animated.View>
 
         {/* CARD */}

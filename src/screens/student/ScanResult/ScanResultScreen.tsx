@@ -13,6 +13,7 @@ import {
   IconBin, IconCelebrate,
 }                                  from "../../../components/icons";
 import { AchievementUnlockedModal } from "../../../components/modals/AchievementUnlockedModal";
+import { AnimatedHeroHeader }       from "../../../components/layout/AnimatedHeroHeader";
 import type { NewAchievement }      from "../../../services/achievementService";
 
 import {
@@ -136,28 +137,30 @@ export function ScanResultScreen() {
       <ScrollView contentContainerStyle={styles.scroll} showsVerticalScrollIndicator={false}>
 
         {/* ── HEADER CELEBRATÓRIO ──────────────────────── */}
-        <Animated.View style={[styles.header, { opacity: d.headerAnim }]}>
-          <ConfettiEffect anim={d.confettiAnim} />
+        <Animated.View style={{ opacity: d.headerAnim }}>
+          <AnimatedHeroHeader style={styles.header}>
+            <ConfettiEffect anim={d.confettiAnim} />
 
-          <Animated.Text style={[styles.celebrationText, {
-            transform: [{ scale: d.celebrationAnim }],
-          }]}>
-            {d.celebration}
-          </Animated.Text>
+            <Animated.Text style={[styles.celebrationText, {
+              transform: [{ scale: d.celebrationAnim }],
+            }]}>
+              {d.celebration}
+            </Animated.Text>
 
-          <View style={styles.iconWrap}>
-            <IconCelebrate color="#fff" size={36} />
-          </View>
+            <View style={styles.iconWrap}>
+              <IconCelebrate color="#fff" size={36} />
+            </View>
 
-          <Animated.View style={[styles.pointsBadge, {
-            transform: [{ scale: d.pointsScale }],
-            opacity:   d.pointsOpacity,
-          }]}>
-            <IconStar color="#fbbf24" size={22} />
-            <Text style={styles.pointsEarned}>+{d.result?.pointsEarned ?? 0}</Text>
-          </Animated.View>
+            <Animated.View style={[styles.pointsBadge, {
+              transform: [{ scale: d.pointsScale }],
+              opacity:   d.pointsOpacity,
+            }]}>
+              <IconStar color="#fbbf24" size={22} />
+              <Text style={styles.pointsEarned}>+{d.result?.pointsEarned ?? 0}</Text>
+            </Animated.View>
 
-          <Text style={styles.pointsLabel}>pontos ganhos!</Text>
+            <Text style={styles.pointsLabel}>pontos ganhos!</Text>
+          </AnimatedHeroHeader>
         </Animated.View>
 
         {/* ── CARD PRINCIPAL ───────────────────────────── */}

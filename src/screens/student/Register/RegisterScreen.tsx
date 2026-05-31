@@ -13,6 +13,7 @@ import { IconMail, IconLock, IconUser, IconHash, IconBook, IconEye } from "../..
 import { useRegisterAnimations }  from "./hooks/useRegisterAnimations";
 import { useRegisterColors }      from "../../../theme/useRegisterColors";
 import { styles }                 from "./registerStyles";
+import { AnimatedHeroHeader }     from "../../../components/layout/AnimatedHeroHeader";
 
 type PasswordLevel = {
   level: number;
@@ -114,14 +115,16 @@ export function RegisterScreen() {
         showsVerticalScrollIndicator={false}
       >
         {/* HEADER */}
-        <Animated.View style={[styles.header, { opacity: anim.headerOpacity }]}>
-          <TouchableOpacity style={styles.backBtn} onPress={() => navigation.navigate("Login")}>
-            <Text style={styles.backArrow}>←</Text>
-          </TouchableOpacity>
-          <View style={styles.headerContent}>
-            <Text style={styles.headerTitle}>Criar conta</Text>
-            <Text style={styles.headerSub}>DESCARTE CERTO</Text>
-          </View>
+        <Animated.View style={{ opacity: anim.headerOpacity }}>
+          <AnimatedHeroHeader style={styles.header}>
+            <TouchableOpacity style={[styles.backBtn, { zIndex: 10 }]} onPress={() => navigation.navigate("Login")}>
+              <Text style={styles.backArrow}>←</Text>
+            </TouchableOpacity>
+            <View style={styles.headerContent}>
+              <Text style={styles.headerTitle}>Criar conta</Text>
+              <Text style={styles.headerSub}>DESCARTE CERTO</Text>
+            </View>
+          </AnimatedHeroHeader>
         </Animated.View>
 
         {/* CARD */}
