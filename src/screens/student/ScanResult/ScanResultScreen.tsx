@@ -1,23 +1,75 @@
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import {
   View, Text, ScrollView, TouchableOpacity,
   Animated, StatusBar, Image,
 } from "react-native";
 
-import { useScanResultColors } from "../../../theme/useScanResultColors";
-import { styles }              from "./scanResultStyles";
-import { IconTrophy, IconRecycle } from "../../../components/icons";
+import { useScanResultColors }    from "../../../theme/useScanResultColors";
+import { getStreakColors }         from "../../../theme/streakColors";
+import { styles }                  from "./scanResultStyles";
+import {
+  IconRecycle, IconFlame, IconStar, IconBulb,
+  IconCamera, IconHome, IconRanking,
+  IconBin, IconCelebrate,
+}                                  from "../../../components/icons";
 import { AchievementUnlockedModal } from "../../../components/modals/AchievementUnlockedModal";
-import type { NewAchievement } from "../../../services/achievementService";
+import type { NewAchievement }      from "../../../services/achievementService";
 
 import {
   useScanResultData,
-  CATEGORY_LABEL, CATEGORY_TIP, CATEGORY_BIN,
+  CATEGORY_LABEL, CATEGORY_BIN,
 } from "./hooks/useScanResultData";
 
 const GREEN = "#22c55e";
 
-// ── Componente para exibir troféus em fila ───────────────
+// ── Confetti component ────────────────────────────────────
+function ConfettiEffect({ anim }: { anim: Animated.Value }) {
+  const particles = useMemo(() => {
+    const colors = ["#22c55e", "#3b82f6", "#eab308", "#ef4444", "#a855f7", "#ec4899", "#06b6d4"];
+    return Array.from({ length: 24 }, (_, i) => ({
+      id: i,
+      left: Math.random() * 100,
+      size: 4 + Math.random() * 6,
+      color: colors[i % colors.length],
+      delay: Math.random() * 400,
+      rotation: Math.random() * 360,
+    }));
+  }, []);
+
+  return (
+    <View style={styles.confettiContainer}>
+      {particles.map((p) => (
+        <Animated.View
+          key={p.id}
+          style={[
+            styles.confettiParticle,
+            {
+              left: `${p.left}%`,
+              width: p.size,
+              height: p.size * 1.6,
+              backgroundColor: p.color,
+              transform: [
+                {
+                  translateY: anim.interpolate({
+                    inputRange: [0, 1],
+                    outputRange: [-20, 350 + p.delay * 0.5],
+                  }),
+                },
+                { rotate: `${p.rotation}deg` },
+              ],
+              opacity: anim.interpolate({
+                inputRange: [0, 0.2, 0.8, 1],
+                outputRange: [0, 1, 1, 0],
+              }),
+            },
+          ]}
+        />
+      ))}
+    </View>
+  );
+}
+
+// ── Achievement queue (mantido do original) ───────────────
 function AchievementQueue({ achievements }: { achievements: NewAchievement[] }) {
   const [index, setIndex] = useState(0);
   const [visible, setVisible] = useState(achievements.length > 0);
@@ -45,10 +97,12 @@ function AchievementQueue({ achievements }: { achievements: NewAchievement[] }) 
   );
 }
 
+// ── Tela principal ────────────────────────────────────────
 export function ScanResultScreen() {
   const colors = useScanResultColors();
   const d      = useScanResultData();
 
+  // ── Error state ─────────────────────────────────────
   if (d.error) {
     return (
       <View style={[styles.root, {
@@ -69,27 +123,44 @@ export function ScanResultScreen() {
     );
   }
 
+  const streakColors = getStreakColors(d.newStreak);
+  const bin          = CATEGORY_BIN[d.result?.category];
+  const streakProgress = d.nextStreakThreshold
+    ? d.newStreak / d.nextStreakThreshold
+    : 1;
+
   return (
     <View style={[styles.root, { backgroundColor: colors.cardBg }]}>
       <StatusBar barStyle="light-content" backgroundColor={GREEN} />
 
       <ScrollView contentContainerStyle={styles.scroll} showsVerticalScrollIndicator={false}>
 
-        {/* HEADER VERDE */}
+        {/* ── HEADER CELEBRATÓRIO ──────────────────────── */}
         <Animated.View style={[styles.header, { opacity: d.headerAnim }]}>
+          <ConfettiEffect anim={d.confettiAnim} />
+
+          <Animated.Text style={[styles.celebrationText, {
+            transform: [{ scale: d.celebrationAnim }],
+          }]}>
+            {d.celebration}
+          </Animated.Text>
+
           <View style={styles.iconWrap}>
-            <IconRecycle color="#fff" size={36} />
+            <IconCelebrate color="#fff" size={36} />
           </View>
+
           <Animated.View style={[styles.pointsBadge, {
             transform: [{ scale: d.pointsScale }],
             opacity:   d.pointsOpacity,
           }]}>
+            <IconStar color="#fbbf24" size={22} />
             <Text style={styles.pointsEarned}>+{d.result?.pointsEarned ?? 0}</Text>
           </Animated.View>
+
           <Text style={styles.pointsLabel}>pontos ganhos!</Text>
         </Animated.View>
 
-        {/* CARD RESULTADO */}
+        {/* ── CARD PRINCIPAL ───────────────────────────── */}
         <Animated.View style={[styles.card, {
           backgroundColor: colors.cardBg,
           opacity:   d.cardOpacity,
@@ -101,14 +172,9 @@ export function ScanResultScreen() {
 
           {d.photoUri ? (
             <Image source={{ uri: d.photoUri }} style={styles.photo} resizeMode="cover" />
-          ) : (
-            <Text style={{ color: "red" }}>sem foto</Text>
-          )}
+          ) : null}
 
-          <Text style={[styles.cardSub, { color: colors.subTextColor, marginTop: 12 }]}>
-            {CATEGORY_TIP[d.result?.category] ?? "Continue reciclando!"}
-          </Text>
-
+          {/* ── Pontos info ───────────────────────── */}
           <View style={[styles.divider, { backgroundColor: colors.dividerColor }]} />
 
           <View style={styles.row}>
@@ -118,72 +184,156 @@ export function ScanResultScreen() {
             </Text>
           </View>
           <View style={styles.row}>
-            <Text style={[styles.rowLabel, { color: colors.subTextColor }]}>Certeza</Text>
-            <View style={{ flexDirection: "row", alignItems: "center" }}>
-              <Text style={[styles.rowValue, { color: d.barColor }]}>
-                {Math.round(d.confValue * 100)}%
-              </Text>
-              <View style={[styles.confidenceBar, { backgroundColor: colors.dividerColor }]}>
-                <Animated.View
-                  style={[
-                    styles.confidenceBarFill,
-                    {
-                      backgroundColor: d.barColor,
-                      width: d.confidenceAnim.interpolate({
-                        inputRange: [0, 1],
-                        outputRange: ["0%", "100%"],
-                      }),
-                    },
-                  ]}
-                />
-              </View>
-            </View>
-          </View>
-          <View style={styles.row}>
             <Text style={[styles.rowLabel, { color: colors.subTextColor }]}>Pontos ganhos</Text>
             <Text style={[styles.rowValue, { color: GREEN }]}>+{d.result?.pointsEarned ?? 0}</Text>
           </View>
           <View style={styles.row}>
             <Text style={[styles.rowLabel, { color: colors.subTextColor }]}>Total acumulado</Text>
-            <View style={{ flexDirection: "row", alignItems: "center", gap: 4 }}>
-              <IconTrophy color={GREEN} size={14} />
-              <Text style={[styles.rowValue, { color: GREEN }]}>{d.result?.totalPoints ?? 0} pts</Text>
-            </View>
+            <Text style={[styles.rowValue, { color: GREEN }]}>{d.result?.totalPoints ?? 0} pts</Text>
           </View>
-          {CATEGORY_BIN[d.result?.category] && (
-            <View style={styles.row}>
-              <Text style={[styles.rowLabel, { color: colors.subTextColor }]}>Descartar em</Text>
-              <View style={{ flexDirection: "row", alignItems: "center", gap: 6 }}>
-                <View style={{
-                  width: 12, height: 12, borderRadius: 6,
-                  backgroundColor: CATEGORY_BIN[d.result?.category]?.color,
-                }} />
-                <Text style={[styles.rowValue, { color: colors.textColor }]}>
-                  {CATEGORY_BIN[d.result?.category]?.label}
-                </Text>
-              </View>
-            </View>
-          )}
 
           <View style={[styles.divider, { backgroundColor: colors.dividerColor }]} />
 
-          <TouchableOpacity
-            style={styles.btnPrimary}
-            onPress={() => d.navigation.navigate("Tabs", { screen: "Scanner" })}
-            activeOpacity={0.85}
-          >
-            <Text style={styles.btnPrimaryText}>ESCANEAR MAIS</Text>
-          </TouchableOpacity>
+          {/* ── STREAK ────────────────────────────── */}
+          <Animated.View style={[styles.streakSection, {
+            backgroundColor: colors.streakBg,
+            transform: [{ scale: d.streakAnim }],
+          }]}>
+            <View style={[styles.streakIconWrap, { backgroundColor: colors.streakIconBg }]}>
+              <IconFlame
+                outer={streakColors.outer}
+                innerStart={streakColors.innerStart}
+                innerEnd={streakColors.innerEnd}
+                size={28}
+              />
+            </View>
+            <View style={styles.streakRight}>
+              <Text style={[styles.streakTitle, { color: colors.textColor }]}>
+                {d.newStreak} {d.newStreak === 1 ? "dia" : "dias"} de sequência
+              </Text>
+              <Text style={[styles.streakMessage, { color: streakColors.outer }]}>
+                {d.streakMessage}
+              </Text>
+              <View style={[styles.streakBarBg, { backgroundColor: colors.streakBarBg }]}>
+                <View style={[
+                  styles.streakBarFill,
+                  {
+                    backgroundColor: streakColors.outer,
+                    width: `${Math.min(streakProgress * 100, 100)}%`,
+                  },
+                ]} />
+              </View>
+              {d.nextStreakThreshold && (
+                <Text style={[styles.streakNext, { color: colors.subTextColor }]}>
+                  Próximo nível: {d.nextStreakThreshold} dias
+                </Text>
+              )}
+            </View>
+          </Animated.View>
+
+          {/* ── XP / NÍVEL ────────────────────────── */}
+          {d.levelInfo && (
+            <View style={[styles.xpSection, { backgroundColor: colors.xpBg }]}>
+              <View style={styles.xpHeader}>
+                <View style={styles.xpLevelRow}>
+                  <IconStar color={GREEN} size={18} />
+                  <Text style={[styles.xpLevelName, { color: colors.textColor }]}>
+                    {d.levelInfo.currentName}
+                  </Text>
+                </View>
+                {d.levelInfo.pointsToNext && (
+                  <Text style={[styles.xpPointsText, { color: colors.subTextColor }]}>
+                    {d.levelInfo.pointsInLevel}/{d.levelInfo.pointsToNext} pts
+                  </Text>
+                )}
+              </View>
+              <View style={[styles.xpBarBg, { backgroundColor: colors.xpBarBg }]}>
+                <Animated.View style={[
+                  styles.xpBarFill,
+                  { backgroundColor: colors.xpBarFill, width: d.xpWidth },
+                ]} />
+              </View>
+              {d.levelInfo.nextName ? (
+                <Text style={[styles.xpNextLabel, { color: colors.subTextColor }]}>
+                  Faltam {(d.levelInfo.pointsToNext ?? 0) - d.levelInfo.pointsInLevel} pts para {d.levelInfo.nextName}
+                </Text>
+              ) : (
+                <Text style={[styles.xpNextLabel, { color: GREEN }]}>
+                  Nível máximo alcançado!
+                </Text>
+              )}
+            </View>
+          )}
+
+          {/* ── DESCARTE ──────────────────────────── */}
+          {bin && (
+            <View style={[styles.binSection, { backgroundColor: colors.binBg }]}>
+              <Text style={[styles.binSectionTitle, { color: colors.subTextColor }]}>
+                Onde descartar?
+              </Text>
+              <View style={[styles.binIconWrap, { backgroundColor: bin.color + "20" }]}>
+                <IconBin color={bin.color} size={32} />
+              </View>
+              <Text style={[styles.binLabel, { color: bin.color }]}>
+                {bin.label}
+              </Text>
+              <Text style={[styles.binMaterial, { color: colors.subTextColor }]}>
+                {bin.material}
+              </Text>
+            </View>
+          )}
+
+          {/* ── CURIOSIDADE ───────────────────────── */}
+          <View style={[styles.curiositySection, { backgroundColor: colors.curiosityBg }]}>
+            <View style={[styles.curiosityIconWrap, { backgroundColor: colors.curiosityIconBg }]}>
+              <IconBulb color={colors.curiosityAccent} size={22} />
+            </View>
+            <View style={{ flex: 1 }}>
+              <Text style={[styles.curiosityTitle, { color: colors.curiosityAccent }]}>
+                Você sabia?
+              </Text>
+              <Text style={[styles.curiosityText, { color: colors.textColor }]}>
+                {d.curiosity}
+              </Text>
+            </View>
+          </View>
+
+          <View style={[styles.divider, { backgroundColor: colors.dividerColor }]} />
+
+          {/* ── BOTÕES GAMIFICADOS ─────────────────── */}
+          <Animated.View style={{ transform: [{ scale: d.btnPulse }] }}>
+            <TouchableOpacity
+              style={styles.btnPrimary}
+              onPress={d.goScan}
+              activeOpacity={0.85}
+            >
+              <IconCamera color="#fff" size={18} />
+              <Text style={styles.btnPrimaryText}>ESCANEAR OUTRO ITEM</Text>
+            </TouchableOpacity>
+          </Animated.View>
 
           <TouchableOpacity
             style={[styles.btnSecondary, { borderColor: colors.dividerColor }]}
+            onPress={d.goRanking}
+            activeOpacity={0.7}
+          >
+            <IconRanking color={GREEN} size={18} />
+            <Text style={[styles.btnSecondaryText, { color: colors.textColor }]}>
+              Ver meu ranking
+            </Text>
+          </TouchableOpacity>
+
+          <TouchableOpacity
+            style={styles.btnTertiary}
             onPress={d.goHome}
             activeOpacity={0.7}
           >
-            <Text style={[styles.btnSecondaryText, { color: colors.textColor }]}>
-              Ir para o início
+            <IconHome color={colors.subTextColor} size={16} />
+            <Text style={[styles.btnTertiaryText, { color: colors.subTextColor }]}>
+              Voltar pro início
             </Text>
           </TouchableOpacity>
+
         </Animated.View>
 
       </ScrollView>
