@@ -1,39 +1,42 @@
 import React from "react";
-import { View, Text } from "react-native";
-import { useTeacherColors } from "../../../theme/useTeacherColors";
+import { View, Animated } from "react-native";
+import { useAnimatedTeacherColors } from "../../../theme/useTeacherColors";
 import { styles } from "../teacherStyles";
 import type { MotivationData } from "../teacher.types";
 
 interface MotivationCardProps {
   data: MotivationData;
+  isDark?: boolean;
 }
 
-export function MotivationCard({ data }: MotivationCardProps) {
-  const colors = useTeacherColors();
+export function MotivationCard({ data, isDark }: MotivationCardProps) {
+  const aColors = useAnimatedTeacherColors(isDark);
 
   return (
     <View style={styles.motivationContainer}>
-      <View
+      <Animated.View
         style={[
           styles.motivationCard,
           {
-            backgroundColor: colors.motivationBg,
-            borderColor: colors.motivationBorder,
+            backgroundColor: aColors.motivationBg,
+            borderColor: aColors.motivationBorder,
+            borderStyle: "dashed",
+            borderWidth: 1.5,
           },
         ]}
       >
-        <View style={styles.motivationEmojiWrap}>
-          <Text style={styles.motivationEmoji}>{data.emoji}</Text>
+        <View style={[styles.motivationEmojiWrap, { backgroundColor: "rgba(34, 197, 94, 0.15)" }]}>
+          <Animated.Text style={styles.motivationEmoji}>{data.emoji}</Animated.Text>
         </View>
         <View style={styles.motivationContent}>
-          <Text style={[styles.motivationTitle, { color: colors.textColor }]}>
+          <Animated.Text style={[styles.motivationTitle, { color: aColors.textColor }]}>
             {data.title}
-          </Text>
-          <Text style={[styles.motivationText, { color: colors.subTextColor }]}>
+          </Animated.Text>
+          <Animated.Text style={[styles.motivationText, { color: aColors.subTextColor }]}>
             {data.message}
-          </Text>
+          </Animated.Text>
         </View>
-      </View>
+      </Animated.View>
     </View>
   );
 }
