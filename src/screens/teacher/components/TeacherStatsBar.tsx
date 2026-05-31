@@ -1,50 +1,47 @@
 import React from "react";
-import { View, Text } from "react-native";
-import { useTeacherColors } from "../../../theme/useTeacherColors";
+import { View, Animated } from "react-native";
+import { useAnimatedTeacherColors } from "../../../theme/useTeacherColors";
 import { styles } from "../teacherStyles";
 import {
   IconUser,
-  IconLightning,
+  IconStar,
   IconFlame,
-  IconTrophy,
+  IconTrend,
 } from "../../../components/icons";
 import type { TeacherStats } from "../teacher.types";
 
 interface TeacherStatsBarProps {
   stats: TeacherStats;
+  isDark?: boolean;
 }
 
-export function TeacherStatsBar({ stats }: TeacherStatsBarProps) {
-  const colors = useTeacherColors();
+export function TeacherStatsBar({ stats, isDark }: TeacherStatsBarProps) {
+  const aColors = useAnimatedTeacherColors(isDark);
 
   const cards = [
     {
       label: "Alunos",
       value: stats.totalStudents,
-      icon: <IconUser color={colors.textColor} size={20} />,
-      bg: colors.statTealBg,
-      border: colors.dividerColor,
+      icon: <IconUser color="#22c55e" size={20} />,
+      iconBg: "rgba(34, 197, 94, 0.15)",
     },
     {
-      label: "Média de Pts",
-      value: stats.averagePoints,
-      icon: <IconLightning color={colors.textColor} />,
-      bg: colors.statCyanBg,
-      border: colors.dividerColor,
+      label: "Média pts",
+      value: stats.averagePoints.toLocaleString("pt-BR"),
+      icon: <IconStar color="#3b82f6" size={20} />,
+      iconBg: "rgba(59, 130, 246, 0.15)",
     },
     {
-      label: "Com Streak",
+      label: "Streaks",
       value: stats.activeStreaks,
-      icon: <IconFlame color={colors.textColor} size={20} />,
-      bg: colors.statEmeraldBg,
-      border: colors.dividerColor,
+      icon: <IconFlame outer="#f97316" innerStart="#fdba74" innerEnd="#ea580c" size={20} />,
+      iconBg: "rgba(249, 115, 22, 0.15)",
     },
     {
-      label: "Total da Turma",
-      value: stats.totalPoints,
-      icon: <IconTrophy color={colors.textColor} size={20} />,
-      bg: colors.statAmberBg,
-      border: colors.dividerColor,
+      label: "Total pts",
+      value: stats.totalPoints.toLocaleString("pt-BR"),
+      icon: <IconTrend color="#8b5cf6" size={20} />,
+      iconBg: "rgba(139, 92, 246, 0.15)",
     },
   ];
 
@@ -52,28 +49,28 @@ export function TeacherStatsBar({ stats }: TeacherStatsBarProps) {
     <View style={styles.statsBarContainer}>
       <View style={styles.statsGrid}>
         {cards.map((card, index) => (
-          <View
+          <Animated.View
             key={index}
             style={[
               styles.statCard,
               {
-                backgroundColor: card.bg,
-                borderColor: colors.dividerColor,
+                backgroundColor: aColors.cardBg,
+                borderColor: aColors.dividerColor,
               },
             ]}
           >
-            <View style={[styles.statIconWrap, { backgroundColor: "rgba(255, 255, 255, 0.25)" }]}>
+            <View style={[styles.statIconWrap, { backgroundColor: card.iconBg, borderRadius: 999 }]}>
               {card.icon}
             </View>
             <View style={styles.statInfo}>
-              <Text style={[styles.statValue, { color: colors.textColor }]} numberOfLines={1}>
+              <Animated.Text style={[styles.statValue, { color: aColors.textColor }]} numberOfLines={1}>
                 {card.value}
-              </Text>
-              <Text style={[styles.statLabel, { color: colors.subTextColor }]} numberOfLines={1}>
+              </Animated.Text>
+              <Animated.Text style={[styles.statLabel, { color: aColors.subTextColor }]} numberOfLines={1}>
                 {card.label}
-              </Text>
+              </Animated.Text>
             </View>
-          </View>
+          </Animated.View>
         ))}
       </View>
     </View>
