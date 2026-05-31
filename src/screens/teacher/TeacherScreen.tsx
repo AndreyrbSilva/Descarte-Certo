@@ -64,6 +64,7 @@ export function TeacherScreen() {
     try {
       setLogoutLoading(true);
       await logout();
+      d.navigation.replace("Login");
     } catch (e) {
       console.warn("Erro ao deslogar:", e);
     } finally {
