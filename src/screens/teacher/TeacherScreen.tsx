@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import {
   View,
   Text,
@@ -8,7 +8,10 @@ import {
   Animated,
   ActivityIndicator,
 } from "react-native";
-import { useTeacherColors } from "../../theme/useTeacherColors";
+import { useAnimatedTeacherColors } from "../../theme/useTeacherColors";
+import { useTheme } from "../../context/ThemeContext";
+import { useAuthStore } from "../../store/useAuthStore";
+import { logout } from "../../services/authService";
 import { styles } from "./teacherStyles";
 
 // Hooks
@@ -18,14 +21,26 @@ import { useTeacherAnimations } from "./hooks/useTeacherAnimations";
 // Componentes
 import { TeacherStatsBar } from "./components/TeacherStatsBar";
 import { MotivationCard } from "./components/MotivationCard";
-import { StreakOverview } from "./components/StreakOverview";
 import { TeacherPodium } from "./components/TeacherPodium";
 import { StudentRankCard } from "./components/StudentRankCard";
+import { LogoutModal } from "../student/Config/modals/LogoutModal";
+import { IconSun, IconMoonStars, IconLogout } from "../../components/icons";
 
 export function TeacherScreen() {
   const d = useTeacherData();
   const anims = useTeacherAnimations();
-  const colors = useTeacherColors();
+
+  const { isDark: globalIsDark, setTheme } = useTheme();
+  const [localIsDark, setLocalIsDark] = useState(globalIsDark);
+  const [showLogout, setShowLogout] = useState(false);
+  const [logoutLoading, setLogoutLoading] = useState(false);
+
+  const user = useAuthStore((state) => state.user);
+  const aColors = useAnimatedTeacherColors(localIsDark);
+
+  useEffect(() => {
+    setLocalIsDark(globalIsDark);
+  }, [globalIsDark]);
 
   // Dispara animação de entrada uma vez após carregar os dados
   useEffect(() => {
@@ -34,70 +49,117 @@ export function TeacherScreen() {
     }
   }, [d.loading]);
 
+  function handleToggleTheme() {
+    const next = !localIsDark;
+    setLocalIsDark(next);
+    import("react-native").then(({ DeviceEventEmitter }) => {
+      DeviceEventEmitter.emit("onThemeToggle", next);
+    });
+    setTimeout(() => {
+      setTheme(next ? "dark" : "light");
+    }, 400);
+  }
+
+  async function handleConfirmLogout() {
+    try {
+      setLogoutLoading(true);
+      await logout();
+    } catch (e) {
+      console.warn("Erro ao deslogar:", e);
+    } finally {
+      setLogoutLoading(false);
+      setShowLogout(false);
+    }
+  }
+
   return (
-    <View style={[styles.root, { backgroundColor: colors.bg }]}>
-      <StatusBar barStyle={colors.statusBar} backgroundColor={colors.bg} />
+    <Animated.View style={[styles.root, { backgroundColor: aColors.bg }]}>
+      <StatusBar barStyle={aColors.statusBar} backgroundColor={localIsDark ? "#0f172a" : "#f8fafc"} />
 
       {d.loading ? (
         <View style={styles.loadingWrap}>
-          <ActivityIndicator size="large" color={colors.textColor} />
-          <Text style={[styles.loadingText, { color: colors.subTextColor }]}>
+          <ActivityIndicator size="large" color="#22c55e" />
+          <Animated.Text style={[styles.loadingText, { color: aColors.subTextColor }]}>
             Carregando painel do professor...
-          </Text>
+          </Animated.Text>
         </View>
       ) : (
         <ScrollView
           contentContainerStyle={styles.scroll}
           showsVerticalScrollIndicator={false}
         >
-          {/* HEADER (Com animação de entrada) */}
+          {/* HEADER DINÂMICO */}
           <Animated.View
             style={[
-              styles.header,
+              styles.newHeader,
               {
                 opacity: anims.headerOpacity,
                 transform: [{ translateY: anims.headerY }],
               },
             ]}
           >
-            <Text style={[styles.headerSubtitle, { color: colors.textColor }]}>
-              Painel do Docente
-            </Text>
-            <Text style={[styles.headerTitle, { color: colors.textColor }]}>
-              Olá, Professor!
-            </Text>
-            <Text style={[styles.headerDescription, { color: colors.subTextColor }]}>
-              Acompanhe e motive o engajamento de reciclagem dos seus alunos.
-            </Text>
+            <View style={styles.headerLeft}>
+              <View style={[styles.headerAvatar, { backgroundColor: "#3b82f6" }]}>
+                <Text style={styles.headerAvatarText}>
+                  {user?.name?.[0]?.toUpperCase() || "T"}
+                </Text>
+              </View>
+              <View style={styles.headerGreeting}>
+                <Animated.Text style={[styles.headerGreetingSub, { color: aColors.subTextColor }]}>
+                  Olá, Professor(a)
+                </Animated.Text>
+                <Animated.Text style={[styles.headerGreetingName, { color: aColors.textColor }]} numberOfLines={1}>
+                  {user?.name || "Professor"}
+                </Animated.Text>
+              </View>
+            </View>
+
+            <View style={styles.headerActions}>
+              {/* Alternador de tema suave */}
+              <TouchableOpacity
+                style={[styles.headerBtn, { backgroundColor: localIsDark ? "#1e293b" : "#ffffff", borderColor: localIsDark ? "#334155" : "#e2e8f0" }]}
+                onPress={handleToggleTheme}
+                activeOpacity={0.7}
+              >
+                {localIsDark ? (
+                  <IconSun color="#f59e0b" size={20} />
+                ) : (
+                  <IconMoonStars color="#64748b" size={20} />
+                )}
+              </TouchableOpacity>
+
+              {/* Botão deslogar */}
+              <TouchableOpacity
+                style={[styles.headerBtn, { backgroundColor: localIsDark ? "#1e293b" : "#ffffff", borderColor: localIsDark ? "#334155" : "#e2e8f0" }]}
+                onPress={() => setShowLogout(true)}
+                activeOpacity={0.7}
+              >
+                <IconLogout color="#ef4444" size={20} />
+              </TouchableOpacity>
+            </View>
           </Animated.View>
 
-          {/* QUICK STATS BAR (Com animação de entrada) */}
-          <Animated.View
-            style={{
-              opacity: anims.statsOpacity,
-              transform: [{ translateY: anims.statsY }],
-            }}
-          >
-            <TeacherStatsBar stats={d.stats} />
-          </Animated.View>
-
-          {/* MOTIVATION CARD (Com animação de entrada) */}
-          <Animated.View
-            style={{
-              opacity: anims.motivationOpacity,
-              transform: [{ scale: anims.motivationScale }],
-            }}
-          >
-            <MotivationCard data={d.motivation} />
-          </Animated.View>
-
-          {/* STREAK OVERVIEW (Com animação de entrada) */}
-          <Animated.View style={{ opacity: anims.streakOpacity }}>
-            <StreakOverview chips={d.streakChips} />
-          </Animated.View>
+          {/* CLASSE PILL BADGE */}
+          {d.turmaLabel ? (
+            <View style={styles.classPillRow}>
+              <View
+                style={[
+                  styles.classPill,
+                  {
+                    backgroundColor: localIsDark ? "rgba(34, 197, 94, 0.15)" : "#f0fdf4",
+                    borderColor: "rgba(34, 197, 94, 0.4)",
+                  },
+                ]}
+              >
+                <Text style={styles.classPillText}>
+                  📚 Turma {d.turmaLabel}
+                </Text>
+              </View>
+            </View>
+          ) : null}
 
           {/* TAB SWITCHER */}
-          <View style={[styles.tabRow, { backgroundColor: colors.tabBg }]}>
+          <Animated.View style={[styles.tabRow, { backgroundColor: aColors.tabBg }]}>
             {/* Indicador Deslizante (Animated.spring) */}
             <Animated.View
               style={{
@@ -107,7 +169,7 @@ export function TeacherScreen() {
                 top: 4,
                 bottom: 4,
                 borderRadius: 11,
-                backgroundColor: colors.tabActive,
+                backgroundColor: aColors.tabActive,
               }}
             />
             {(["turma", "escola"] as const).map((t) => (
@@ -117,33 +179,60 @@ export function TeacherScreen() {
                 onPress={() => d.switchTab(t)}
                 activeOpacity={0.7}
               >
-                <Text
+                <Animated.Text
                   style={[
                     styles.tabText,
                     {
-                      color: d.tab === t ? "#ffffff" : colors.tabInactive,
+                      color: d.tab === t ? "#ffffff" : aColors.tabInactive,
                     },
                   ]}
                 >
                   {t === "turma" ? "Minha Turma" : "Escola"}
-                </Text>
+                </Animated.Text>
               </TouchableOpacity>
             ))}
-          </View>
+          </Animated.View>
 
-          {/* LISTA & PODIO (Com animação de cross-fade e fade-in stagger dos cards) */}
+          {/* QUICK STATS BAR */}
+          <Animated.View
+            style={{
+              opacity: anims.statsOpacity,
+              transform: [{ translateY: anims.statsY }],
+            }}
+          >
+            <TeacherStatsBar stats={d.stats} isDark={localIsDark} />
+          </Animated.View>
+
+          {/* MOTIVATION CARD */}
+          <Animated.View
+            style={{
+              opacity: anims.motivationOpacity,
+              transform: [{ scale: anims.motivationScale }],
+            }}
+          >
+            <MotivationCard data={d.motivation} isDark={localIsDark} />
+          </Animated.View>
+
+          {/* LISTA & PODIO COM RACHADURAS EM CROSS-FADE */}
           <Animated.View style={{ opacity: d.listOpacity }}>
             {d.data.length === 0 ? (
               <View style={{ alignItems: "center", paddingVertical: 40, paddingHorizontal: 20 }}>
-                <Text style={{ fontSize: 16, fontWeight: "800", color: colors.textColor, marginBottom: 4 }}>
+                <Animated.Text style={{ fontSize: 16, fontWeight: "800", color: aColors.textColor, marginBottom: 4 }}>
                   Nenhum aluno no ranking! 🏃‍♂️
-                </Text>
-                <Text style={{ fontSize: 13, color: colors.subTextColor, textAlign: "center" }}>
+                </Animated.Text>
+                <Animated.Text style={{ fontSize: 13, color: aColors.subTextColor, textAlign: "center" }}>
                   Aguardando os primeiros registros de reciclagem para classificar a pontuação.
-                </Text>
+                </Animated.Text>
               </View>
             ) : (
               <>
+                {/* RANKING SECTION TITLE */}
+                <View style={styles.rankingTitleRow}>
+                  <Animated.Text style={[styles.rankingSectionTitle, { color: aColors.subTextColor }]}>
+                    🏆 RANKING DA {d.tab === "turma" ? "TURMA" : "ESCOLA"}
+                  </Animated.Text>
+                </View>
+
                 {/* PÓDIO */}
                 <TeacherPodium
                   slots={d.podiumOrder}
@@ -151,6 +240,7 @@ export function TeacherScreen() {
                   onPressItem={(userId) =>
                     d.navigation.navigate("PublicProfile", { userId })
                   }
+                  isDark={localIsDark}
                 />
 
                 {/* LISTA DE CARDS */}
@@ -171,6 +261,7 @@ export function TeacherScreen() {
                           onPress={() =>
                             d.navigation.navigate("PublicProfile", { userId: entry.userId })
                           }
+                          isDark={localIsDark}
                         />
                       </Animated.View>
                     );
@@ -181,7 +272,14 @@ export function TeacherScreen() {
           </Animated.View>
         </ScrollView>
       )}
-    </View>
+
+      {/* CONFIRMAÇÃO DE SAÍDA */}
+      <LogoutModal
+        visible={showLogout}
+        onConfirm={handleConfirmLogout}
+        onClose={() => setShowLogout(false)}
+      />
+    </Animated.View>
   );
 }
 export default TeacherScreen;
