@@ -1,6 +1,7 @@
 import { useEffect, useRef } from "react";
-import { Animated } from "react-native";
+import { Animated, Platform } from "react-native";
 import * as NavigationBar from "expo-navigation-bar";
+import * as Haptics from "expo-haptics";
 import { useNavigation, useRoute } from "@react-navigation/native";
 
 import { useAuthStore } from "../../../../store/useAuthStore";
@@ -157,7 +158,12 @@ export function useScanResultData() {
       ]),
       // 5. Streak aparece
       Animated.spring(streakAnim, { toValue: 1, tension: 80, friction: 6, useNativeDriver: true }),
-    ]).start();
+    ]).start(() => {
+      // Haptic feedback quando as animações de entrada completam
+      if (Platform.OS !== "web") {
+        Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+      }
+    });
 
     // XP bar (non-native driver pra animar width)
     if (result?.totalPoints != null) {
