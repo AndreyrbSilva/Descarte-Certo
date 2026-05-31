@@ -1,6 +1,6 @@
 import React from "react";
-import { View, Text, TouchableOpacity, Image } from "react-native";
-import { useTeacherColors } from "../../../theme/useTeacherColors";
+import { View, Animated, TouchableOpacity, Image } from "react-native";
+import { useAnimatedTeacherColors } from "../../../theme/useTeacherColors";
 import { styles } from "../teacherStyles";
 import { IconCrown, IconMedal, IconFlame } from "../../../components/icons";
 import { getStreakColors } from "../../../theme/streakColors";
@@ -10,6 +10,7 @@ interface TeacherPodiumProps {
   slots: PodiumSlot[];
   showTurma: boolean;
   onPressItem?: (userId: string) => void;
+  isDark?: boolean;
 }
 
 function Avatar({
@@ -42,15 +43,15 @@ function Avatar({
         justifyContent: "center",
       }}
     >
-      <Text style={{ fontSize: size * 0.38, fontWeight: "900", color: "#fff" }}>
+      <Animated.Text style={{ fontSize: size * 0.38, fontWeight: "900", color: "#fff" }}>
         {name[0].toUpperCase()}
-      </Text>
+      </Animated.Text>
     </View>
   );
 }
 
-export function TeacherPodium({ slots, showTurma, onPressItem }: TeacherPodiumProps) {
-  const colors = useTeacherColors();
+export function TeacherPodium({ slots, showTurma, onPressItem, isDark }: TeacherPodiumProps) {
+  const aColors = useAnimatedTeacherColors(isDark);
 
   return (
     <View style={styles.podium}>
@@ -59,15 +60,16 @@ export function TeacherPodium({ slots, showTurma, onPressItem }: TeacherPodiumPr
         const fc = entry ? getStreakColors(entry.streak) : null;
         const bg =
           position === 1
-            ? colors.gold
+            ? aColors.gold
             : position === 2
-            ? colors.silver
-            : colors.bronze;
+            ? aColors.silver
+            : aColors.bronze;
 
         return (
           <View key={position} style={styles.podiumItem}>
+            {/* Crown only for 1st place */}
             {position === 1 && (
-              <View style={{ opacity: entry ? 1 : 0.4, marginBottom: -2 }}>
+              <View style={{ opacity: entry ? 1 : 0.4, marginBottom: 2 }}>
                 <IconCrown size={30} />
               </View>
             )}
@@ -76,6 +78,7 @@ export function TeacherPodium({ slots, showTurma, onPressItem }: TeacherPodiumPr
               <TouchableOpacity
                 onPress={() => onPressItem?.(entry.userId)}
                 activeOpacity={0.8}
+                style={{ alignItems: "center" }}
               >
                 <View
                   style={[
@@ -85,14 +88,17 @@ export function TeacherPodium({ slots, showTurma, onPressItem }: TeacherPodiumPr
                       height: 62,
                       borderRadius: 31,
                       borderWidth: 3,
-                      borderColor: entry.isMe ? colors.meBorder : "transparent",
+                      borderColor: entry.isMe ? aColors.meBorder : "transparent",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      marginBottom: 4,
                     },
                   ]}
                 >
                   <Avatar
                     name={entry.name}
                     avatarUrl={entry.avatarUrl}
-                    size={50}
+                    size={52}
                     bg={bg}
                   />
                 </View>
@@ -102,27 +108,28 @@ export function TeacherPodium({ slots, showTurma, onPressItem }: TeacherPodiumPr
                 style={[
                   styles.podiumAvatar,
                   {
-                    backgroundColor: colors.iconBg,
+                    backgroundColor: aColors.iconBg,
                     borderWidth: 2,
-                    borderColor: colors.dividerColor,
+                    borderColor: aColors.dividerColor,
                     borderStyle: "dashed",
+                    marginBottom: 4,
                   },
                 ]}
               />
             )}
 
             {entry ? (
-              <>
-                <Text
-                  style={[styles.podiumName, { color: colors.textColor }]}
+              <View style={{ alignItems: "center", marginBottom: 8, gap: 2 }}>
+                <Animated.Text
+                  style={[styles.podiumName, { color: aColors.textColor }]}
                   numberOfLines={1}
                 >
                   {entry.name.split(" ")[0]}
                   {showTurma && entry.turma ? ` · T${entry.turma}` : ""}
-                </Text>
-                <Text style={[styles.podiumPoints, { color: colors.subTextColor }]}>
+                </Animated.Text>
+                <Animated.Text style={[styles.podiumPoints, { color: aColors.subTextColor }]}>
                   {entry.points} pts
-                </Text>
+                </Animated.Text>
                 <View style={styles.podiumStreakRow}>
                   <IconFlame
                     outer={fc!.outer}
@@ -130,19 +137,28 @@ export function TeacherPodium({ slots, showTurma, onPressItem }: TeacherPodiumPr
                     innerEnd={fc!.innerEnd}
                     size={12}
                   />
-                  <Text style={[styles.podiumStreakText, { color: colors.subTextColor }]}>
+                  <Animated.Text style={[styles.podiumStreakText, { color: aColors.subTextColor }]}>
                     {entry.streak}d
-                  </Text>
+                  </Animated.Text>
                 </View>
-              </>
+              </View>
             ) : (
               <View style={{ height: 48 }} />
             )}
 
+            {/* Solid Podium Column Block */}
             <View
               style={[
                 styles.podiumBase,
-                { height, backgroundColor: bg + (entry ? "cc" : "44") },
+                {
+                  height: height + 20,
+                  backgroundColor: bg,
+                  borderTopLeftRadius: 16,
+                  borderTopRightRadius: 16,
+                  justifyContent: "center",
+                  alignItems: "center",
+                  width: "100%",
+                },
               ]}
             >
               <View style={{ opacity: entry ? 1 : 0.5 }}>
