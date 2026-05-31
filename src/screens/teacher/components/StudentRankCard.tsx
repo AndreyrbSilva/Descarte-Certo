@@ -1,6 +1,6 @@
 import React from "react";
-import { View, Text, TouchableOpacity, Image } from "react-native";
-import { useTeacherColors } from "../../../theme/useTeacherColors";
+import { View, Text, Animated, TouchableOpacity, Image } from "react-native";
+import { useAnimatedTeacherColors } from "../../../theme/useTeacherColors";
 import { styles } from "../teacherStyles";
 import { IconFlame } from "../../../components/icons";
 import { getStreakColors } from "../../../theme/streakColors";
@@ -10,6 +10,7 @@ interface StudentRankCardProps {
   entry: RankingEntry;
   showTurma: boolean;
   onPress?: () => void;
+  isDark?: boolean;
 }
 
 function Avatar({
@@ -49,30 +50,30 @@ function Avatar({
   );
 }
 
-export function StudentRankCard({ entry, showTurma, onPress }: StudentRankCardProps) {
-  const colors = useTeacherColors();
+export function StudentRankCard({ entry, showTurma, onPress, isDark }: StudentRankCardProps) {
+  const aColors = useAnimatedTeacherColors(isDark);
   const fc = getStreakColors(entry.streak);
 
   return (
     <TouchableOpacity activeOpacity={0.85} onPress={onPress}>
-      <View
+      <Animated.View
         style={[
           styles.card,
           {
-            backgroundColor: entry.isMe ? colors.meBg : colors.cardBg,
+            backgroundColor: entry.isMe ? aColors.meBg : aColors.cardBg,
             borderWidth: entry.isMe ? 1.5 : 0,
-            borderColor: entry.isMe ? colors.meBorder : "transparent",
+            borderColor: entry.isMe ? aColors.meBorder : "transparent",
           },
         ]}
       >
-        <Text style={[styles.position, { color: colors.subTextColor }]}>
+        <Animated.Text style={[styles.position, { color: aColors.subTextColor }]}>
           {entry.position}
-        </Text>
+        </Animated.Text>
         <Avatar name={entry.name} avatarUrl={entry.avatarUrl} size={44} bg={fc.outer} />
         <View style={styles.info}>
-          <Text style={[styles.name, { color: colors.textColor }]} numberOfLines={1}>
+          <Animated.Text style={[styles.name, { color: aColors.textColor }]} numberOfLines={1}>
             {entry.name.split(" ").slice(0, 2).join(" ")}
-          </Text>
+          </Animated.Text>
           <View style={styles.streakRow}>
             <IconFlame
               outer={fc.outer}
@@ -80,28 +81,28 @@ export function StudentRankCard({ entry, showTurma, onPress }: StudentRankCardPr
               innerEnd={fc.innerEnd}
               size={12}
             />
-            <Text style={[styles.streakText, { color: colors.subTextColor }]}>
+            <Animated.Text style={[styles.streakText, { color: aColors.subTextColor }]}>
               {entry.streak} {entry.streak === 1 ? "dia" : "dias"}
-            </Text>
+            </Animated.Text>
             {showTurma && entry.turma && (
               <>
-                <Text style={[styles.streakText, { color: colors.dividerColor }]}>·</Text>
-                <Text style={[styles.streakText, { color: colors.subTextColor }]}>
+                <Animated.Text style={[styles.streakText, { color: aColors.dividerColor }]}>·</Animated.Text>
+                <Animated.Text style={[styles.streakText, { color: aColors.subTextColor }]}>
                   Turma {entry.turma}
-                </Text>
+                </Animated.Text>
               </>
             )}
           </View>
         </View>
         <View style={styles.pointsCol}>
-          <Text style={[styles.points, { color: colors.textColor }]}>
+          <Animated.Text style={[styles.points, { color: aColors.textColor }]}>
             {entry.points}
-          </Text>
-          <Text style={[styles.pointsLabel, { color: colors.subTextColor }]}>
+          </Animated.Text>
+          <Animated.Text style={[styles.pointsLabel, { color: aColors.subTextColor }]}>
             pts
-          </Text>
+          </Animated.Text>
         </View>
-      </View>
+      </Animated.View>
     </TouchableOpacity>
   );
 }
