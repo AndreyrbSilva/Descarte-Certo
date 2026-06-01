@@ -1,5 +1,4 @@
 import { useState } from "react";
-import { Alert } from "react-native";
 import { useNavigation } from "@react-navigation/native";
 import { useAuthStore } from "../../../store/useAuthStore";
 import { logout } from "../../../services/authService";
@@ -15,6 +14,7 @@ import type {
   WeekDay, TurmaRealData,
 } from "../admin.types";
 import { ROLE_LABELS } from "../admin.types";
+import type { AdminDialogState } from "../modals/AdminDialogModal";
 
 export function useAdminData() {
   const navigation = useNavigation<any>();
@@ -32,6 +32,7 @@ export function useAdminData() {
   const [roleModalUser,        setRoleModalUser]        = useState<AdminUser | null>(null);
   const [selectedUserDetails,  setSelectedUserDetails]  = useState<AdminUser | null>(null);
   const [selectedTurmaDetails, setSelectedTurmaDetails] = useState<string | null>(null);
+  const [dialogConfig,         setDialogConfig]         = useState<AdminDialogState | null>(null);
 
   // ── View mode ─────────────────────────────────────────────────────────────
   const [viewMode,       setViewMode]       = useState<"list" | "grouped">("list");
@@ -58,7 +59,13 @@ export function useAdminData() {
       setStats(statsData);
       setUsers(usersData);
     } catch {
-      Alert.alert("Erro", "Não foi possível carregar os dados.");
+      setDialogConfig({
+        visible: true,
+        type: "error",
+        title: "Erro",
+        message: "Não foi possível carregar os dados.",
+        onConfirm: () => setDialogConfig(null),
+      });
     } finally {
       setLoading(false);
     }
@@ -66,25 +73,30 @@ export function useAdminData() {
 
   // ── Handlers ──────────────────────────────────────────────────────────────
   async function handleLogout() {
-    Alert.alert(
-      "Sair",
-      "Tem certeza que deseja sair?",
-      [
-        { text: "Cancelar", style: "cancel" },
-        {
-          text: "Sair", style: "destructive",
-          onPress: async () => {
-            await logout();
-            navigation.replace("Login");
-          },
-        },
-      ],
-    );
+    setDialogConfig({
+      visible: true,
+      type: "logout",
+      title: "Sair da conta?",
+      message: "Tem certeza que deseja sair do Painel Admin?",
+      confirmText: "Sair",
+      cancelText: "Cancelar",
+      onConfirm: async () => {
+        await logout();
+        navigation.replace("Login");
+      },
+      onCancel: () => setDialogConfig(null),
+    });
   }
 
   async function handleChangeRole(user: AdminUser, newRole: Role) {
     if (user.id === adminUser?.id && newRole !== "ADMIN") {
-      Alert.alert("Atenção", "Você não pode remover seu próprio papel de administrador.");
+      setDialogConfig({
+        visible: true,
+        type: "warning",
+        title: "Atenção",
+        message: "Você não pode remover seu próprio papel de administrador.",
+        onConfirm: () => setDialogConfig(null),
+      });
       return;
     }
     try {
@@ -95,61 +107,78 @@ export function useAdminData() {
       }
       setRoleModalUser(null);
     } catch {
-      Alert.alert("Erro", "Não foi possível alterar o cargo.");
+      setDialogConfig({
+        visible: true,
+        type: "error",
+        title: "Erro",
+        message: "Não foi possível alterar o cargo.",
+        onConfirm: () => setDialogConfig(null),
+      });
     }
   }
 
   async function handleDeleteUser(user: AdminUser) {
     if (user.id === adminUser?.id) {
-      Alert.alert("Atenção", "Você não pode deletar sua própria conta.");
+      setDialogConfig({
+        visible: true,
+        type: "warning",
+        title: "Atenção",
+        message: "Você não pode deletar sua própria conta.",
+        onConfirm: () => setDialogConfig(null),
+      });
       return;
     }
-    Alert.alert(
-      "Remover usuário",
-      `Tem certeza que deseja remover "${user.name}"? Esta ação é irreversível e excluirá todo o histórico de reciclagem deste aluno.`,
-      [
-        { text: "Cancelar", style: "cancel" },
-        {
-          text: "Remover", style: "destructive",
-          onPress: async () => {
-            try {
-              await removeUser(user.id);
-              setUsers((prev) => prev.filter((u) => u.id !== user.id));
-              if (stats) setStats({ ...stats, totalUsers: stats.totalUsers - 1 });
-              setSelectedUserDetails(null);
-            } catch {
-              Alert.alert("Erro", "Não foi possível remover o usuário.");
-            }
-          },
-        },
-      ],
-    );
+    setDialogConfig({
+      visible: true,
+      type: "warning",
+      title: "Remover usuário",
+      message: `Tem certeza que deseja remover "${user.name}"? Esta ação é irreversível e excluirá todo o histórico de reciclagem deste aluno.`,
+      confirmText: "Remover",
+      cancelText: "Cancelar",
+      onConfirm: async () => {
+        try {
+          await removeUser(user.id);
+          setUsers((prev) => prev.filter((u) => u.id !== user.id));
+          if (stats) setStats({ ...stats, totalUsers: stats.totalUsers - 1 });
+          setSelectedUserDetails(null);
+        } catch {
+          setDialogConfig({
+            visible: true,
+            type: "error",
+            title: "Erro",
+            message: "Não foi possível remover o usuário.",
+            onConfirm: () => setDialogConfig(null),
+          });
+        }
+      },
+      onCancel: () => setDialogConfig(null),
+    });
   }
 
   async function handleCreateUser() {
     if (newUserName.trim().length < 2) {
-      Alert.alert("Validação", "Nome completo deve ter pelo menos 2 caracteres.");
+      setDialogConfig({ visible: true, type: "warning", title: "Validação", message: "Nome completo deve ter pelo menos 2 caracteres.", onConfirm: () => setDialogConfig(null) });
       return;
     }
     if (/\d/.test(newUserName)) {
-      Alert.alert("Validação", "Nome completo não pode conter números.");
+      setDialogConfig({ visible: true, type: "warning", title: "Validação", message: "Nome completo não pode conter números.", onConfirm: () => setDialogConfig(null) });
       return;
     }
     if (newUserMatricula.trim().length < 6 || !/^\d+$/.test(newUserMatricula)) {
-      Alert.alert("Validação", "Matrícula deve conter pelo menos 6 dígitos numéricos.");
+      setDialogConfig({ visible: true, type: "warning", title: "Validação", message: "Matrícula deve conter pelo menos 6 dígitos numéricos.", onConfirm: () => setDialogConfig(null) });
       return;
     }
     if (!newUserEmail.includes("@")) {
-      Alert.alert("Validação", "Informe um e-mail válido.");
+      setDialogConfig({ visible: true, type: "warning", title: "Validação", message: "Informe um e-mail válido.", onConfirm: () => setDialogConfig(null) });
       return;
     }
     if (newUserPassword.length < 6) {
-      Alert.alert("Validação", "Senha deve ter pelo menos 6 caracteres.");
+      setDialogConfig({ visible: true, type: "warning", title: "Validação", message: "Senha deve ter pelo menos 6 caracteres.", onConfirm: () => setDialogConfig(null) });
       return;
     }
     const normalizedTurma = newUserTurma.trim().toUpperCase().replace(/\s/g, "");
     if (!/^[1-9][A-Z]$/.test(normalizedTurma)) {
-      Alert.alert("Validação", "Formato de turma inválido. Use letras e números simples como: 3B, 2A, 1C.");
+      setDialogConfig({ visible: true, type: "warning", title: "Validação", message: "Formato de turma inválido. Use letras e números simples como: 3B, 2A, 1C.", onConfirm: () => setDialogConfig(null) });
       return;
     }
 
@@ -182,7 +211,13 @@ export function useAdminData() {
       setUsers((prev) => [...prev, createdUser]);
       if (stats) setStats({ ...stats, totalUsers: stats.totalUsers + 1 });
 
-      Alert.alert("Sucesso", `Usuário "${newUserName}" cadastrado com sucesso como ${ROLE_LABELS[finalRole]}!`);
+      setDialogConfig({
+        visible: true,
+        type: "success",
+        title: "Sucesso",
+        message: `Usuário "${newUserName}" cadastrado com sucesso como ${ROLE_LABELS[finalRole]}!`,
+        onConfirm: () => setDialogConfig(null),
+      });
 
       // Limpa campos
       setNewUserName("");
@@ -195,7 +230,13 @@ export function useAdminData() {
     } catch (err: any) {
       const errMsg = err?.response?.data?.error
         ?? "Não foi possível cadastrar o usuário. Verifique se o e-mail ou matrícula já estão registrados.";
-      Alert.alert("Erro de Cadastro", errMsg);
+      setDialogConfig({
+        visible: true,
+        type: "error",
+        title: "Erro de Cadastro",
+        message: errMsg,
+        onConfirm: () => setDialogConfig(null),
+      });
     } finally {
       setIsCreatingUser(false);
     }
@@ -271,6 +312,8 @@ export function useAdminData() {
     // state
     tab, setTab,
     stats, setStats,
+    // Dialog
+    dialogConfig, setDialogConfig,
     users, setUsers,
     search, setSearch,
     roleFilter, setRoleFilter,

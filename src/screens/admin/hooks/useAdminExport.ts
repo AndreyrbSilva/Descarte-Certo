@@ -1,9 +1,14 @@
 import { useRef, useState } from "react";
-import { Animated, Alert, Platform } from "react-native";
+import { Animated, Platform } from "react-native";
 import * as FileSystem from "expo-file-system/legacy";
 import type { AdminStats, AdminUser } from "../admin.types";
+import type { AdminDialogState } from "../modals/AdminDialogModal";
 
-export function useAdminExport(stats: AdminStats | null, users: AdminUser[]) {
+export function useAdminExport(
+  stats: AdminStats | null,
+  users: AdminUser[],
+  setDialogConfig: (config: AdminDialogState | null) => void
+) {
   const [isExporting,    setIsExporting]    = useState(false);
   const [exportProgress, setExportProgress] = useState(0);
   const [exportStepText, setExportStepText] = useState("");
@@ -152,15 +157,33 @@ export function useAdminExport(stats: AdminStats | null, users: AdminUser[]) {
           a.click();
           document.body.removeChild(a);
           URL.revokeObjectURL(url);
-          Alert.alert("Sucesso", "Relatório escolar visual gerado e baixado com sucesso no seu navegador!");
+          setDialogConfig({
+            visible: true,
+            type: "success",
+            title: "Sucesso",
+            message: "Relatório escolar visual gerado e baixado com sucesso no seu navegador!",
+            onConfirm: () => setDialogConfig(null),
+          });
         } else {
           const fileUri = FileSystem.documentDirectory + "Descarte_Certo_Relatorio_Sustentabilidade.html";
           await FileSystem.writeAsStringAsync(fileUri, htmlContent, { encoding: "utf8" });
-          Alert.alert("Sucesso", `Relatório gerado com sucesso localmente!\n\nCaminho: ${fileUri}`);
+          setDialogConfig({
+            visible: true,
+            type: "success",
+            title: "Sucesso",
+            message: `Relatório gerado com sucesso localmente!\n\nCaminho: ${fileUri}`,
+            onConfirm: () => setDialogConfig(null),
+          });
         }
       } catch (err: any) {
         console.error("Erro ao salvar arquivo:", err);
-        Alert.alert("Erro", "Ocorreu um erro ao salvar o relatório no dispositivo.");
+        setDialogConfig({
+          visible: true,
+          type: "error",
+          title: "Erro",
+          message: "Ocorreu um erro ao salvar o relatório no dispositivo.",
+          onConfirm: () => setDialogConfig(null),
+        });
       }
     }, 2800);
   }

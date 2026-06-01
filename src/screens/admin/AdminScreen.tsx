@@ -21,6 +21,7 @@ import { ClassDetailModal }    from "./modals/ClassDetailModal";
 import { ChangeRoleModal }     from "./modals/ChangeRoleModal";
 import { CreateUserModal }     from "./modals/CreateUserModal";
 import { ExportProgressModal } from "./modals/ExportProgressModal";
+import { AdminDialogModal }    from "./modals/AdminDialogModal";
 
 import { styles } from "./adminStyles";
 
@@ -32,7 +33,7 @@ export function AdminScreen() {
 
   const data     = useAdminData();
   const anim     = useAdminAnimations();
-  const exporter = useAdminExport(data.stats, data.users);
+  const exporter = useAdminExport(data.stats, data.users, data.setDialogConfig);
 
   const sunOpacity = aColors.animValue.interpolate({
     inputRange: [0, 1],
@@ -257,6 +258,12 @@ export function AdminScreen() {
         exportProgress={exporter.exportProgress}
         exportStepText={exporter.exportStepText}
         colors={colors}
+      />
+
+      <AdminDialogModal
+        dialog={data.dialogConfig}
+        colors={colors}
+        onClose={() => data.setDialogConfig(null)}
       />
     </Animated.View>
   );
