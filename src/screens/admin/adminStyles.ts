@@ -22,7 +22,7 @@ export const styles = StyleSheet.create({
   logoutBtn:     { width: 40, height: 40, borderRadius: 20, alignItems: "center", justifyContent: "center" },
 
   // ── Tab bar ───────────────────────────────────────────────────────────────────
-  tabContainer: { paddingHorizontal: 20, marginBottom: 12 },
+  tabContainer: { paddingHorizontal: 20, paddingTop: 16, marginBottom: 12 },
   tabBar: {
     flexDirection: "row",
     borderRadius:  20,

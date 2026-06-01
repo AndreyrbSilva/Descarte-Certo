@@ -2,17 +2,19 @@ import React, { useEffect, useState } from "react";
 import {
   View,
   Text,
-  StatusBar,
+  
   ScrollView,
-  TouchableOpacity,
+  TouchableOpacity as RN_TouchableOpacity,
   Animated,
   ActivityIndicator,
 } from "react-native";
-import { useAnimatedTeacherColors } from "../../theme/useTeacherColors";
+const TouchableOpacity = Animated.createAnimatedComponent(RN_TouchableOpacity);
+import { useTeacherColors, useAnimatedTeacherColors } from "../../theme/useTeacherColors";
 import { useTheme } from "../../context/ThemeContext";
 import { useAuthStore } from "../../store/useAuthStore";
 import { logout } from "../../services/authService";
 import { styles } from "./teacherStyles";
+import { FocusAwareStatusBar } from "../../components/layout/FocusAwareStatusBar";
 
 // Hooks
 import { useTeacherData } from "./hooks/useTeacherData";
@@ -35,7 +37,17 @@ export function TeacherScreen() {
   const [logoutLoading, setLogoutLoading] = useState(false);
 
   const user = useAuthStore((state) => state.user);
+  const colors = useTeacherColors(globalIsDark);
   const aColors = useAnimatedTeacherColors(globalIsDark);
+
+  const sunOpacity = aColors.animValue.interpolate({
+    inputRange: [0, 1],
+    outputRange: [0, 1],
+  });
+  const moonOpacity = aColors.animValue.interpolate({
+    inputRange: [0, 1],
+    outputRange: [1, 0],
+  });
 
   // Dispara animação de entrada uma vez após carregar os dados
   useEffect(() => {
@@ -63,7 +75,7 @@ export function TeacherScreen() {
 
   return (
     <Animated.View style={[styles.root, { backgroundColor: aColors.bg }]}>
-      <StatusBar barStyle={aColors.statusBar} backgroundColor={globalIsDark ? "#0f172a" : "#f8fafc"} />
+      <FocusAwareStatusBar animated={true} barStyle={colors.statusBar} backgroundColor={colors.bg} />
 
       {d.loading ? (
         <View style={styles.loadingWrap}>
@@ -106,20 +118,21 @@ export function TeacherScreen() {
             <View style={styles.headerActions}>
               {/* Alternador de tema suave */}
               <TouchableOpacity
-                style={[styles.headerBtn, { backgroundColor: globalIsDark ? "#1e293b" : "#ffffff", borderColor: globalIsDark ? "#334155" : "#e2e8f0" }]}
+                style={[styles.headerBtn, { backgroundColor: aColors.cardBg, borderColor: aColors.dividerColor }]}
                 onPress={handleToggleTheme}
                 activeOpacity={0.7}
               >
-                {globalIsDark ? (
+                <Animated.View style={{ position: "absolute", opacity: sunOpacity }}>
                   <IconSun color="#f59e0b" size={20} />
-                ) : (
+                </Animated.View>
+                <Animated.View style={{ position: "absolute", opacity: moonOpacity }}>
                   <IconMoonStars color="#64748b" size={20} />
-                )}
+                </Animated.View>
               </TouchableOpacity>
 
               {/* Botão deslogar */}
               <TouchableOpacity
-                style={[styles.headerBtn, { backgroundColor: globalIsDark ? "#1e293b" : "#ffffff", borderColor: globalIsDark ? "#334155" : "#e2e8f0" }]}
+                style={[styles.headerBtn, { backgroundColor: aColors.cardBg, borderColor: aColors.dividerColor }]}
                 onPress={() => setShowLogout(true)}
                 activeOpacity={0.7}
               >
@@ -131,11 +144,11 @@ export function TeacherScreen() {
           {/* CLASSE PILL BADGE */}
           {d.turmaLabel ? (
             <View style={styles.classPillRow}>
-              <View
+              <Animated.View
                 style={[
                   styles.classPill,
                   {
-                    backgroundColor: globalIsDark ? "rgba(34, 197, 94, 0.15)" : "#f0fdf4",
+                    backgroundColor: aColors.motivationBg,
                     borderColor: "rgba(34, 197, 94, 0.4)",
                   },
                 ]}
@@ -143,7 +156,7 @@ export function TeacherScreen() {
                 <Text style={styles.classPillText}>
                   📚 Turma {d.turmaLabel}
                 </Text>
-              </View>
+              </Animated.View>
             </View>
           ) : null}
 

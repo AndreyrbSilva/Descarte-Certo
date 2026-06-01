@@ -1,7 +1,7 @@
 import { useEffect, useCallback } from "react";
 import {
   View, Text, TouchableOpacity,
-  Animated, StatusBar, Image, StyleSheet,
+  Animated, Image, StyleSheet,
 } from "react-native";
 import { ScrollView } from "react-native-gesture-handler";
 import * as NavigationBar      from "expo-navigation-bar";
@@ -13,6 +13,7 @@ import { StreakSheetModal } from "../../../components/modals/StreakSheetModal";
 import { useHomeColors }   from "../../../theme/useHomeColors";
 import { getStreakColors } from "../../../theme/streakColors";
 import { styles }          from "./homeStyles";
+import { FocusAwareStatusBar } from "../../../components/layout/FocusAwareStatusBar";
 import {
   IconTrophy, IconTrend, IconCamera, IconCheck,
   IconTarget, IconBulb, IconRecycle, IconRanking, IconStar, IconFlame,
@@ -85,7 +86,7 @@ export function HomeScreen() {
 
   return (
     <View style={[styles.root, { backgroundColor: colors.bg }]}>
-      <StatusBar barStyle={colors.statusBar} backgroundColor={colors.bg} />
+      <FocusAwareStatusBar barStyle={colors.statusBar} backgroundColor={colors.bg} />
 
       <ScrollView
         contentContainerStyle={[styles.scroll, { paddingBottom: 120 }]}

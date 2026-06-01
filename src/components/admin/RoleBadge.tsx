@@ -6,7 +6,7 @@ import { styles } from "../../screens/admin/adminStyles";
 
 interface RoleBadgeProps {
   role:   Role;
-  colors: ReturnType<typeof useAdminColors>;
+  colors: ReturnType<typeof useAdminColors> | any;
 }
 
 export function RoleBadge({ role, colors }: RoleBadgeProps) {

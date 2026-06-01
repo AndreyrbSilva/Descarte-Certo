@@ -1,12 +1,13 @@
 import {
-  View, Text, StatusBar, ActivityIndicator,
+  View, Text, ActivityIndicator,
   TouchableOpacity, Animated,
 } from "react-native";
 import { useEffect } from "react";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
-import { useAdminColors } from "../../theme/useAdminColors";
+import { useAdminColors, useAnimatedAdminColors } from "../../theme/useAdminColors";
 import { useTheme }       from "../../context/ThemeContext";
+import { FocusAwareStatusBar } from "../../components/layout/FocusAwareStatusBar";
 import { IconLogout, IconSun, IconMoonStars } from "../../components/icons";
 
 import { useAdminData }       from "./hooks/useAdminData";
@@ -25,6 +26,7 @@ import { styles } from "./adminStyles";
 
 export function AdminScreen() {
   const colors          = useAdminColors();
+  const aColors         = useAnimatedAdminColors();
   const insets          = useSafeAreaInsets();
   const { isDark, setTheme } = useTheme();
 
@@ -32,54 +34,70 @@ export function AdminScreen() {
   const anim     = useAdminAnimations();
   const exporter = useAdminExport(data.stats, data.users);
 
+  const sunOpacity = aColors.animValue.interpolate({
+    inputRange: [0, 1],
+    outputRange: [0, 1],
+  });
+  const moonOpacity = aColors.animValue.interpolate({
+    inputRange: [0, 1],
+    outputRange: [1, 0],
+  });
+
   useEffect(() => {
     anim.startEntranceAnimation();
     data.loadData();
   }, []);
 
   return (
-    <View style={[styles.root, { backgroundColor: colors.bg }]}>
-      <StatusBar barStyle={colors.statusBar} backgroundColor={colors.bg} />
+    <Animated.View style={[styles.root, { backgroundColor: aColors.bg }]}>
+      <FocusAwareStatusBar animated={true} barStyle={colors.statusBar} backgroundColor={colors.bg} />
 
       {/* ── Header ─────────────────────────────────────────────────────────── */}
-      <Animated.View style={[styles.header, {
-        backgroundColor: colors.headerBg,
-        paddingTop:      insets.top + 16,
-        opacity:         anim.headerAnim,
-      }]}>
+      <Animated.View style={{ opacity: anim.headerAnim }}>
+        <Animated.View style={[styles.header, {
+          backgroundColor: aColors.headerBg,
+          paddingTop:      insets.top + 16,
+        }]}>
         <View style={styles.headerLeft}>
           <View style={[styles.adminAvatar, { backgroundColor: "#ef4444" }]}>
             <Text style={styles.avatarText}>AD</Text>
           </View>
           <View style={styles.headerInfo}>
-            <Text style={[styles.headerHello, { color: colors.subTextColor }]} numberOfLines={1}>
+            <Animated.Text style={[styles.headerHello, { color: aColors.subTextColor }]} numberOfLines={1}>
               Controle Escolar
-            </Text>
-            <Text style={[styles.headerName, { color: colors.textColor }]} numberOfLines={1}>
+            </Animated.Text>
+            <Animated.Text style={[styles.headerName, { color: aColors.textColor }]} numberOfLines={1}>
               Painel Admin
-            </Text>
+            </Animated.Text>
           </View>
         </View>
         <View style={styles.headerActions}>
-          <TouchableOpacity
-            onPress={() => setTheme(isDark ? "light" : "dark")}
-            style={[styles.themeBtn, { backgroundColor: colors.bg }]}
-            activeOpacity={0.8}
+          <Animated.View
+            style={[styles.themeBtn, { backgroundColor: aColors.bg }]}
           >
-            {isDark
-              ? <IconSun color="#eab308" size={20} />
-              : <IconMoonStars color="#3b82f6" size={20} />
-            }
-          </TouchableOpacity>
+            <TouchableOpacity
+              onPress={() => setTheme(isDark ? "light" : "dark")}
+              style={[{ flex: 1, width: '100%', alignItems: 'center', justifyContent: 'center' }]}
+              activeOpacity={0.8}
+            >
+              <Animated.View style={{ position: "absolute", opacity: sunOpacity }}>
+                <IconSun color="#eab308" size={20} />
+              </Animated.View>
+              <Animated.View style={{ position: "absolute", opacity: moonOpacity }}>
+                <IconMoonStars color="#3b82f6" size={20} />
+              </Animated.View>
+            </TouchableOpacity>
+          </Animated.View>
           <TouchableOpacity onPress={data.handleLogout} style={styles.logoutBtn} activeOpacity={0.8}>
             <IconLogout color="#ef4444" size={22} />
           </TouchableOpacity>
         </View>
+        </Animated.View>
       </Animated.View>
 
       {/* ── Tab bar ─────────────────────────────────────────────────────────── */}
       <View style={styles.tabContainer}>
-        <View style={[styles.tabBar, { backgroundColor: colors.cardBg }]}>
+        <Animated.View style={[styles.tabBar, { backgroundColor: aColors.cardBg }]}>
           {(["dashboard", "users"] as const).map((t) => (
             <TouchableOpacity
               key={t}
@@ -87,22 +105,22 @@ export function AdminScreen() {
               onPress={() => data.setTab(t)}
               activeOpacity={0.8}
             >
-              <Text style={[
+              <Animated.Text style={[
                 styles.tabLabel,
-                { color: data.tab === t ? "#ffffff" : colors.subTextColor, fontWeight: "800" },
+                { color: data.tab === t ? "#ffffff" : aColors.subTextColor, fontWeight: "800" },
               ]}>
                 {t === "dashboard" ? "Dashboard" : "Usuários"}
-              </Text>
+              </Animated.Text>
             </TouchableOpacity>
           ))}
-        </View>
+        </Animated.View>
       </View>
 
       {/* ── Conteúdo ────────────────────────────────────────────────────────── */}
       {data.loading ? (
         <View style={styles.loadingWrap}>
           <ActivityIndicator size="large" color="#22c55e" />
-          <Text style={[styles.loadingText, { color: colors.subTextColor }]}>Carregando dados...</Text>
+          <Animated.Text style={[styles.loadingText, { color: aColors.subTextColor }]}>Carregando dados...</Animated.Text>
         </View>
       ) : data.tab === "dashboard" ? (
         <DashboardTab
@@ -110,6 +128,7 @@ export function AdminScreen() {
           WEEK_DAYS={data.WEEK_DAYS}
           turmasRealData={data.turmasRealData}
           colors={colors}
+          aColors={aColors}
           insets={insets}
           s0Opacity={anim.s0Opacity} s0Y={anim.s0Y}
           s1Opacity={anim.s1Opacity} s1Y={anim.s1Y}
@@ -128,6 +147,7 @@ export function AdminScreen() {
           expandedTurmas={data.expandedTurmas}
           setExpandedTurmas={data.setExpandedTurmas}
           colors={colors}
+          aColors={aColors}
           insets={insets}
           listOpacity={anim.listOpacity}
           listY={anim.listY}
@@ -182,6 +202,6 @@ export function AdminScreen() {
         exportStepText={exporter.exportStepText}
         colors={colors}
       />
-    </View>
+    </Animated.View>
   );
 }

@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import {
   View, Text, TouchableOpacity,
-  Animated, StatusBar,
+  Animated,
 } from "react-native";
 import { ScrollView } from "react-native-gesture-handler";
 import * as NavigationBar from "expo-navigation-bar";
@@ -9,6 +9,7 @@ import * as NavigationBar from "expo-navigation-bar";
 import { useConfigColors, useAnimatedConfigColors } from "../../../theme/useConfigColors";
 import { useTheme } from "../../../context/ThemeContext";
 import { styles }   from "./configStyles";
+import { FocusAwareStatusBar } from "../../../components/layout/FocusAwareStatusBar";
 import {
   IconMailCheck, IconMailEdit,
   IconResetPass, IconShield, IconSecureLock,
@@ -41,7 +42,7 @@ export function ConfigScreen() {
 
   return (
     <Animated.View style={[styles.root, { backgroundColor: aColors.bg }]}>
-      <StatusBar barStyle={colors.statusBar} backgroundColor={colors.bg} />
+      <FocusAwareStatusBar barStyle={colors.statusBar} backgroundColor={colors.bg} />
 
       <ScrollView contentContainerStyle={styles.scroll} showsVerticalScrollIndicator={false}>
 

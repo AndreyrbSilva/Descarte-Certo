@@ -1,12 +1,13 @@
 import { useState, useMemo } from "react";
 import {
   View, Text, ScrollView, TouchableOpacity,
-  Animated, StatusBar, Image,
+  Animated, Image,
 } from "react-native";
 
 import { useScanResultColors }    from "../../../theme/useScanResultColors";
 import { getStreakColors }         from "../../../theme/streakColors";
 import { styles }                  from "./scanResultStyles";
+import { FocusAwareStatusBar }     from "../../../components/layout/FocusAwareStatusBar";
 import {
   IconRecycle, IconFlame, IconStar, IconBulb,
   IconCamera, IconHome, IconRanking,
@@ -132,7 +133,7 @@ export function ScanResultScreen() {
 
   return (
     <View style={[styles.root, { backgroundColor: colors.cardBg }]}>
-      <StatusBar barStyle="light-content" backgroundColor={GREEN} />
+      <FocusAwareStatusBar barStyle="light-content" backgroundColor={GREEN} />
 
       <ScrollView contentContainerStyle={styles.scroll} showsVerticalScrollIndicator={false}>
 

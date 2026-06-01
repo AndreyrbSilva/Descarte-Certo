@@ -1,4 +1,5 @@
-import { View, Text, Animated } from "react-native";
+import { Animated } from "react-native";
+const { View, Text } = Animated;
 import type { useAdminColors } from "../../theme/useAdminColors";
 import { styles } from "../../screens/admin/adminStyles";
 
@@ -7,7 +8,7 @@ interface StatCardProps {
   label:       string;
   value:       string | number;
   accent:      string;
-  colors:      ReturnType<typeof useAdminColors>;
+  colors:      ReturnType<typeof useAdminColors> | any;
   animOpacity: Animated.Value;
   animY:       Animated.Value;
 }

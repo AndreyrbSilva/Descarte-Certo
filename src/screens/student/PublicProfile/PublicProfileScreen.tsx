@@ -1,12 +1,13 @@
 import { useEffect, useRef } from "react";
 import {
   View, Text, ScrollView, TouchableOpacity,
-  Animated, StatusBar, Image,
+  Animated, Image,
 } from "react-native";
 
 import { useProfileColors } from "../../../theme/useProfileColors";
 import { getStreakColors }   from "../../../theme/streakColors";
 import { styles }            from "../Profile/profileStyles";
+import { FocusAwareStatusBar } from "../../../components/layout/FocusAwareStatusBar";
 import {
   IconTrophy, IconTrend, IconRecycle, IconFlame, IconCheck,
 } from "../../../components/icons";
@@ -90,7 +91,7 @@ export function PublicProfileScreen() {
 
   return (
     <View style={[styles.root, { backgroundColor: colors.bg }]}>
-      <StatusBar barStyle="light-content" backgroundColor={GREEN} />
+      <FocusAwareStatusBar barStyle="light-content" backgroundColor={GREEN} />
 
       <ScrollView
         contentContainerStyle={[styles.scroll, { paddingBottom: 90 }]}

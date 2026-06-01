@@ -140,5 +140,6 @@ export function useAnimatedTeacherColors(overrideIsDark?: boolean) {
     meBorder:         "#22c55e",
 
     statusBar:        isDark ? ("light-content" as const) : ("dark-content" as const),
+    animValue:        anim,
   };
 }

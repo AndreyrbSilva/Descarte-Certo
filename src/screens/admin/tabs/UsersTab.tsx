@@ -1,7 +1,10 @@
 import {
-  View, Text, TextInput, TouchableOpacity,
-  FlatList, Animated,
+  TextInput as RN_TextInput, TouchableOpacity as RN_TouchableOpacity,
+  Animated,
 } from "react-native";
+const { View, Text, FlatList } = Animated;
+const TextInput = Animated.createAnimatedComponent(RN_TextInput);
+const TouchableOpacity = Animated.createAnimatedComponent(RN_TouchableOpacity);
 import { ScrollView } from "react-native-gesture-handler";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import type { useAdminColors } from "../../../theme/useAdminColors";
@@ -22,6 +25,7 @@ interface UsersTabProps {
   expandedTurmas:   Record<string, boolean>;
   setExpandedTurmas: (fn: (prev: Record<string, boolean>) => Record<string, boolean>) => void;
   colors:           ReturnType<typeof useAdminColors>;
+  aColors?:         any;
   insets:           ReturnType<typeof useSafeAreaInsets>;
   listOpacity:      Animated.Value;
   listY:            Animated.Value;
@@ -31,8 +35,9 @@ interface UsersTabProps {
 export function UsersTab({
   filteredUsers, search, setSearch, roleFilter, setRoleFilter,
   viewMode, setViewMode, expandedTurmas, setExpandedTurmas,
-  colors, insets, listOpacity, listY, onSelectUser,
+  colors, aColors, insets, listOpacity, listY, onSelectUser,
 }: UsersTabProps) {
+  const c = aColors || colors;
   const FILTERS: { key: RoleFilter; label: string }[] = [
     { key: "ALL",     label: "Todos"    },
     { key: "STUDENT", label: ROLE_LABELS["STUDENT"] },
@@ -46,12 +51,12 @@ export function UsersTab({
       <Animated.View style={[styles.searchWrap, { opacity: listOpacity }]}>
         <TextInput
           style={[styles.searchInput, {
-            backgroundColor: colors.inputBg,
-            borderColor:     colors.inputBorder,
-            color:           colors.textColor,
+            backgroundColor: c.inputBg,
+            borderColor:     c.inputBorder,
+            color:           c.textColor,
           }]}
           placeholder="Buscar aluno, turma ou e-mail..."
-          placeholderTextColor={colors.subTextColor}
+          placeholderTextColor={c.subTextColor}
           value={search}
           onChangeText={setSearch}
         />
@@ -65,11 +70,11 @@ export function UsersTab({
             return (
               <TouchableOpacity
                 key={key}
-                style={[styles.chip, { backgroundColor: active ? "#22c55e" : colors.cardBg }]}
+                style={[styles.chip, { backgroundColor: active ? "#22c55e" : c.cardBg }]}
                 onPress={() => setRoleFilter(key)}
                 activeOpacity={0.8}
               >
-                <Text style={[styles.chipText, { color: active ? "#ffffff" : colors.textColor }]}>
+                <Text style={[styles.chipText, { color: active ? "#ffffff" : c.textColor }]}>
                   {label}
                 </Text>
               </TouchableOpacity>
@@ -79,10 +84,11 @@ export function UsersTab({
       </Animated.View>
 
       {/* ── Toggle de visualização ─────────────────────────────────────────── */}
-      <Animated.View style={[
-        styles.viewModeToggleContainer,
-        { opacity: listOpacity, backgroundColor: colors.cardBg, borderColor: colors.dividerColor },
-      ]}>
+      <Animated.View style={{ opacity: listOpacity }}>
+        <Animated.View style={[
+          styles.viewModeToggleContainer,
+          { backgroundColor: c.cardBg, borderColor: c.dividerColor },
+        ]}>
         {(["list", "grouped"] as const).map((mode) => (
           <TouchableOpacity
             key={mode}
@@ -90,18 +96,19 @@ export function UsersTab({
             onPress={() => setViewMode(mode)}
             activeOpacity={0.8}
           >
-            <Text style={[styles.viewModeBtnText, { color: viewMode === mode ? "#ffffff" : colors.textColor }]}>
+            <Text style={[styles.viewModeBtnText, { color: viewMode === mode ? "#ffffff" : c.textColor }]}>
               {mode === "list" ? "Lista Unificada" : "Agrupar por Turma"}
             </Text>
           </TouchableOpacity>
         ))}
+        </Animated.View>
       </Animated.View>
 
       {/* ── Conteúdo: agrupado ou lista ────────────────────────────────────── */}
       {viewMode === "grouped" ? (
         <GroupedView
           filteredUsers={filteredUsers}
-          colors={colors} insets={insets}
+          colors={colors} aColors={aColors} insets={insets}
           listOpacity={listOpacity} listY={listY}
           expandedTurmas={expandedTurmas}
           setExpandedTurmas={setExpandedTurmas}
@@ -116,7 +123,7 @@ export function UsersTab({
           renderItem={({ item: user }) => (
             <Animated.View style={{ opacity: listOpacity, transform: [{ translateY: listY }] }}>
               <TouchableOpacity
-                style={[styles.userCard, { backgroundColor: colors.cardBg }]}
+                style={[styles.userCard, { backgroundColor: c.cardBg }]}
                 onPress={() => onSelectUser(user)}
                 activeOpacity={0.8}
               >
@@ -125,27 +132,27 @@ export function UsersTab({
                 </View>
                 <View style={{ flex: 1, marginLeft: 12 }}>
                   <View style={styles.userNameRow}>
-                    <Text style={[styles.userName, { color: colors.textColor }]} numberOfLines={1}>
+                    <Text style={[styles.userName, { color: c.textColor }]} numberOfLines={1}>
                       {user.name}
                     </Text>
                   </View>
-                  <Text style={[styles.userEmail, { color: colors.subTextColor }]} numberOfLines={1}>
+                  <Text style={[styles.userEmail, { color: c.subTextColor }]} numberOfLines={1}>
                     {user.email}
                   </Text>
                   <View style={styles.userMeta}>
-                    <RoleBadge role={user.role} colors={colors} />
-                    <Text style={[styles.userMetaText, { color: colors.subTextColor }]}>
+                    <RoleBadge role={user.role} colors={c} />
+                    <Text style={[styles.userMetaText, { color: c.subTextColor }]}>
                       Turma: {user.turma || "N/A"}
                     </Text>
                   </View>
                 </View>
-                <Text style={[styles.arrowRight, { color: colors.subTextColor }]}>➔</Text>
+                <Text style={[styles.arrowRight, { color: c.subTextColor }]}>➔</Text>
               </TouchableOpacity>
             </Animated.View>
           )}
           ListEmptyComponent={
             <View style={styles.emptyWrap}>
-              <Text style={[styles.emptyText, { color: colors.subTextColor }]}>
+              <Text style={[styles.emptyText, { color: c.subTextColor }]}>
                 Nenhum usuário correspondente encontrado.
               </Text>
             </View>
@@ -161,6 +168,7 @@ export function UsersTab({
 interface GroupedViewProps {
   filteredUsers:     AdminUser[];
   colors:            ReturnType<typeof useAdminColors>;
+  aColors?:          any;
   insets:            ReturnType<typeof useSafeAreaInsets>;
   listOpacity:       Animated.Value;
   listY:             Animated.Value;
@@ -170,9 +178,10 @@ interface GroupedViewProps {
 }
 
 function GroupedView({
-  filteredUsers, colors, insets, listOpacity, listY,
+  filteredUsers, colors, aColors, insets, listOpacity, listY,
   expandedTurmas, setExpandedTurmas, onSelectUser,
 }: GroupedViewProps) {
+  const c = aColors || colors;
   const groupedByTurma = (() => {
     const groups: Record<string, AdminUser[]> = {};
     filteredUsers.forEach((u) => {
@@ -190,7 +199,7 @@ function GroupedView({
   if (groupedByTurma.length === 0) {
     return (
       <View style={styles.emptyWrap}>
-        <Text style={[styles.emptyText, { color: colors.subTextColor }]}>
+        <Text style={[styles.emptyText, { color: c.subTextColor }]}>
           Nenhum usuário correspondente encontrado.
         </Text>
       </View>
@@ -209,13 +218,13 @@ function GroupedView({
             key={turmaName}
             style={{ opacity: listOpacity, transform: [{ translateY: listY }], marginBottom: 16 }}
           >
-            <View style={[styles.groupedCard, { backgroundColor: colors.cardBg, borderColor: colors.dividerColor }]}>
+            <View style={[styles.groupedCard, { backgroundColor: c.cardBg, borderColor: c.dividerColor }]}>
               {/* Cabeçalho sanfona */}
               <TouchableOpacity
                 style={[
                   styles.groupedHeader,
                   {
-                    borderBottomColor: colors.dividerColor,
+                    borderBottomColor: c.dividerColor,
                     borderBottomWidth: isExpanded ? 1 : 0,
                     paddingBottom:     isExpanded ? 10 : 0,
                     marginBottom:      isExpanded ? 10 : 0,
@@ -226,12 +235,12 @@ function GroupedView({
               >
                 <View style={styles.groupedHeaderLeft}>
                   <IconHash color="#22c55e" size={16} />
-                  <Text style={[styles.groupedHeaderTitle, { color: colors.textColor }]}>
+                  <Text style={[styles.groupedHeaderTitle, { color: c.textColor }]}>
                     Turma {turmaName}
                   </Text>
                 </View>
                 <View style={{ flexDirection: "row", alignItems: "center", gap: 10 }}>
-                  <Text style={[styles.groupedHeaderCount, { color: colors.subTextColor }]}>
+                  <Text style={[styles.groupedHeaderCount, { color: c.subTextColor }]}>
                     {members.length} {members.length === 1 ? "integrante" : "integrantes"}
                   </Text>
                   <Text style={{ fontSize: 11, color: "#22c55e", fontWeight: "700" }}>
@@ -252,20 +261,20 @@ function GroupedView({
                       <Text style={styles.userInitialSmall}>{user.name[0].toUpperCase()}</Text>
                     </View>
                     <View style={{ flex: 1, marginLeft: 12 }}>
-                      <Text style={[styles.userNameSmall, { color: colors.textColor }]} numberOfLines={1}>
+                      <Text style={[styles.userNameSmall, { color: c.textColor }]} numberOfLines={1}>
                         {user.name}
                       </Text>
                       <View style={{ flexDirection: "row", alignItems: "center", marginTop: 2 }}>
-                        <RoleBadge role={user.role} colors={colors} />
-                        <Text style={{ fontSize: 11, color: colors.subTextColor, marginLeft: 8 }}>
+                        <RoleBadge role={user.role} colors={c} />
+                        <Text style={{ fontSize: 11, color: c.subTextColor, marginLeft: 8 }}>
                           {user.scans?.length ?? 0} Scans • {user.points?.total ?? 0} pts
                         </Text>
                       </View>
                     </View>
-                    <Text style={[styles.arrowRight, { color: colors.subTextColor }]}>➔</Text>
+                    <Text style={[styles.arrowRight, { color: c.subTextColor }]}>➔</Text>
                   </TouchableOpacity>
                   {idx < members.length - 1 && (
-                    <View style={[styles.divider, { backgroundColor: colors.dividerColor }]} />
+                    <View style={[styles.divider, { backgroundColor: c.dividerColor }]} />
                   )}
                 </View>
               ))}
