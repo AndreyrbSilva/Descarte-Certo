@@ -57,7 +57,7 @@ export function useAnimatedConfigColors(overrideIsDark?: boolean) {
   useEffect(() => {
     Animated.timing(anim, {
       toValue: isDark ? 1 : 0,
-      duration: 350,
+      duration: 200,
       useNativeDriver: false, // cor não suporta native driver
     }).start();
   }, [isDark]);

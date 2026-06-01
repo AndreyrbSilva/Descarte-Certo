@@ -55,9 +55,7 @@ export function TeacherScreen() {
     import("react-native").then(({ DeviceEventEmitter }) => {
       DeviceEventEmitter.emit("onThemeToggle", next);
     });
-    setTimeout(() => {
-      setTheme(next ? "dark" : "light");
-    }, 400);
+    setTheme(next ? "dark" : "light");
   }
 
   async function handleConfirmLogout() {
