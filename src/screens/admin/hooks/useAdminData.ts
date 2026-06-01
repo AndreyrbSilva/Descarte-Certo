@@ -216,12 +216,26 @@ export function useAdminData() {
   const carbonOffset  = (scansCount * 0.15).toFixed(1);
   const wasteDiverted = (scansCount * 0.25).toFixed(1);
 
-  // Agrupamento por dia de semana com dados reais
+  // Agrupamento por dia de semana com dados reais (APENAS DA SEMANA ATUAL)
+  const now = new Date();
+  const currentDay = now.getDay();
+  // Se hoje for domingo (0), a segunda-feira da semana foi 6 dias atrás.
+  const diffToMonday = currentDay === 0 ? -6 : 1 - currentDay;
+  const startOfThisWeek = new Date(now);
+  startOfThisWeek.setDate(now.getDate() + diffToMonday);
+  startOfThisWeek.setHours(0, 0, 0, 0);
+
   const allScans = users.flatMap((u) => u.scans ?? []);
   let segCount = 0, terCount = 0, quaCount = 0, quiCount = 0, sexCount = 0;
+  
   allScans.forEach((scan) => {
     if (!scan.createdAt) return;
-    const day = new Date(scan.createdAt).getDay();
+    const scanDate = new Date(scan.createdAt);
+    
+    // Ignorar scans que ocorreram antes da segunda-feira desta semana
+    if (scanDate < startOfThisWeek) return;
+    
+    const day = scanDate.getDay();
     if      (day === 1) segCount++;
     else if (day === 2) terCount++;
     else if (day === 3) quaCount++;
