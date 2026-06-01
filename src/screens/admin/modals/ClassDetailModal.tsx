@@ -1,4 +1,5 @@
 import { View, Text, Modal, TouchableOpacity, FlatList } from "react-native";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 import type { useAdminColors } from "../../../theme/useAdminColors";
 import type { AdminUser } from "../admin.types";
 import { styles } from "../adminStyles";
@@ -12,6 +13,7 @@ interface ClassDetailModalProps {
 }
 
 export function ClassDetailModal({ turmaName, users, colors, onClose, onSelectUser }: ClassDetailModalProps) {
+  const insets = useSafeAreaInsets();
   const classMembers = turmaName
     ? users
         .filter((u) => u.turma?.toUpperCase().trim() === turmaName.toUpperCase().trim())
@@ -19,10 +21,10 @@ export function ClassDetailModal({ turmaName, users, colors, onClose, onSelectUs
     : [];
 
   return (
-    <Modal visible={turmaName !== null} transparent animationType="slide" onRequestClose={onClose}>
+    <Modal visible={turmaName !== null} transparent animationType="slide" onRequestClose={onClose} statusBarTranslucent navigationBarTranslucent>
       <TouchableOpacity style={styles.modalBackdrop} activeOpacity={1} onPress={onClose}>
         <View
-          style={[styles.modalCard, { backgroundColor: colors.cardBg }]}
+          style={[styles.modalCard, { backgroundColor: colors.cardBg, paddingBottom: Math.max((insets.bottom || 0) + 12, 24) }]}
           onStartShouldSetResponder={() => true}
         >
           {/* Header */}

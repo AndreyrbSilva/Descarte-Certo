@@ -24,9 +24,8 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
 
   function setTheme(theme: ThemePreference) {
     setPreference(theme);
-    setTimeout(() => {
-      saveThemePreference(theme).catch(() => {});
-    }, 100);
+    // Salva de forma assíncrona sem bloquear
+    saveThemePreference(theme).catch(() => {});
   }
 
   const isDark =

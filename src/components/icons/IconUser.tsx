@@ -16,11 +16,11 @@ const styles = StyleSheet.create({
   },
   head: {
     width: 10, height: 10,
-    borderRadius: 5, borderWidth: 1.5,
+    borderRadius: 5, borderWidth: 2,
   },
   body: {
     width: 14, height: 7,
     borderTopLeftRadius: 7, borderTopRightRadius: 7,
-    borderWidth: 1.5, marginTop: 1,
+    borderWidth: 2, marginTop: 1,
   },
 });

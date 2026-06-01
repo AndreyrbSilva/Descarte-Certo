@@ -1,4 +1,5 @@
 import { View, Text, Modal, TouchableOpacity, ScrollView, FlatList } from "react-native";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 import type { useAdminColors } from "../../../theme/useAdminColors";
 import type { AdminUser } from "../admin.types";
 import { RoleBadge } from "../../../components/admin/RoleBadge";
@@ -13,6 +14,8 @@ interface UserDetailModalProps {
 }
 
 export function UserDetailModal({ user, colors, onClose, onChangeRole, onDeleteUser }: UserDetailModalProps) {
+  const insets = useSafeAreaInsets();
+
   if (!user) return null;
 
   const totalUserScans  = user.scans?.length ?? 0;
@@ -38,10 +41,10 @@ export function UserDetailModal({ user, colors, onClose, onChangeRole, onDeleteU
   ];
 
   return (
-    <Modal visible transparent animationType="slide" onRequestClose={onClose}>
+    <Modal visible transparent animationType="slide" onRequestClose={onClose} statusBarTranslucent navigationBarTranslucent>
       <TouchableOpacity style={styles.modalBackdrop} activeOpacity={1} onPress={onClose}>
         <View
-          style={[styles.modalCard, { backgroundColor: colors.cardBg }]}
+          style={[styles.modalCard, { backgroundColor: colors.cardBg, paddingBottom: Math.max((insets.bottom || 0) + 12, 24) }]}
           onStartShouldSetResponder={() => true}
         >
           {/* Header */}

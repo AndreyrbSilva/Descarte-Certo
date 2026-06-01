@@ -1,10 +1,11 @@
 import {
   View, Text, TouchableOpacity,
-  Animated, StatusBar, ActivityIndicator, StyleSheet,
+  Animated, ActivityIndicator, StyleSheet,
 } from "react-native";
 import { CameraView } from "expo-camera";
 
 import { styles } from "./scannerStyles";
+import { FocusAwareStatusBar } from "../../../components/layout/FocusAwareStatusBar";
 import { IconFlash, IconFlip, IconCheck } from "../../../components/icons";
 
 import { useScannerData } from "./hooks/useScannerData";
@@ -34,7 +35,7 @@ export function ScannerScreen() {
 
   return (
     <View style={styles.root}>
-      <StatusBar barStyle="light-content" backgroundColor="#000" />
+      <FocusAwareStatusBar barStyle="light-content" backgroundColor="#000" />
 
       <CameraView
         ref={d.cameraRef}

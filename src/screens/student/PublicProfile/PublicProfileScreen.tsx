@@ -1,17 +1,19 @@
 import { useEffect, useRef } from "react";
 import {
   View, Text, ScrollView, TouchableOpacity,
-  Animated, StatusBar, Image,
+  Animated, Image,
 } from "react-native";
 
 import { useProfileColors } from "../../../theme/useProfileColors";
 import { getStreakColors }   from "../../../theme/streakColors";
 import { styles }            from "../Profile/profileStyles";
+import { FocusAwareStatusBar } from "../../../components/layout/FocusAwareStatusBar";
 import {
   IconTrophy, IconTrend, IconRecycle, IconFlame, IconCheck,
 } from "../../../components/icons";
 import { ProfileTrophyIcon } from "../Profile/ProfileScreen";
 import { getTypeColor } from "../../../theme/useTrophyColors";
+import { AnimatedHeroHeader } from "../../../components/layout/AnimatedHeroHeader";
 
 import { usePublicProfileData, FILTERS, formatDate } from "./hooks/usePublicProfileData";
 
@@ -89,68 +91,69 @@ export function PublicProfileScreen() {
 
   return (
     <View style={[styles.root, { backgroundColor: colors.bg }]}>
-      <StatusBar barStyle="light-content" backgroundColor={GREEN} />
+      <FocusAwareStatusBar barStyle="light-content" backgroundColor={GREEN} />
 
       <ScrollView
         contentContainerStyle={[styles.scroll, { paddingBottom: 90 }]}
         showsVerticalScrollIndicator={false}
       >
-        <Animated.View style={[styles.header, { backgroundColor: GREEN, opacity: d.headerAnim }]}>
+        <AnimatedHeroHeader style={[styles.header, { opacity: d.headerAnim }]}>
           {/* botão voltar */}
-          <TouchableOpacity
-            onPress={() => d.navigation.goBack()}
-            activeOpacity={0.7}
-            style={{ position: "absolute", top: 56, left: 20 }}
-          >
-            <Text style={{ color: "#fff", fontSize: 28, lineHeight: 32 }}>←</Text>
-          </TouchableOpacity>
+            <TouchableOpacity
+              onPress={() => d.navigation.goBack()}
+              activeOpacity={0.7}
+              style={{ position: "absolute", top: 56, left: 20, zIndex: 20 }}
+            >
+              <Text style={{ color: "#fff", fontSize: 28, lineHeight: 32 }}>←</Text>
+            </TouchableOpacity>
 
-          {/* avatar */}
-          <View style={{
-            width: 96, height: 96, borderRadius: 48,
-            borderWidth: 3, borderColor: colors.dividerColor,
-            alignItems: "center", justifyContent: "center", marginBottom: 12,
-          }}>
-            <View style={[styles.avatarWrap, { backgroundColor: ORANGE }]}>
-              {d.profileUser?.avatarUrl
-                ? <Image source={{ uri: d.profileUser.avatarUrl }} style={styles.avatarImg} />
-                : <Text style={styles.avatarText}>{d.initial}</Text>
-              }
+            {/* avatar */}
+            <View style={{
+              width: 96, height: 96, borderRadius: 48,
+              borderWidth: 3, borderColor: colors.dividerColor,
+              alignItems: "center", justifyContent: "center", marginBottom: 12,
+              alignSelf: 'center'
+            }}>
+              <View style={[styles.avatarWrap, { backgroundColor: ORANGE }]}>
+                {d.profileUser?.avatarUrl
+                  ? <Image source={{ uri: d.profileUser.avatarUrl }} style={styles.avatarImg} />
+                  : <Text style={styles.avatarText}>{d.initial}</Text>
+                }
+              </View>
             </View>
-          </View>
 
-          <Text style={styles.userName}>{d.profileUser?.name ?? "..."}</Text>
-          <Text style={styles.userTurma}>{d.profileUser?.turma ?? ""} • Descarte Certo</Text>
+            <Text style={styles.userName}>{d.profileUser?.name ?? "..."}</Text>
+            <Text style={styles.userTurma}>{d.profileUser?.turma ?? ""} • Descarte Certo</Text>
 
-          {/* streak badge */}
-          <View style={[styles.levelBadge, { marginTop: 6 }]}>
-            <IconFlame
-              outer={flameColors.outer}
-              innerStart={flameColors.innerStart}
-              innerEnd={flameColors.innerEnd}
-              size={14}
-            />
-            <Text style={styles.levelText}>{streakText(d.streak)}</Text>
-          </View>
-
-          <View style={styles.levelBadge}>
-            <IconTrophy color="#fff" size={14} />
-            <Text style={styles.levelText}>{d.levelInfo.currentName}</Text>
-          </View>
-
-          <View style={styles.xpBarWrap}>
-            <View style={styles.xpBarBg}>
-              <Animated.View style={[styles.xpBarFill, { width: d.xpWidth }]} />
+            {/* streak badge */}
+            <View style={[styles.levelBadge, { marginTop: 6 }]}>
+              <IconFlame
+                outer={flameColors.outer}
+                innerStart={flameColors.innerStart}
+                innerEnd={flameColors.innerEnd}
+                size={14}
+              />
+              <Text style={styles.levelText}>{streakText(d.streak)}</Text>
             </View>
-            {d.levelInfo.isMax ? (
-              <Text style={styles.xpLabel}>Nível máximo!</Text>
-            ) : (
-              <Text style={styles.xpLabel}>
-                {d.levelInfo.pointsInLevel}/{d.levelInfo.pointsToNext} → {d.levelInfo.nextName}
-              </Text>
-            )}
-          </View>
-        </Animated.View>
+
+            <View style={styles.levelBadge}>
+              <IconTrophy color="#fff" size={14} />
+              <Text style={styles.levelText}>{d.levelInfo.currentName}</Text>
+            </View>
+
+            <View style={styles.xpBarWrap}>
+              <View style={styles.xpBarBg}>
+                <Animated.View style={[styles.xpBarFill, { width: d.xpWidth }]} />
+              </View>
+              {d.levelInfo.isMax ? (
+                <Text style={styles.xpLabel}>Nível máximo!</Text>
+              ) : (
+                <Text style={styles.xpLabel}>
+                  {d.levelInfo.pointsInLevel}/{d.levelInfo.pointsToNext} → {d.levelInfo.nextName}
+                </Text>
+              )}
+            </View>
+          </AnimatedHeroHeader>
 
         <Animated.View style={[styles.statsRow, { opacity: d.cardOpacity, transform: [{ translateY: d.cardAnim }] }]}>
           <View style={[styles.statCard, { backgroundColor: ORANGE }]}>

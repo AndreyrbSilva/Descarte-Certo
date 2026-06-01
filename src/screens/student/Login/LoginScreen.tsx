@@ -9,10 +9,11 @@ import {
 import { useNavigation, useRoute } from "@react-navigation/native";
 
 import { GREEN }               from "../../../theme/colors";
-import { IconHash, IconLock, IconEye } from "../../../components/icons";
+import { IconIdBadge, IconLock, IconEye } from "../../../components/icons";
 import { useLoginAnimations }  from "./hooks/useLoginAnimations";
 import { useThemeColors }      from "../../../theme/useThemeColors";
 import { styles }              from "./loginStyles";
+import { AnimatedHeroHeader }  from "../../../components/layout/AnimatedHeroHeader";
 
 export function LoginScreen() {
   const navigation = useNavigation<any>();
@@ -106,17 +107,17 @@ export function LoginScreen() {
         showsVerticalScrollIndicator={false}
       >
         {/* HEADER */}
-        <Animated.View style={[styles.header, { opacity: anim.headerOpacity }]}>
+        <AnimatedHeroHeader style={[styles.header, { opacity: anim.headerOpacity }]}>
           <Animated.View
-            style={[styles.logoArea, { opacity: anim.logoAnim, transform: [{ scale: anim.logoAnim }] }]}
-          >
-            <View style={styles.appNameRow}>
-              <Text style={styles.appNameDark}>Descarte</Text>
-              <Text style={styles.appNameWhite}> Certo</Text>
-            </View>
-            <Text style={styles.appTagline}>RECICLE • PONTUE • TRANSFORME</Text>
-          </Animated.View>
-        </Animated.View>
+              style={[styles.logoArea, { opacity: anim.logoAnim, transform: [{ scale: anim.logoAnim }] }]}
+            >
+              <View style={styles.appNameRow}>
+                <Text style={styles.appNameDark}>Descarte</Text>
+                <Text style={styles.appNameWhite}> Certo</Text>
+              </View>
+              <Text style={styles.appTagline}>RECICLE • PONTUE • TRANSFORME</Text>
+            </Animated.View>
+          </AnimatedHeroHeader>
 
         {/* CARD */}
         <Animated.View
@@ -138,7 +139,7 @@ export function LoginScreen() {
               backgroundColor: colors.inputBg,
               borderColor: emailFocus ? GREEN : colors.inputBorder,
             }]}>
-              <IconHash color={emailFocus ? GREEN : colors.iconColor} />
+              <IconIdBadge color={emailFocus ? GREEN : colors.iconColor} />
               <TextInput
                 style={[styles.input, { color: colors.textColor }]}
                 placeholder="Ex: 1234"

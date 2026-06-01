@@ -4,7 +4,7 @@ export default {
   expo: {
     name: "DescarteCerto",
     slug: "descarte-certo",
-    version: "1.2.0",
+    version: "1.2.1",
     orientation: "portrait",
     updates: {
       fallbackToCacheTimeout: 0,

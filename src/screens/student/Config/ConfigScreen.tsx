@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import {
   View, Text, TouchableOpacity,
-  Animated, StatusBar,
+  Animated,
 } from "react-native";
 import { ScrollView } from "react-native-gesture-handler";
 import * as NavigationBar from "expo-navigation-bar";
@@ -9,6 +9,7 @@ import * as NavigationBar from "expo-navigation-bar";
 import { useConfigColors, useAnimatedConfigColors } from "../../../theme/useConfigColors";
 import { useTheme } from "../../../context/ThemeContext";
 import { styles }   from "./configStyles";
+import { FocusAwareStatusBar } from "../../../components/layout/FocusAwareStatusBar";
 import {
   IconMailCheck, IconMailEdit,
   IconResetPass, IconShield, IconSecureLock,
@@ -24,36 +25,24 @@ import { LogoutModal }    from "./modals/LogoutModal";
 
 export function ConfigScreen() {
   const { isDark: globalIsDark, setTheme } = useTheme();
-  const [localIsDark, setLocalIsDark] = useState(globalIsDark);
 
-  useEffect(() => {
-    setLocalIsDark(globalIsDark);
-  }, [globalIsDark]);
-
-  const colors  = useConfigColors(localIsDark);
-  const aColors = useAnimatedConfigColors(localIsDark);
+  const colors  = useConfigColors(globalIsDark);
+  const aColors = useAnimatedConfigColors(globalIsDark);
 
   useEffect(() => {
     NavigationBar.setBackgroundColorAsync(colors.bg);
-    NavigationBar.setButtonStyleAsync(localIsDark ? "light" : "dark");
-  }, [colors.bg, localIsDark]);
+    NavigationBar.setButtonStyleAsync(globalIsDark ? "light" : "dark");
+  }, [colors.bg, globalIsDark]);
 
   const data = useConfigData(colors);
 
   function handleToggleTheme() {
-    const next = !localIsDark;
-    setLocalIsDark(next);
-    import("react-native").then(({ DeviceEventEmitter }) => {
-      DeviceEventEmitter.emit("onThemeToggle", next);
-    });
-    setTimeout(() => {
-      setTheme(next ? "dark" : "light");
-    }, 400);
+    setTheme(!globalIsDark ? "dark" : "light");
   }
 
   return (
     <Animated.View style={[styles.root, { backgroundColor: aColors.bg }]}>
-      <StatusBar barStyle={colors.statusBar} backgroundColor={colors.bg} />
+      <FocusAwareStatusBar barStyle={colors.statusBar} backgroundColor={colors.bg} />
 
       <ScrollView contentContainerStyle={styles.scroll} showsVerticalScrollIndicator={false}>
 
@@ -101,7 +90,7 @@ export function ConfigScreen() {
         {/* TEMA */}
         <Animated.Text style={[styles.sectionLabel, { color: aColors.sectionLabel }]}>Aparência</Animated.Text>
         <Animated.View style={[styles.section, { backgroundColor: aColors.cardBg, marginBottom: 18 }]}>
-          <ThemeToggle isDark={localIsDark} onToggle={handleToggleTheme} aColors={aColors} />
+          <ThemeToggle isDark={globalIsDark} onToggle={handleToggleTheme} aColors={aColors} />
         </Animated.View>
 
         {/* SEÇÃO EMAIL */}

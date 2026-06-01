@@ -94,7 +94,7 @@ export function useAnimatedTeacherColors(overrideIsDark?: boolean) {
   useEffect(() => {
     Animated.timing(anim, {
       toValue: isDark ? 1 : 0,
-      duration: 350,
+      duration: 200,
       useNativeDriver: false,
     }).start();
   }, [isDark]);
@@ -140,5 +140,6 @@ export function useAnimatedTeacherColors(overrideIsDark?: boolean) {
     meBorder:         "#22c55e",
 
     statusBar:        isDark ? ("light-content" as const) : ("dark-content" as const),
+    animValue:        anim,
   };
 }

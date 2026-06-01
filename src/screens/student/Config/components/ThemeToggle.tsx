@@ -22,7 +22,7 @@ export function ThemeToggle({ isDark, onToggle, aColors }: {
 
     Animated.timing(colorAnim, {
       toValue: isDark ? 1 : 0,
-      duration: 350,
+      duration: 200,
       useNativeDriver: false,
     }).start();
   }, [isDark]);

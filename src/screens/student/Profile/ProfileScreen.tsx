@@ -1,19 +1,21 @@
 import { useEffect, useRef } from "react";
 import {
   View, Text, TouchableOpacity,
-  Animated, StatusBar, Image, Modal, ActivityIndicator,
+  Animated, Image, Modal, ActivityIndicator,
 } from "react-native";
 import { ScrollView } from "react-native-gesture-handler";
 import { useNavigation } from "@react-navigation/native";
 
 import { useProfileColors } from "../../../theme/useProfileColors";
 import { styles } from "./profileStyles";
+import { FocusAwareStatusBar } from "../../../components/layout/FocusAwareStatusBar";
 import {
   IconTrophy, IconTrend, IconRecycle, IconLogout, IconCamera,
   IconStar, IconCrown, IconMedal, IconFlame, IconTarget,
   IconShield, IconDiamond, IconRainbow, IconLightning, IconShieldCheck, IconCheck,
 } from "../../../components/icons";
 import { getTypeColor } from "../../../theme/useTrophyColors";
+import { AnimatedHeroHeader } from "../../../components/layout/AnimatedHeroHeader";
 
 import { useProfileData, FILTERS, formatDate } from "./hooks/useProfileData";
 
@@ -106,60 +108,60 @@ export function ProfileScreen() {
 
   return (
     <View style={[styles.root, { backgroundColor: colors.bg }]}>
-      <StatusBar barStyle="light-content" backgroundColor={GREEN} />
+      <FocusAwareStatusBar barStyle="light-content" backgroundColor={GREEN} />
 
       <ScrollView
         contentContainerStyle={[styles.scroll, { paddingBottom: 120 }]}
         showsVerticalScrollIndicator={false}
       >
 
-        <Animated.View style={[styles.header, { backgroundColor: GREEN, opacity: data.headerAnim }]}>
-          <TouchableOpacity onPress={data.handlePickPhoto} activeOpacity={0.85} disabled={data.uploadingPhoto}>
-            <View
-              style={{
-                width: 96, height: 96, borderRadius: 48,
-                borderWidth: 3, borderColor,
-                alignItems: "center", marginBottom: 12, justifyContent: "center",
-              }}
-            >
-              <View style={[styles.avatarWrap, { backgroundColor: ORANGE }]}>
-                {data.photoUri
-                  ? <Image source={{ uri: data.photoUri }} style={styles.avatarImg} />
-                  : <Text style={styles.avatarText}>{data.initial}</Text>
-                }
-                {data.uploadingPhoto && (
-                  <View style={styles.avatarOverlay}>
-                    <ActivityIndicator color="#fff" size="small" />
-                  </View>
-                )}
+        <AnimatedHeroHeader style={[styles.header, { opacity: data.headerAnim }]}>
+          <TouchableOpacity onPress={data.handlePickPhoto} activeOpacity={0.85} disabled={data.uploadingPhoto} style={{ alignSelf: 'center' }}>
+              <View
+                style={{
+                  width: 96, height: 96, borderRadius: 48,
+                  borderWidth: 3, borderColor,
+                  alignItems: "center", marginBottom: 12, justifyContent: "center",
+                }}
+              >
+                <View style={[styles.avatarWrap, { backgroundColor: ORANGE }]}>
+                  {data.photoUri
+                    ? <Image source={{ uri: data.photoUri }} style={styles.avatarImg} />
+                    : <Text style={styles.avatarText}>{data.initial}</Text>
+                  }
+                  {data.uploadingPhoto && (
+                    <View style={styles.avatarOverlay}>
+                      <ActivityIndicator color="#fff" size="small" />
+                    </View>
+                  )}
+                </View>
               </View>
-            </View>
-            <View style={styles.cameraIcon}>
-              <IconCamera color="#fff" size={14} />
-            </View>
-          </TouchableOpacity>
+              <View style={styles.cameraIcon}>
+                <IconCamera color="#fff" size={14} />
+              </View>
+            </TouchableOpacity>
 
-          <Text style={styles.userName}>{data.fullName}</Text>
-          <Text style={styles.userTurma}>{data.user?.turma ?? ""} • Descarte Certo</Text>
+            <Text style={styles.userName}>{data.fullName}</Text>
+            <Text style={styles.userTurma}>{data.user?.turma ?? ""} • Descarte Certo</Text>
 
-          <View style={styles.levelBadge}>
-            <IconTrophy color="#fff" size={14} />
-            <Text style={styles.levelText}>{data.levelInfo.currentName}</Text>
-          </View>
-
-          <View style={styles.xpBarWrap}>
-            <View style={styles.xpBarBg}>
-              <Animated.View style={[styles.xpBarFill, { width: data.xpWidth }]} />
+            <View style={styles.levelBadge}>
+              <IconTrophy color="#fff" size={14} />
+              <Text style={styles.levelText}>{data.levelInfo.currentName}</Text>
             </View>
-            {data.levelInfo.isMax ? (
-              <Text style={styles.xpLabel}>Nível máximo!</Text>
-            ) : (
-              <Text style={styles.xpLabel}>
-                {data.levelInfo.pointsInLevel}/{data.levelInfo.pointsToNext} → {data.levelInfo.nextName}
-              </Text>
-            )}
-          </View>
-        </Animated.View>
+
+            <View style={styles.xpBarWrap}>
+              <View style={styles.xpBarBg}>
+                <Animated.View style={[styles.xpBarFill, { width: data.xpWidth }]} />
+              </View>
+              {data.levelInfo.isMax ? (
+                <Text style={styles.xpLabel}>Nível máximo!</Text>
+              ) : (
+                <Text style={styles.xpLabel}>
+                  {data.levelInfo.pointsInLevel}/{data.levelInfo.pointsToNext} → {data.levelInfo.nextName}
+                </Text>
+              )}
+            </View>
+          </AnimatedHeroHeader>
 
         <Animated.View style={[styles.statsRow, { opacity: data.cardOpacity, transform: [{ translateY: data.cardAnim }] }]}>
           <View style={[styles.statCard, { backgroundColor: ORANGE }]}>

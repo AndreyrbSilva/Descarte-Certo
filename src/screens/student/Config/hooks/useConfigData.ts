@@ -1,4 +1,4 @@
-import { useState, useCallback } from "react";
+import { useState, useCallback, useRef } from "react";
 import { Animated } from "react-native";
 import { useFocusEffect, useNavigation } from "@react-navigation/native";
 import * as NavigationBar from "expo-navigation-bar";
@@ -37,7 +37,7 @@ export function useConfigData(colors: { bg: string }) {
   const [secret,  setSecret]  = useState("");
   const [pending2FAEmail, setPending2FAEmail] = useState("");
 
-  const headerOpacity = new Animated.Value(0);
+  const headerOpacity = useRef(new Animated.Value(0)).current;
 
   useFocusEffect(
     useCallback(() => {

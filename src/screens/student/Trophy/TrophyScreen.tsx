@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import {
   View, Text, TouchableOpacity,
-  Animated, StatusBar, Platform, UIManager,
+  Animated, Platform, UIManager,
 } from "react-native";
 
 if (Platform.OS === "android" && UIManager.setLayoutAnimationEnabledExperimental) {
@@ -13,6 +13,7 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { AchievementData } from "../../../services/achievementService";
 import { getTypeColor, getTypeLabel } from "../../../theme/useTrophyColors";
 import { styles } from "./trophyStyles";
+import { FocusAwareStatusBar } from "../../../components/layout/FocusAwareStatusBar";
 import {
   IconTrophy, IconStar, IconRecycle, IconMedal, IconCrown,
   IconFlame, IconTarget, IconTrend, IconShield, IconCheck,
@@ -229,7 +230,7 @@ export function TrophyScreen() {
 
   return (
     <View style={[styles.root, { backgroundColor: data.colors.bg }]}>
-      <StatusBar barStyle={data.colors.statusBar} backgroundColor={data.colors.bg} />
+      <FocusAwareStatusBar barStyle={data.colors.statusBar} backgroundColor={data.colors.bg} />
 
       {/* Botão Voltar */}
       <TouchableOpacity

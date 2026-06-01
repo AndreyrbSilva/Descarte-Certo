@@ -1,6 +1,6 @@
 import {
   View, Text, Animated,
-  StatusBar, TouchableOpacity, Image,
+  TouchableOpacity, Image,
 } from "react-native";
 import { ScrollView } from "react-native-gesture-handler";
 
@@ -8,6 +8,7 @@ import { RankingEntry } from "../../../services/rankingService";
 import { getStreakColors }  from "../../../theme/streakColors";
 import { IconFlame, IconCrown, IconMedal } from "../../../components/icons";
 import { styles }           from "./rankingStyles";
+import { FocusAwareStatusBar } from "../../../components/layout/FocusAwareStatusBar";
 
 import { useRankingData, Tab } from "./hooks/useRankingData";
 
@@ -97,7 +98,7 @@ export function RankingScreen() {
 
   return (
     <View style={[styles.root, { backgroundColor: d.colors.bg }]}>
-      <StatusBar barStyle={d.colors.statusBar} backgroundColor={d.colors.bg} />
+      <FocusAwareStatusBar barStyle={d.colors.statusBar} backgroundColor={d.colors.bg} />
 
       <ScrollView contentContainerStyle={styles.scroll} showsVerticalScrollIndicator={false}>
 

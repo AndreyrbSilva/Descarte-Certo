@@ -9,10 +9,11 @@ import {
 import { useNavigation, useRoute } from "@react-navigation/native";
 
 import { GREEN }                  from "../../../theme/colors";
-import { IconMail, IconLock, IconUser, IconHash, IconBook, IconEye } from "../../../components/icons";
+import { IconMail, IconLock, IconUser, IconIdBadge, IconStudents, IconEye } from "../../../components/icons";
 import { useRegisterAnimations }  from "./hooks/useRegisterAnimations";
 import { useRegisterColors }      from "../../../theme/useRegisterColors";
 import { styles }                 from "./registerStyles";
+import { AnimatedHeroHeader }     from "../../../components/layout/AnimatedHeroHeader";
 
 type PasswordLevel = {
   level: number;
@@ -114,15 +115,15 @@ export function RegisterScreen() {
         showsVerticalScrollIndicator={false}
       >
         {/* HEADER */}
-        <Animated.View style={[styles.header, { opacity: anim.headerOpacity }]}>
-          <TouchableOpacity style={styles.backBtn} onPress={() => navigation.navigate("Login")}>
-            <Text style={styles.backArrow}>←</Text>
-          </TouchableOpacity>
-          <View style={styles.headerContent}>
-            <Text style={styles.headerTitle}>Criar conta</Text>
-            <Text style={styles.headerSub}>DESCARTE CERTO</Text>
-          </View>
-        </Animated.View>
+        <AnimatedHeroHeader style={[styles.header, { opacity: anim.headerOpacity }]}>
+          <TouchableOpacity style={[styles.backBtn, { zIndex: 10 }]} onPress={() => navigation.navigate("Login")}>
+              <Text style={styles.backArrow}>←</Text>
+            </TouchableOpacity>
+            <View style={styles.headerContent}>
+              <Text style={styles.headerTitle}>Criar conta</Text>
+              <Text style={styles.headerSub}>DESCARTE CERTO</Text>
+            </View>
+          </AnimatedHeroHeader>
 
         {/* CARD */}
         <Animated.View style={[styles.card, {
@@ -158,7 +159,7 @@ export function RegisterScreen() {
           <View style={styles.fieldGroup}>
             <Text style={[styles.fieldLabel, { color: colors.labelColor }]}>Matrícula</Text>
             <View style={[styles.inputWrapper, { backgroundColor: colors.inputBg, borderColor: matriculaFocus ? GREEN : colors.inputBorder }]}>
-              <IconHash color={matriculaFocus ? GREEN : colors.iconColor} />
+              <IconIdBadge color={matriculaFocus ? GREEN : colors.iconColor} />
               <TextInput
                 style={[styles.input, { color: colors.textColor }]}
                 placeholder="Ex: 20241234"
@@ -242,7 +243,7 @@ export function RegisterScreen() {
           <View style={styles.fieldGroup}>
             <Text style={[styles.fieldLabel, { color: colors.labelColor }]}>Turma / Série</Text>
             <View style={[styles.inputWrapper, { backgroundColor: colors.inputBg, borderColor: turmaFocus ? GREEN : colors.inputBorder }]}>
-              <IconBook color={turmaFocus ? GREEN : colors.iconColor} />
+              <IconStudents color={turmaFocus ? GREEN : colors.iconColor} />
               <TextInput
                 style={[styles.input, { color: colors.textColor }]}
                 placeholder="Ex: 3º A"

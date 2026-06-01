@@ -116,21 +116,9 @@ function CustomTabBar({ state, descriptors, navigation, position, colors, aColor
 
 export function TabNavigator() {
   const { isDark: globalIsDark } = useTheme();
-  const [localIsDark, setLocalIsDark] = useState(globalIsDark);
 
-  useEffect(() => {
-    setLocalIsDark(globalIsDark);
-  }, [globalIsDark]);
-
-  useEffect(() => {
-    import("react-native").then(({ DeviceEventEmitter }) => {
-      const sub = DeviceEventEmitter.addListener("onThemeToggle", setLocalIsDark);
-      return () => sub.remove();
-    });
-  }, []);
-
-  const colors  = useTabColors(localIsDark);
-  const aColors = useAnimatedTabColors(localIsDark);
+  const colors  = useTabColors(globalIsDark);
+  const aColors = useAnimatedTabColors(globalIsDark);
   const insets  = useSafeAreaInsets();
 
   return (

@@ -13,7 +13,7 @@ export function ExportProgressModal({
   visible, exportProgress, exportStepText, colors,
 }: ExportProgressModalProps) {
   return (
-    <Modal visible={visible} transparent animationType="fade">
+    <Modal visible={visible} transparent animationType="fade" statusBarTranslucent navigationBarTranslucent>
       <View style={styles.exportBackdrop}>
         <View style={[styles.exportCard, { backgroundColor: colors.cardBg }]}>
           <ActivityIndicator size="large" color="#3b82f6" />
