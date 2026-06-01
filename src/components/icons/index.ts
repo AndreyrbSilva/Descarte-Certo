@@ -35,3 +35,6 @@ export { IconLightning }   from "./IconLightning";
 export { IconBin }         from "./IconBin";
 export { IconCelebrate }   from "./IconCelebrate";
 export { IconLeaf }        from "./IconLeaf";
+export { IconIdBadge }     from "./IconIdBadge";
+export { IconClasses }     from "./IconClasses";
+export { IconStudents }    from "./IconStudents";

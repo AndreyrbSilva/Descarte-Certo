@@ -8,7 +8,7 @@ import { StatCard } from "../../../components/admin/StatCard";
 import { RoleBadge } from "../../../components/admin/RoleBadge";
 import { styles } from "../adminStyles";
 import {
-  IconUser, IconRecycle, IconStar, IconHash,
+  IconUser, IconRecycle, IconStar, IconClasses,
   IconTrend, IconMedal,
 } from "../../../components/icons";
 
@@ -61,7 +61,7 @@ export function DashboardTab({
           colors={c} animOpacity={s2Opacity} animY={s2Y}
         />
         <StatCard
-          icon={<IconHash color="#a855f7" />}
+          icon={<IconClasses color="#a855f7" size={22} />}
           label="Total Turmas" value={stats?.turmas.length ?? 0} accent="#a855f7"
           colors={c} animOpacity={s3Opacity} animY={s3Y}
         />
