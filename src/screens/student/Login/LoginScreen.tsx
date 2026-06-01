@@ -107,9 +107,8 @@ export function LoginScreen() {
         showsVerticalScrollIndicator={false}
       >
         {/* HEADER */}
-        <Animated.View style={{ opacity: anim.headerOpacity }}>
-          <AnimatedHeroHeader style={styles.header}>
-            <Animated.View
+        <AnimatedHeroHeader style={[styles.header, { opacity: anim.headerOpacity }]}>
+          <Animated.View
               style={[styles.logoArea, { opacity: anim.logoAnim, transform: [{ scale: anim.logoAnim }] }]}
             >
               <View style={styles.appNameRow}>
@@ -119,7 +118,6 @@ export function LoginScreen() {
               <Text style={styles.appTagline}>RECICLE • PONTUE • TRANSFORME</Text>
             </Animated.View>
           </AnimatedHeroHeader>
-        </Animated.View>
 
         {/* CARD */}
         <Animated.View

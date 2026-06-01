@@ -115,9 +115,8 @@ export function RegisterScreen() {
         showsVerticalScrollIndicator={false}
       >
         {/* HEADER */}
-        <Animated.View style={{ opacity: anim.headerOpacity }}>
-          <AnimatedHeroHeader style={styles.header}>
-            <TouchableOpacity style={[styles.backBtn, { zIndex: 10 }]} onPress={() => navigation.navigate("Login")}>
+        <AnimatedHeroHeader style={[styles.header, { opacity: anim.headerOpacity }]}>
+          <TouchableOpacity style={[styles.backBtn, { zIndex: 10 }]} onPress={() => navigation.navigate("Login")}>
               <Text style={styles.backArrow}>←</Text>
             </TouchableOpacity>
             <View style={styles.headerContent}>
@@ -125,7 +124,6 @@ export function RegisterScreen() {
               <Text style={styles.headerSub}>DESCARTE CERTO</Text>
             </View>
           </AnimatedHeroHeader>
-        </Animated.View>
 
         {/* CARD */}
         <Animated.View style={[styles.card, {

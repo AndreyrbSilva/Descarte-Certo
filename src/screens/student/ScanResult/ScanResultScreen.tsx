@@ -137,9 +137,8 @@ export function ScanResultScreen() {
       <ScrollView contentContainerStyle={styles.scroll} showsVerticalScrollIndicator={false}>
 
         {/* ── HEADER CELEBRATÓRIO ──────────────────────── */}
-        <Animated.View style={{ opacity: d.headerAnim }}>
-          <AnimatedHeroHeader style={styles.header}>
-            <ConfettiEffect anim={d.confettiAnim} />
+        <AnimatedHeroHeader style={[styles.header, { opacity: d.headerAnim }]} hasCurve>
+          <ConfettiEffect anim={d.confettiAnim} />
 
             <Animated.Text style={[styles.celebrationText, {
               transform: [{ scale: d.celebrationAnim }],
@@ -161,7 +160,6 @@ export function ScanResultScreen() {
 
             <Text style={styles.pointsLabel}>pontos ganhos!</Text>
           </AnimatedHeroHeader>
-        </Animated.View>
 
         {/* ── CARD PRINCIPAL ───────────────────────────── */}
         <Animated.View style={[styles.card, {

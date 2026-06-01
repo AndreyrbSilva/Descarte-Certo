@@ -96,9 +96,8 @@ export function PublicProfileScreen() {
         contentContainerStyle={[styles.scroll, { paddingBottom: 90 }]}
         showsVerticalScrollIndicator={false}
       >
-        <Animated.View style={{ opacity: d.headerAnim }}>
-          <AnimatedHeroHeader style={styles.header}>
-            {/* botão voltar */}
+        <AnimatedHeroHeader style={[styles.header, { opacity: d.headerAnim }]}>
+          {/* botão voltar */}
             <TouchableOpacity
               onPress={() => d.navigation.goBack()}
               activeOpacity={0.7}
@@ -154,7 +153,6 @@ export function PublicProfileScreen() {
               )}
             </View>
           </AnimatedHeroHeader>
-        </Animated.View>
 
         <Animated.View style={[styles.statsRow, { opacity: d.cardOpacity, transform: [{ translateY: d.cardAnim }] }]}>
           <View style={[styles.statCard, { backgroundColor: ORANGE }]}>

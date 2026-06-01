@@ -114,9 +114,8 @@ export function ProfileScreen() {
         showsVerticalScrollIndicator={false}
       >
 
-        <Animated.View style={{ opacity: data.headerAnim }}>
-          <AnimatedHeroHeader style={styles.header}>
-            <TouchableOpacity onPress={data.handlePickPhoto} activeOpacity={0.85} disabled={data.uploadingPhoto} style={{ alignSelf: 'center' }}>
+        <AnimatedHeroHeader style={[styles.header, { opacity: data.headerAnim }]}>
+          <TouchableOpacity onPress={data.handlePickPhoto} activeOpacity={0.85} disabled={data.uploadingPhoto} style={{ alignSelf: 'center' }}>
               <View
                 style={{
                   width: 96, height: 96, borderRadius: 48,
@@ -162,7 +161,6 @@ export function ProfileScreen() {
               )}
             </View>
           </AnimatedHeroHeader>
-        </Animated.View>
 
         <Animated.View style={[styles.statsRow, { opacity: data.cardOpacity, transform: [{ translateY: data.cardAnim }] }]}>
           <View style={[styles.statCard, { backgroundColor: ORANGE }]}>

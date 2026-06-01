@@ -1,14 +1,13 @@
 import { useEffect, useRef, ReactNode, useMemo } from "react";
-import { View, Animated, StyleSheet, StyleProp, ViewStyle, Dimensions } from "react-native";
+import { View, Animated, StyleSheet, StyleProp, ViewStyle, Dimensions, ViewProps } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
 import Svg, { Path } from "react-native-svg";
 import { IconLeaf, IconRecycle, IconStar } from "../icons";
 
 const { width } = Dimensions.get("window");
 
-type Props = {
+type Props = ViewProps & {
   children: ReactNode;
-  style?: StyleProp<ViewStyle>;
   hasCurve?: boolean;
 };
 
@@ -77,9 +76,9 @@ function FloatingPattern() {
   );
 }
 
-export function AnimatedHeroHeader({ children, style, hasCurve = false }: Props) {
+export function AnimatedHeroHeader({ children, style, hasCurve = false, ...rest }: Props) {
   return (
-    <View style={[styles.container, style]}>
+    <Animated.View style={[styles.container, style]} {...rest}>
       {/* Background gradiente */}
       <LinearGradient
         colors={["#16a34a", "#22c55e", "#4ade80"]} // Tons de verde modernos
@@ -91,24 +90,18 @@ export function AnimatedHeroHeader({ children, style, hasCurve = false }: Props)
       {/* Pattern Flutuante */}
       <FloatingPattern />
       
-      {/* Conteúdo principal */}
-      <View style={styles.content}>
-        {children}
-      </View>
-
       {/* Curva inferior */}
       {hasCurve && <CurveBottom />}
-    </View>
+
+      {/* Conteúdo principal */}
+      {children}
+    </Animated.View>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
     overflow: "hidden", // Importante para manter a curva/borda arredondada
-  },
-  content: {
-    flex: 1,
-    zIndex: 10, // Garante que o conteúdo fique por cima do background
   },
   curveWrapper: {
     position: "absolute",
