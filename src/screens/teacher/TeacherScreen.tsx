@@ -31,16 +31,11 @@ export function TeacherScreen() {
   const anims = useTeacherAnimations();
 
   const { isDark: globalIsDark, setTheme } = useTheme();
-  const [localIsDark, setLocalIsDark] = useState(globalIsDark);
   const [showLogout, setShowLogout] = useState(false);
   const [logoutLoading, setLogoutLoading] = useState(false);
 
   const user = useAuthStore((state) => state.user);
-  const aColors = useAnimatedTeacherColors(localIsDark);
-
-  useEffect(() => {
-    setLocalIsDark(globalIsDark);
-  }, [globalIsDark]);
+  const aColors = useAnimatedTeacherColors(globalIsDark);
 
   // Dispara animação de entrada uma vez após carregar os dados
   useEffect(() => {
@@ -50,12 +45,7 @@ export function TeacherScreen() {
   }, [d.loading]);
 
   function handleToggleTheme() {
-    const next = !localIsDark;
-    setLocalIsDark(next);
-    import("react-native").then(({ DeviceEventEmitter }) => {
-      DeviceEventEmitter.emit("onThemeToggle", next);
-    });
-    setTheme(next ? "dark" : "light");
+    setTheme(!globalIsDark ? "dark" : "light");
   }
 
   async function handleConfirmLogout() {
@@ -73,7 +63,7 @@ export function TeacherScreen() {
 
   return (
     <Animated.View style={[styles.root, { backgroundColor: aColors.bg }]}>
-      <StatusBar barStyle={aColors.statusBar} backgroundColor={localIsDark ? "#0f172a" : "#f8fafc"} />
+      <StatusBar barStyle={aColors.statusBar} backgroundColor={globalIsDark ? "#0f172a" : "#f8fafc"} />
 
       {d.loading ? (
         <View style={styles.loadingWrap}>
@@ -116,11 +106,11 @@ export function TeacherScreen() {
             <View style={styles.headerActions}>
               {/* Alternador de tema suave */}
               <TouchableOpacity
-                style={[styles.headerBtn, { backgroundColor: localIsDark ? "#1e293b" : "#ffffff", borderColor: localIsDark ? "#334155" : "#e2e8f0" }]}
+                style={[styles.headerBtn, { backgroundColor: globalIsDark ? "#1e293b" : "#ffffff", borderColor: globalIsDark ? "#334155" : "#e2e8f0" }]}
                 onPress={handleToggleTheme}
                 activeOpacity={0.7}
               >
-                {localIsDark ? (
+                {globalIsDark ? (
                   <IconSun color="#f59e0b" size={20} />
                 ) : (
                   <IconMoonStars color="#64748b" size={20} />
@@ -129,7 +119,7 @@ export function TeacherScreen() {
 
               {/* Botão deslogar */}
               <TouchableOpacity
-                style={[styles.headerBtn, { backgroundColor: localIsDark ? "#1e293b" : "#ffffff", borderColor: localIsDark ? "#334155" : "#e2e8f0" }]}
+                style={[styles.headerBtn, { backgroundColor: globalIsDark ? "#1e293b" : "#ffffff", borderColor: globalIsDark ? "#334155" : "#e2e8f0" }]}
                 onPress={() => setShowLogout(true)}
                 activeOpacity={0.7}
               >
@@ -145,7 +135,7 @@ export function TeacherScreen() {
                 style={[
                   styles.classPill,
                   {
-                    backgroundColor: localIsDark ? "rgba(34, 197, 94, 0.15)" : "#f0fdf4",
+                    backgroundColor: globalIsDark ? "rgba(34, 197, 94, 0.15)" : "#f0fdf4",
                     borderColor: "rgba(34, 197, 94, 0.4)",
                   },
                 ]}
@@ -199,7 +189,7 @@ export function TeacherScreen() {
               transform: [{ translateY: anims.statsY }],
             }}
           >
-            <TeacherStatsBar stats={d.stats} isDark={localIsDark} />
+            <TeacherStatsBar stats={d.stats} isDark={globalIsDark} />
           </Animated.View>
 
           {/* MOTIVATION CARD */}
@@ -209,7 +199,7 @@ export function TeacherScreen() {
               transform: [{ scale: anims.motivationScale }],
             }}
           >
-            <MotivationCard data={d.motivation} isDark={localIsDark} />
+            <MotivationCard data={d.motivation} isDark={globalIsDark} />
           </Animated.View>
 
           {/* LISTA & PODIO COM RACHADURAS EM CROSS-FADE */}
@@ -239,7 +229,7 @@ export function TeacherScreen() {
                   onPressItem={(userId) =>
                     d.navigation.navigate("PublicProfile", { userId })
                   }
-                  isDark={localIsDark}
+                  isDark={globalIsDark}
                 />
 
                 {/* LISTA DE CARDS */}
@@ -260,7 +250,7 @@ export function TeacherScreen() {
                           onPress={() =>
                             d.navigation.navigate("PublicProfile", { userId: entry.userId })
                           }
-                          isDark={localIsDark}
+                          isDark={globalIsDark}
                         />
                       </Animated.View>
                     );
