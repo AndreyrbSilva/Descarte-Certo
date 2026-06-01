@@ -48,6 +48,36 @@ export function AdminScreen() {
     data.loadData();
   }, []);
 
+  // ── Tab switch: slide indicator FIRST, then swap state after fade ────────
+  function handleTabSwitch(nextTab: "dashboard" | "users") {
+    if (nextTab === data.tab) return;
+    // Slide indicator on native thread (instant, smooth)
+    anim.animateTabIndicator(nextTab);
+    // Fade content, swap state at midpoint, fade back in
+    anim.crossFadeContent(() => {
+      data.setTab(nextTab);
+    });
+  }
+
+  // ── Filter switch ─────────────────────────────────────────────────────────
+  function handleRoleFilterChange(filter: typeof data.roleFilter) {
+    if (filter === data.roleFilter) return;
+    anim.crossFadeFilterContent(() => {
+      data.setRoleFilter(filter);
+      setTimeout(() => anim.animateCardEntrance(40), 20);
+    });
+  }
+
+  // ── View mode switch ──────────────────────────────────────────────────────
+  function handleViewModeChange(mode: "list" | "grouped") {
+    if (mode === data.viewMode) return;
+    anim.animateViewModeIndicator(mode);
+    anim.crossFadeFilterContent(() => {
+      data.setViewMode(mode);
+      setTimeout(() => anim.animateCardEntrance(40), 20);
+    });
+  }
+
   return (
     <Animated.View style={[styles.root, { backgroundColor: aColors.bg }]}>
       <FocusAwareStatusBar animated={true} barStyle={colors.statusBar} backgroundColor={colors.bg} />
@@ -95,19 +125,38 @@ export function AdminScreen() {
         </Animated.View>
       </Animated.View>
 
-      {/* ── Tab bar ─────────────────────────────────────────────────────────── */}
+      {/* ── Tab bar — translateX nativo, zero stutter ─────────────────────── */}
       <View style={styles.tabContainer}>
-        <Animated.View style={[styles.tabBar, { backgroundColor: aColors.cardBg }]}>
+        <Animated.View
+          style={[styles.tabBar, { backgroundColor: aColors.cardBg }]}
+          onLayout={(e) => anim.setTabBarWidth(e.nativeEvent.layout.width)}
+        >
+          {/* Indicator pill — positioned with translateX (native thread) */}
+          <Animated.View
+            style={{
+              position:        "absolute",
+              left:            4,
+              width:           "50%",
+              top:             4,
+              bottom:          4,
+              borderRadius:    18,
+              backgroundColor: "#22c55e",
+              transform:       [{ translateX: anim.tabAnim }],
+            }}
+          />
           {(["dashboard", "users"] as const).map((t) => (
             <TouchableOpacity
               key={t}
-              style={[styles.tabBtn, data.tab === t && { backgroundColor: "#22c55e" }]}
-              onPress={() => data.setTab(t)}
+              style={[styles.tabBtn]}
+              onPress={() => handleTabSwitch(t)}
               activeOpacity={0.8}
             >
               <Animated.Text style={[
                 styles.tabLabel,
-                { color: data.tab === t ? "#ffffff" : aColors.subTextColor, fontWeight: "800" },
+                {
+                  color: data.tab === t ? "#ffffff" : aColors.subTextColor,
+                  fontWeight: "800",
+                },
               ]}>
                 {t === "dashboard" ? "Dashboard" : "Usuários"}
               </Animated.Text>
@@ -116,44 +165,51 @@ export function AdminScreen() {
         </Animated.View>
       </View>
 
-      {/* ── Conteúdo ────────────────────────────────────────────────────────── */}
-      {data.loading ? (
-        <View style={styles.loadingWrap}>
-          <ActivityIndicator size="large" color="#22c55e" />
-          <Animated.Text style={[styles.loadingText, { color: aColors.subTextColor }]}>Carregando dados...</Animated.Text>
-        </View>
-      ) : data.tab === "dashboard" ? (
-        <DashboardTab
-          stats={data.stats}
-          WEEK_DAYS={data.WEEK_DAYS}
-          turmasRealData={data.turmasRealData}
-          colors={colors}
-          aColors={aColors}
-          insets={insets}
-          s0Opacity={anim.s0Opacity} s0Y={anim.s0Y}
-          s1Opacity={anim.s1Opacity} s1Y={anim.s1Y}
-          s2Opacity={anim.s2Opacity} s2Y={anim.s2Y}
-          s3Opacity={anim.s3Opacity} s3Y={anim.s3Y}
-          listOpacity={anim.listOpacity} listY={anim.listY}
-          onOpenCreateUser={() => data.setCreateUserModalVisible(true)}
-          onOpenTurmaDetail={data.setSelectedTurmaDetails}
-        />
-      ) : (
-        <UsersTab
-          filteredUsers={data.filteredUsers}
-          search={data.search}         setSearch={data.setSearch}
-          roleFilter={data.roleFilter} setRoleFilter={data.setRoleFilter}
-          viewMode={data.viewMode}     setViewMode={data.setViewMode}
-          expandedTurmas={data.expandedTurmas}
-          setExpandedTurmas={data.setExpandedTurmas}
-          colors={colors}
-          aColors={aColors}
-          insets={insets}
-          listOpacity={anim.listOpacity}
-          listY={anim.listY}
-          onSelectUser={data.setSelectedUserDetails}
-        />
-      )}
+      {/* ── Conteúdo (fade simples, nativo) ──────────────────────────────── */}
+      <Animated.View style={{ flex: 1, opacity: anim.contentOpacity }}>
+        {data.loading ? (
+          <View style={styles.loadingWrap}>
+            <ActivityIndicator size="large" color="#22c55e" />
+            <Animated.Text style={[styles.loadingText, { color: aColors.subTextColor }]}>Carregando dados...</Animated.Text>
+          </View>
+        ) : data.tab === "dashboard" ? (
+          <DashboardTab
+            stats={data.stats}
+            WEEK_DAYS={data.WEEK_DAYS}
+            turmasRealData={data.turmasRealData}
+            colors={colors}
+            aColors={aColors}
+            insets={insets}
+            s0Opacity={anim.s0Opacity} s0Y={anim.s0Y}
+            s1Opacity={anim.s1Opacity} s1Y={anim.s1Y}
+            s2Opacity={anim.s2Opacity} s2Y={anim.s2Y}
+            s3Opacity={anim.s3Opacity} s3Y={anim.s3Y}
+            listOpacity={anim.listOpacity} listY={anim.listY}
+            onOpenCreateUser={() => data.setCreateUserModalVisible(true)}
+            onOpenTurmaDetail={data.setSelectedTurmaDetails}
+          />
+        ) : (
+          <UsersTab
+            filteredUsers={data.filteredUsers}
+            search={data.search}         setSearch={data.setSearch}
+            roleFilter={data.roleFilter} setRoleFilter={handleRoleFilterChange}
+            viewMode={data.viewMode}     setViewMode={handleViewModeChange}
+            expandedTurmas={data.expandedTurmas}
+            setExpandedTurmas={data.setExpandedTurmas}
+            colors={colors}
+            aColors={aColors}
+            insets={insets}
+            listOpacity={anim.listOpacity}
+            listY={anim.listY}
+            viewModeAnim={anim.viewModeAnim}
+            setViewModeWidth={anim.setViewModeWidth}
+            filterContentOpacity={anim.filterContentOpacity}
+            cardAnims={anim.cardAnims}
+            animateCardEntrance={anim.animateCardEntrance}
+            onSelectUser={data.setSelectedUserDetails}
+          />
+        )}
+      </Animated.View>
 
       {/* ── Modais ──────────────────────────────────────────────────────────── */}
       <UserDetailModal
