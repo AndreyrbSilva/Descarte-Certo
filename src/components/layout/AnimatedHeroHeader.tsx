@@ -2,7 +2,7 @@ import { useEffect, useRef, ReactNode, useMemo } from "react";
 import { View, Animated, StyleSheet, StyleProp, ViewStyle, Dimensions, ViewProps } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
 import Svg, { Path } from "react-native-svg";
-import { IconLeaf, IconRecycle, IconStar } from "../icons";
+import { IconLeaf, IconRecycle, IconStar, IconBin } from "../icons";
 
 const { width } = Dimensions.get("window");
 
@@ -28,6 +28,7 @@ function FloatingPattern() {
   const anim1 = useRef(new Animated.Value(0)).current;
   const anim2 = useRef(new Animated.Value(0)).current;
   const anim3 = useRef(new Animated.Value(0)).current;
+  const anim4 = useRef(new Animated.Value(0)).current;
 
   useEffect(() => {
     const createLoop = (anim: Animated.Value, duration: number) => {
@@ -42,14 +43,17 @@ function FloatingPattern() {
     createLoop(anim1, 4000).start();
     createLoop(anim2, 6000).start();
     createLoop(anim3, 5000).start();
-  }, [anim1, anim2, anim3]);
+    createLoop(anim4, 5500).start();
+  }, [anim1, anim2, anim3, anim4]);
 
   const tY1 = anim1.interpolate({ inputRange: [0, 1], outputRange: [0, -15] });
   const tY2 = anim2.interpolate({ inputRange: [0, 1], outputRange: [0, -25] });
   const tY3 = anim3.interpolate({ inputRange: [0, 1], outputRange: [0, 20] });
+  const tY4 = anim4.interpolate({ inputRange: [0, 1], outputRange: [0, -20] });
   const rot1 = anim1.interpolate({ inputRange: [0, 1], outputRange: ["0deg", "10deg"] });
   const rot2 = anim2.interpolate({ inputRange: [0, 1], outputRange: ["0deg", "-15deg"] });
   const rot3 = anim3.interpolate({ inputRange: [0, 1], outputRange: ["0deg", "20deg"] });
+  const rot4 = anim4.interpolate({ inputRange: [0, 1], outputRange: ["0deg", "-10deg"] });
 
   return (
     <View style={styles.patternContainer}>
@@ -67,6 +71,10 @@ function FloatingPattern() {
       
       <Animated.View style={[styles.floatingItem, { top: "70%", left: "20%", transform: [{ translateY: tY1 }, { rotate: rot2 }] }]}>
         <IconLeaf color="rgba(255,255,255,0.15)" size={32} />
+      </Animated.View>
+
+      <Animated.View style={[styles.floatingItem, { top: "20%", left: "45%", transform: [{ translateY: tY4 }, { rotate: rot4 }] }]}>
+        <IconBin color="rgba(255,255,255,0.12)" size={38} />
       </Animated.View>
 
       {/* Bolhas suaves (Blurry circles concept) */}
