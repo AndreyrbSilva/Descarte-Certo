@@ -2,6 +2,7 @@ import {
   View, Text, Modal, TouchableOpacity,
   TextInput, ScrollView, ActivityIndicator,
 } from "react-native";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 import type { useAdminColors } from "../../../theme/useAdminColors";
 import type { Role } from "../admin.types";
 import { ROLE_LABELS, ROLES } from "../admin.types";
@@ -36,6 +37,7 @@ export function CreateUserModal({
     borderColor:     colors.inputBorder,
     color:           colors.textColor,
   };
+  const insets = useSafeAreaInsets();
 
   return (
     <Modal
@@ -43,6 +45,8 @@ export function CreateUserModal({
       transparent
       animationType="slide"
       onRequestClose={() => !isCreatingUser && onClose()}
+      statusBarTranslucent
+      navigationBarTranslucent
     >
       <TouchableOpacity
         style={styles.modalBackdrop}
@@ -50,7 +54,7 @@ export function CreateUserModal({
         onPress={() => !isCreatingUser && onClose()}
       >
         <View
-          style={[styles.modalCard, { backgroundColor: colors.cardBg }]}
+          style={[styles.modalCard, { backgroundColor: colors.cardBg, paddingBottom: Math.max((insets.bottom || 0) + 12, 24) }]}
           onStartShouldSetResponder={() => true}
         >
           {/* Header */}

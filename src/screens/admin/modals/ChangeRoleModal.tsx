@@ -1,4 +1,5 @@
 import { View, Text, Modal, TouchableOpacity } from "react-native";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 import type { useAdminColors } from "../../../theme/useAdminColors";
 import type { AdminUser, Role } from "../admin.types";
 import { ROLE_LABELS, ROLES } from "../admin.types";
@@ -12,11 +13,12 @@ interface ChangeRoleModalProps {
 }
 
 export function ChangeRoleModal({ user, colors, onClose, onChangeRole }: ChangeRoleModalProps) {
+  const insets = useSafeAreaInsets();
   return (
-    <Modal visible={!!user} transparent animationType="fade" onRequestClose={onClose}>
+    <Modal visible={!!user} transparent animationType="fade" onRequestClose={onClose} statusBarTranslucent navigationBarTranslucent>
       <TouchableOpacity style={styles.modalBackdrop} activeOpacity={1} onPress={onClose}>
         <View
-          style={[styles.modalCard, { backgroundColor: colors.cardBg }]}
+          style={[styles.modalCard, { backgroundColor: colors.cardBg, paddingBottom: Math.max((insets.bottom || 0) + 12, 24) }]}
           onStartShouldSetResponder={() => true}
         >
           <Text style={[styles.modalTitle, { color: colors.textColor }]}>Alterar Cargo</Text>
