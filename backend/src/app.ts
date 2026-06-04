@@ -8,6 +8,7 @@ import { profileRoutes } from "./routes/profileRoutes";
 import { missionRoutes }     from "./routes/missionRoutes";
 import { achievementRoutes } from "./routes/achievementRoutes";
 import { adminRoutes }       from "./routes/adminRoutes";
+import { notificationRoutes } from "./routes/notificationRoutes";
 
 export const app = Fastify({ logger: true });
 
@@ -29,5 +30,6 @@ app.register(profileRoutes);
 app.register(missionRoutes);
 app.register(achievementRoutes);
 app.register(adminRoutes);
+app.register(notificationRoutes);
 
 app.get("/health", async () => ({ status: "ok" }));

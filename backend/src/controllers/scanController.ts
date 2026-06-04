@@ -5,6 +5,7 @@ import { getUserFromToken } from "../services/authService";
 import { computeStreak } from "../services/streakService";
 import { updateMissionProgress } from "./missionController";
 import { checkAndUnlockAchievements } from "./achievementController";
+import { notifyRankingChanges } from "../services/pushNotificationService";
 
 const POINTS_MAP: Record<string, number> = {
   plastico: 10,
@@ -59,11 +60,42 @@ export async function registerScan(req: FastifyRequest, reply: FastifyReply) {
     ? (await prisma.userPoints.findUnique({ where: { userId } }))?.total ?? (userPoints?.total ?? points)
     : (userPoints?.total ?? points);
 
+  // Get scanner's turma for ranking notifications
+  const scannerUser = await prisma.user.findUnique({
+    where:  { id: userId },
+    select: { turma: true },
+  });
+
+  // Calculate scanner's new ranking position in turma
+  let turmaRankPosition: number | null = null;
+  if (scannerUser) {
+    const turmaUsers = await prisma.user.findMany({
+      where:  { turma: scannerUser.turma },
+      select: { id: true },
+    });
+    const turmaIds = turmaUsers.map((u) => u.id);
+    const turmaPoints = await prisma.userPoints.findMany({
+      where:   { userId: { in: turmaIds } },
+      orderBy: { total: "desc" },
+      select:  { userId: true },
+    });
+    const idx = turmaPoints.findIndex((p) => p.userId === userId);
+    turmaRankPosition = idx >= 0 ? idx + 1 : null;
+  }
+
+  // Send ranking change push notifications to affected users (fire-and-forget)
+  if (scannerUser) {
+    notifyRankingChanges(userId, scannerUser.turma).catch((err) =>
+      console.error("[PushService] Ranking notification error:", err)
+    );
+  }
+
   return reply.status(201).send({
     scan,
-    pointsEarned: points,
-    totalPoints:  finalPoints,
+    pointsEarned:     points,
+    totalPoints:      finalPoints,
     streak,
+    turmaRankPosition,
     mission: missionUpdate
       ? {
           title: missionUpdate.mission.title,
