@@ -46,6 +46,14 @@ export default {
           photosPermission: "O DescarteCerto precisa acessar suas fotos para enviar imagens.",
         },
       ],
+      [
+        "expo-notifications",
+        {
+          icon: "./assets/logo.png",
+          color: "#064e3b",
+          defaultChannel: "default",
+        },
+      ],
     ],
     extra: {
       eas: {
