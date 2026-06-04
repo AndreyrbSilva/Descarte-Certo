@@ -2,6 +2,7 @@ import { useEffect, useRef } from "react";
 import "./src/globals.css";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import * as Notifications from "expo-notifications";
+import type { EventSubscription } from "expo-modules-core";
 
 import { ThemeProvider } from "./src/context/ThemeContext";
 import { AppNavigator }  from "./src/navigation/index";
@@ -16,7 +17,7 @@ import { useNotificationStore } from "./src/store/useNotificationStore";
 setForegroundHandler();
 
 export default function App() {
-  const notificationResponseListener = useRef<Notifications.EventSubscription | null>(null);
+  const notificationResponseListener = useRef<EventSubscription | null>(null);
 
   useEffect(() => {
     // Hydrate notification preferences from SecureStore
@@ -43,7 +44,7 @@ export default function App() {
 
     return () => {
       if (notificationResponseListener.current) {
-        Notifications.removeNotificationSubscription(notificationResponseListener.current);
+        notificationResponseListener.current.remove();
       }
     };
   }, []);
