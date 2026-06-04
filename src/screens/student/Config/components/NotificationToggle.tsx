@@ -3,13 +3,14 @@ import { TouchableOpacity, View, Animated, Text, StyleSheet } from "react-native
 import { useAnimatedConfigColors } from "../../../../theme/useConfigColors";
 import { styles as configStyles } from "../configStyles";
 
+import React from "react";
 import type { NotificationCategory } from "../../../../types/notifications";
 
 interface Props {
   category: NotificationCategory;
   label:    string;
   sub:      string;
-  icon:     string;
+  icon:     React.ReactNode;
   enabled:  boolean;
   onToggle: (category: NotificationCategory, value: boolean) => void;
   aColors:  ReturnType<typeof useAnimatedConfigColors>;
@@ -50,9 +51,9 @@ export function NotificationToggle({ category, label, sub, icon, enabled, onTogg
       onPress={() => onToggle(category, !enabled)}
       activeOpacity={0.7}
     >
-      {/* Emoji icon */}
+      {/* Icon */}
       <Animated.View style={[configStyles.itemIconWrap, { backgroundColor: aColors.iconBg }]}>
-        <Text style={localStyles.emoji}>{icon}</Text>
+        {icon}
       </Animated.View>
 
       {/* Label + subtitle */}
