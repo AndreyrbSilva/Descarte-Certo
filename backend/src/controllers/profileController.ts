@@ -12,7 +12,7 @@ export async function getPublicProfile(req: FastifyRequest, reply: FastifyReply)
 
   const user = await prisma.user.findUnique({
     where:  { id: userId },
-    select: { id: true, name: true, avatarUrl: true, turma: true },
+    select: { id: true, name: true, avatarUrl: true, profileColor: true, turma: true },
   });
 
   if (!user) return reply.status(404).send({ error: "Usuário não encontrado." });

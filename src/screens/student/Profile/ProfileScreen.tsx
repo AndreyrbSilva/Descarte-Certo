@@ -20,6 +20,7 @@ import { AnimatedHeroHeader } from "../../../components/layout/AnimatedHeroHeade
 import { useProfileThemeStore, PROFILE_COLOR_OPTIONS } from "../../../store/useProfileThemeStore";
 
 import { useProfileData, FILTERS, formatDate } from "./hooks/useProfileData";
+import { updateProfileColor } from "../../../services/profileService";
 
 const GREEN = "#22c55e";
 const ORANGE = "#f97316";
@@ -387,7 +388,15 @@ export function ProfileScreen() {
                     styles.colorItem, 
                     { backgroundColor: option.value }
                   ])}
-                  onPress={() => { setProfileColor(option.value); setShowColorPicker(false); }}
+                  onPress={async () => { 
+                    setProfileColor(option.value); 
+                    setShowColorPicker(false);
+                    try {
+                      await updateProfileColor(option.value);
+                    } catch (error) {
+                      console.log("Erro ao salvar cor no servidor:", error);
+                    }
+                  }}
                   activeOpacity={0.8}
                 >
                   {activeColor === option.value && <IconCheck color="#ffffff" size={24} />}

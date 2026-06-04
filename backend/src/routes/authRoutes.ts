@@ -1,5 +1,5 @@
 import { FastifyInstance } from "fastify";
-import { register, login, logout, updateAvatar, getMe } from "../controllers/authController";
+import { register, login, logout, updateAvatar, updateProfileColor, getMe } from "../controllers/authController";
 import { sendVerifyCode, verifyEmail, changeEmail, confirmChangeEmail } from "../controllers/emailController";
 import { changePassword, requestPasswordReset, verifyResetCode, resetPassword } from "../controllers/passwordController";
 import { setup2FA, verify2FA, disable2FA } from "../controllers/twoFactorController";
@@ -20,6 +20,7 @@ export async function authRoutes(app: FastifyInstance) {
   }, login);
   app.post("/auth/logout",  logout);
   app.patch("/auth/avatar", { preHandler: verifyToken }, updateAvatar);
+  app.patch("/auth/color",  { preHandler: verifyToken }, updateProfileColor);
   app.get("/auth/me",       { preHandler: verifyToken }, getMe);
 
   // email

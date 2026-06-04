@@ -21,6 +21,7 @@ model User {
   turma     String
   role      Role     @default(STUDENT)
   avatarUrl  String?
+  profileColor String?
 
   emailVerified   Boolean  @default(false)
   emailCode       String?
