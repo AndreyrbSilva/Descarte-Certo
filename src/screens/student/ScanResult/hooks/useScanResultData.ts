@@ -6,6 +6,7 @@ import { useNavigation, useRoute } from "@react-navigation/native";
 
 import { useAuthStore } from "../../../../store/useAuthStore";
 import { getLevelInfo } from "../../Profile/hooks/useProfileData";
+import { useNotificationScheduler } from "../../../../hooks/useNotificationScheduler";
 
 const GREEN = "#22c55e";
 
@@ -123,6 +124,8 @@ export function useScanResultData() {
 
   const { result, photoUri, error } = route.params ?? {};
 
+  const { onScanCompleted } = useNotificationScheduler();
+
   // ── Animations ──────────────────────────────────────
   const headerAnim      = useRef(new Animated.Value(0)).current;
   const cardAnim        = useRef(new Animated.Value(60)).current;
@@ -162,6 +165,15 @@ export function useScanResultData() {
       // Haptic feedback quando as animações de entrada completam
       if (Platform.OS !== "web") {
         Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+      }
+
+      // Trigger notifications for scan result (achievements, milestones, ranking, missions)
+      if (result) {
+        onScanCompleted({
+          streak:          result.streak ?? 0,
+          totalPoints:     result.totalPoints ?? 0,
+          newAchievements: result.newAchievements ?? [],
+        });
       }
     });
 

@@ -4,6 +4,7 @@ import { useFocusEffect } from "@react-navigation/native";
 import { useAuthStore }    from "../../../../store/useAuthStore";
 import { fetchHomeData }   from "../../../../services/homeService";
 import { fetchDailyMission, DailyMissionData } from "../../../../services/missionService";
+import { useNotificationScheduler } from "../../../../hooks/useNotificationScheduler";
 
 export type LastScan = { category: string; createdAt: string; points: number } | null;
 
@@ -22,6 +23,8 @@ export function useHomeData() {
   const leveledUp    = useAuthStore((s) => s.leveledUp);
   const setLeveledUp = useAuthStore((s) => s.setLeveledUp);
   const avatarUrl    = useAuthStore((s) => s.user?.avatarUrl ?? null);
+
+  const { onAppOpen } = useNotificationScheduler();
 
   const [totalPoints,   setTotalPoints]   = useState(0);
   const [displayPoints, setDisplayPoints] = useState(0);
@@ -44,6 +47,12 @@ export function useHomeData() {
       setStreak(data.streak);
       onStreakLoaded?.(data.streak);
       onPointsLoaded?.(data.totalPoints);
+
+      // Trigger notification checks (streak lost, ranking drop, reschedule)
+      onAppOpen({
+        currentStreak:       data.streak,
+        currentRankPosition: data.turmaRank ?? undefined,
+      });
 
       // animate display points counter
       let val = 0;
