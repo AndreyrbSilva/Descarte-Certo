@@ -4,7 +4,7 @@ export default {
   expo: {
     name: "DescarteCerto",
     slug: "descarte-certo",
-    version: "1.2.1",
+    version: "1.3.0",
     orientation: "portrait",
     updates: {
       fallbackToCacheTimeout: 0,
@@ -44,6 +44,14 @@ export default {
         "expo-image-picker",
         {
           photosPermission: "O DescarteCerto precisa acessar suas fotos para enviar imagens.",
+        },
+      ],
+      [
+        "expo-notifications",
+        {
+          icon: "./assets/logo.png",
+          color: "#064e3b",
+          defaultChannel: "default",
         },
       ],
     ],

@@ -36,6 +36,7 @@ model User {
   missionProgress  UserMissionProgress[]
   achievements     UserAchievement[]
   rankingSnapshots RankingSnapshot[]
+  pushToken        PushToken?
 }
 
 model BlacklistedToken {
@@ -132,4 +133,14 @@ model RankingSnapshot {
   user       User     @relation(fields: [userId], references: [id])
 
   @@unique([userId, scope, month, year])
+}
+
+model PushToken {
+  id        String   @id @default(uuid())
+  userId    String   @unique
+  token     String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  user      User     @relation(fields: [userId], references: [id])
 }
