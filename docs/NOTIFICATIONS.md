@@ -1,90 +1,92 @@
-# Sistema de Notificações Push — DescarteCerto
+# 🔔 Sistema de Notificações Push — DescarteCerto v1.3.0
 
 ## Visão geral
 
-O sistema de notificações oferece 10 tipos de notificações para manter os usuários engajados com o app de reciclagem. Utiliza **notificações locais** via `expo-notifications` em todas as categorias, com infraestrutura pronta para notificações push remotas no futuro.
+O sistema de notificações oferece 10 tipos de notificações para manter os usuários engajados com o app de reciclagem. Combina **notificações locais** (agendadas no device) com **notificações remotas** (enviadas pelo backend via Expo Push API) para uma cobertura completa.
 
 ## Categorias de notificação
 
 | # | Tipo | Categoria | Gatilho | Modo |
 |---|---|---|---|---|
-| 1 | 🔥 Lembrete de sequência | `streak` | Todo dia às 18h | Local (recorrente) |
-| 2 | 😢 Sequência perdida | `streak` | Ao abrir o app, streak = 0 | Local (sob demanda) |
+| 1 | 🔥 Lembrete de streak | `streak` | Todo dia às 18h | Local (recorrente) |
+| 2 | 😢 Streak perdido | `streak` | Ao abrir o app, streak = 0 | Local (sob demanda) |
 | 3 | 🎯 Missão diária | `missions` | Todo dia às 8h | Local (recorrente) |
-| 4 | 🏆 Missão quase concluída | `missions` | Após scan, progresso ≥ 80% | Local (sob demanda) |
+| 4 | 🏆 Missão quase completa | `missions` | Após scan, progresso ≥ 80% | Local (sob demanda) |
 | 5 | 🏅 Conquista desbloqueada | `achievements` | Após scan, nova conquista | Local (sob demanda) |
 | 6 | 📊 Subiu no ranking | `ranking` | Após scan, posição melhorou | Local (sob demanda) |
-| 7 | 📊 Caiu no ranking | `ranking` | Ao abrir o app, posição caiu | Local (sob demanda) |
+| 7 | 📊 Alguém te ultrapassou | `ranking` | Outro aluno escaneia e te passa | **Remoto (push do backend)** |
 | 8 | 📈 Resumo semanal | `weekly` | Segunda-feira às 9h | Local (recorrente) |
 | 9 | 👋 Reengajamento | `reengagement` | 3 dias sem abrir o app | Local (agendado) |
-| 10 | 🎉 Marco de pontos atingido | `milestones` | Após scan, cruzou um limiar | Local (sob demanda) |
+| 10 | 🎉 Marco atingido | `milestones` | Após scan, cruzou limiar de pontos | Local (sob demanda) |
 
 ## Arquitetura
 
 ```
-src/
-├── types/
-│   └── notifications.ts              # Definições de tipos e metadados de categoria
-├── services/
-│   └── notificationService.ts        # Wrapper da API de notificações
-├── store/
-│   └── useNotificationStore.ts       # Store Zustand (preferências e rastreamento de estado)
-├── hooks/
-│   └── useNotificationScheduler.ts   # Hook de lógica de agendamento
-├── screens/student/Config/
-│   └── components/
-│       └── NotificationToggle.tsx    # Componente de toggle nas configurações
-App.tsx                               # Inicialização na raiz
+Frontend (React Native)
+├── src/types/notifications.ts          # Tipos e metadados
+├── src/services/notificationService.ts # API local + registro de token
+├── src/store/useNotificationStore.ts   # Preferências (Zustand + SecureStore)
+├── src/hooks/useNotificationScheduler.ts # Lógica de agendamento
+├── src/screens/student/Config/components/NotificationToggle.tsx
+└── App.tsx                             # Inicialização
+
+Backend (Fastify + Prisma)
+├── prisma/schema.prisma               # Model PushToken
+├── src/services/pushNotificationService.ts # Expo Push API + ranking detection
+├── src/controllers/notificationController.ts # POST /notifications/register
+├── src/routes/notificationRoutes.ts
+└── src/controllers/scanController.ts   # Ranking change notifications
 ```
 
-## Como funciona
+## Fluxo completo
 
-### Inicialização do app (`App.tsx`)
+### 1. Inicialização do app (`App.tsx`)
 1. Rehidrata preferências de notificação do SecureStore
 2. Configura o canal de notificação no Android
 3. Solicita permissão para notificações push
-4. Salva o token Expo push
-5. Configura exibição de notificações em primeiro plano
-6. Escuta respostas a toques em notificações
+4. Salva o token Expo push localmente
+5. **Registra o token no backend** (`POST /notifications/register`)
+6. Escuta toques em notificações
 
-### Ao carregar a tela inicial (`useHomeData.ts`)
-1. Busca dados do usuário (streak, ranking, pontos)
-2. Chama `onAppOpen()`, que:
-   - Verifica se a sequência foi perdida → dispara notificação "Sequência perdida"
-   - Compara a posição salva no ranking → dispara "Caiu no ranking" se necessário
-   - Reagenda todas as notificações recorrentes (reinicia o timer de reengajamento)
+### 2. Ao carregar a Home (`useHomeData.ts`)
+Chama `onAppOpen()`, que:
+- Verifica se o streak foi perdido → dispara notificação local
+- Compara posição salva no ranking → dispara "Caiu no ranking" se caiu
+- Reagenda todas as notificações recorrentes (reinicia reengajamento)
 
-### Ao concluir um scan (`useScanResultData.ts`)
-1. Recebe o resultado do scan com conquistas, pontos e streak
-2. Chama `onScanCompleted()`, que:
-   - Dispara "Conquista desbloqueada" para cada nova conquista
-   - Verifica se os pontos cruzaram um marco (50, 100, 250, 500, 1000, 2500, 5000, 10000)
-   - Verifica o progresso de missões → dispara "Missão quase concluída" se ≥ 80%
-   - Compara a posição no ranking → dispara "Subiu no ranking" se melhorou
-   - Reagenda notificações recorrentes (reinicia os timers de reengajamento e streak)
+### 3. Ao concluir um scan (`useScanResultData.ts`)
+Chama `onScanCompleted()`, que:
+- Dispara "Conquista desbloqueada" para cada nova conquista
+- Verifica marcos de pontos (50, 100, 250, 500, 1000, 2500, 5000, 10000)
+- Verifica missão → "Missão quase completa" se ≥ 80%
+- Compara ranking → "Subiu no ranking" se melhorou
 
-### Preferências do usuário (`ConfigScreen`)
-- O usuário pode ativar/desativar cada categoria individualmente
-- Preferências persistem via SecureStore
-- Toda a lógica de notificações verifica as preferências antes de disparar
+### 4. Notificação remota de ranking (`scanController.ts` no backend)
+Quando um aluno escaneia:
+1. Backend calcula a nova posição no ranking da turma
+2. Detecta quais alunos foram ultrapassados (diferença ≤ 10 pontos)
+3. Busca os push tokens desses alunos no banco
+4. Envia push notification em tempo real via Expo Push API
+5. **O aluno recebe no celular mesmo com o app fechado** ✅
+
+### 5. Preferências do usuário (`ConfigScreen`)
+- Toggles por categoria (streak, missões, ranking, conquistas, etc.)
+- Persistem via SecureStore
+- Toda lógica verifica preferências antes de disparar
 
 ## Macete de reengajamento
 
-A notificação de reengajamento usa uma abordagem inteligente:
-- Uma notificação é agendada para daqui a 3 dias
-- Toda vez que o usuário abre o app, ela é cancelada e reagendada
-- Se o usuário ficar 3 dias sem abrir o app, a notificação dispara automaticamente
+- Agenda notificação local para daqui 3 dias
+- Cada vez que o usuário abre o app, cancela e reagenda
+- Se não abrir em 3 dias → dispara automaticamente
 
 ## Marcos de pontos
 
-Notificações são disparadas ao cruzar os seguintes limiares:
 `50 → 100 → 250 → 500 → 1000 → 2500 → 5000 → 10000`
 
-## Integração futura com backend
+## Endpoints do backend
 
-Para migrar para notificações push remotas em tempo real:
-
-1. **Salvar tokens push**: criar endpoint `POST /notifications/register` que salva o token Expo push por usuário
-2. **Disparar em eventos**: quando o scan de outro usuário alterar o ranking, usar a Expo Push API para notificar os afetados
-3. **Cron semanal**: adicionar um cron job que compila estatísticas semanais e envia resumos personalizados
-4. **O frontend já está pronto**: o `expoPushToken` já é salvo no store e as categorias/tipos de notificação estão definidos
+| Método | Rota | Descrição |
+|---|---|---|
+| POST | `/notifications/register` | Registra/atualiza token push do usuário |
+| POST | `/scan` | (atualizado) Retorna `turmaRankPosition` e envia push para afetados |
