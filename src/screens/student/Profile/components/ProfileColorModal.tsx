@@ -1,7 +1,7 @@
-import { View, Text, TouchableOpacity, Modal, StyleSheet, Animated } from "react-native";
-import { IconCheck } from "../../../components/icons";
-import { useProfileThemeStore, PROFILE_COLOR_OPTIONS } from "../../../store/useProfileThemeStore";
-import { useProfileColors } from "../../../theme/useProfileColors";
+import { View, Text, Pressable, Modal, StyleSheet } from "react-native";
+import { IconCheck } from "../../../../components/icons";
+import { useProfileThemeStore, PROFILE_COLOR_OPTIONS } from "../../../../store/useProfileThemeStore";
+import { useProfileColors } from "../../../../theme/useProfileColors";
 
 interface Props {
   visible: boolean;
@@ -19,8 +19,8 @@ export function ProfileColorModal({ visible, onClose }: Props) {
 
   return (
     <Modal visible={visible} transparent animationType="fade" onRequestClose={onClose}>
-      <View style={styles.overlay}>
-        <View style={[styles.container, { backgroundColor: themeColors.cardBg }]}>
+      <Pressable style={styles.overlay} onPress={onClose}>
+        <Pressable style={[styles.container, { backgroundColor: themeColors.cardBg }]} onPress={() => {}}>
           <Text style={[styles.title, { color: themeColors.textColor }]}>
             Cor do Perfil
           </Text>
@@ -29,28 +29,29 @@ export function ProfileColorModal({ visible, onClose }: Props) {
           </Text>
 
           <View style={styles.grid}>
-            {PROFILE_COLOR_OPTIONS.map((option) => (
-              <TouchableOpacity
-                key={option.id}
-                style={[styles.colorItem, { backgroundColor: option.value }]}
-                onPress={() => handleSelectColor(option.value)}
-                activeOpacity={0.8}
-              >
-                {activeColor === option.value && (
-                  <IconCheck color="#ffffff" size={24} />
-                )}
-              </TouchableOpacity>
-            ))}
+            {PROFILE_COLOR_OPTIONS.map((option) => {
+              const isActive = activeColor === option.value;
+              return (
+                <Pressable
+                  key={option.id}
+                  onPress={() => handleSelectColor(option.value)}
+                >
+                  <View style={[styles.colorItem, { backgroundColor: option.value }]}>  
+                    {isActive && <IconCheck color="#ffffff" size={24} />}
+                  </View>
+                </Pressable>
+              );
+            })}
           </View>
 
-          <TouchableOpacity
+          <Pressable
             style={[styles.closeBtn, { borderColor: themeColors.dividerColor }]}
             onPress={onClose}
           >
             <Text style={[styles.closeBtnText, { color: themeColors.textColor }]}>Fechar</Text>
-          </TouchableOpacity>
-        </View>
-      </View>
+          </Pressable>
+        </Pressable>
+      </Pressable>
     </Modal>
   );
 }

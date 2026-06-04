@@ -38,3 +38,4 @@ export { IconLeaf }        from "./IconLeaf";
 export { IconIdBadge }     from "./IconIdBadge";
 export { IconClasses }     from "./IconClasses";
 export { IconStudents }    from "./IconStudents";
+export { IconPalette }     from "./IconPalette";

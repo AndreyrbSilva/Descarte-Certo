@@ -115,4 +115,17 @@ export const styles = StyleSheet.create({
   xpBarBg:   { width: "100%", height: 6, borderRadius: 99, backgroundColor: "rgba(255,255,255,0.25)", overflow: "hidden" },
   xpBarFill: { height: 6, borderRadius: 99, backgroundColor: "#fff" },
   xpLabel:   { fontSize: 11, color: "rgba(255,255,255,0.85)", fontWeight: "600" },
+  
+  colorItem: {
+    width: 48,
+    height: 48,
+    borderRadius: 24,
+    alignItems: "center",
+    justifyContent: "center",
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.15,
+    shadowRadius: 4,
+    elevation: 3,
+  },
 });

@@ -1,10 +1,11 @@
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import {
   View, Text, TouchableOpacity,
-  Animated, Image, Modal, ActivityIndicator,
+  Animated, Image, Modal, ActivityIndicator, StyleSheet,
 } from "react-native";
 import { ScrollView } from "react-native-gesture-handler";
 import { useNavigation } from "@react-navigation/native";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { useProfileColors } from "../../../theme/useProfileColors";
 import { styles } from "./profileStyles";
@@ -12,17 +13,15 @@ import { FocusAwareStatusBar } from "../../../components/layout/FocusAwareStatus
 import {
   IconTrophy, IconTrend, IconRecycle, IconLogout, IconCamera,
   IconStar, IconCrown, IconMedal, IconFlame, IconTarget,
-  IconShield, IconDiamond, IconRainbow, IconLightning, IconShieldCheck, IconCheck,
-  IconPalette,
+  IconShield, IconDiamond, IconRainbow, IconLightning, IconShieldCheck, IconCheck, IconPalette,
 } from "../../../components/icons";
 import { getTypeColor } from "../../../theme/useTrophyColors";
 import { AnimatedHeroHeader } from "../../../components/layout/AnimatedHeroHeader";
 import { useProfileThemeStore, PROFILE_COLOR_OPTIONS } from "../../../store/useProfileThemeStore";
-import { ProfileColorModal } from "./components/ProfileColorModal";
 
 import { useProfileData, FILTERS, formatDate } from "./hooks/useProfileData";
 
-const DEFAULT_GREEN = "#22c55e";
+const GREEN = "#22c55e";
 const ORANGE = "#f97316";
 const BLUE = "#3b82f6";
 
@@ -33,7 +32,7 @@ const CATEGORY_LABEL: Record<string, string> = {
 
 const CATEGORY_COLOR: Record<string, string> = {
   plastico: "#ef4444", papel: "#3b82f6",
-  metal: "#eab308", organico: "#92400e", vidro: DEFAULT_GREEN,
+  metal: "#eab308", organico: "#92400e", vidro: GREEN,
 };
 
 export function ProfileTrophyIcon({ icon, color, size }: { icon: string; color: string; size: number }) {
@@ -102,13 +101,14 @@ function useListAnim(filterKey: string) {
 
 export function ProfileScreen() {
   const navigation = useNavigation<any>();
+  const insets = useSafeAreaInsets();
   const colors = useProfileColors();
   const data = useProfileData();
   const borderColor = colors.dividerColor;
 
-  const { activeColor } = useProfileThemeStore();
+  const { activeColor, setProfileColor } = useProfileThemeStore();
   const themeGradient = PROFILE_COLOR_OPTIONS.find(o => o.value === activeColor)?.colors || ["#16a34a", "#22c55e", "#4ade80"];
-  const [showColorModal, setShowColorModal] = React.useState(false);
+  const [showColorPicker, setShowColorPicker] = useState(false);
 
   const chipAnims = useChipAnims(data.timeFilter, colors.chipBg, colors.dividerColor);
   const listAnim = useListAnim(data.timeFilter);
@@ -128,8 +128,8 @@ export function ProfileScreen() {
           colors={themeGradient}
         >
           <TouchableOpacity 
-            style={{ position: 'absolute', top: 20, right: 20, zIndex: 10 }} 
-            onPress={() => setShowColorModal(true)}
+            style={{ position: 'absolute', top: Math.max(insets.top + 10, 20), right: 20, zIndex: 10 }} 
+            onPress={() => setShowColorPicker(true)}
             activeOpacity={0.7}
           >
             <IconPalette color="#ffffff" size={24} />
@@ -263,8 +263,8 @@ export function ProfileScreen() {
             onPress={() => navigation.navigate("Trophies")}
             activeOpacity={0.7}
           >
-            <Text style={{ color: activeColor, fontSize: 13, fontWeight: "700" }}>Ver todos </Text>
-            <Text style={{ color: activeColor, fontSize: 12 }}>›</Text>
+            <Text style={{ color: GREEN, fontSize: 13, fontWeight: "700" }}>Ver todos </Text>
+            <Text style={{ color: GREEN, fontSize: 12 }}>›</Text>
           </TouchableOpacity>
         </Animated.View>
 
@@ -370,7 +370,39 @@ export function ProfileScreen() {
         </View>
       </Modal>
 
-      <ProfileColorModal visible={showColorModal} onClose={() => setShowColorModal(false)} />
+      <Modal visible={showColorPicker} transparent animationType="fade" onRequestClose={() => setShowColorPicker(false)}>
+        <View style={{ flex: 1, backgroundColor: "rgba(0,0,0,0.5)", alignItems: "center", justifyContent: "center", padding: 24 }}>
+          <View style={[{ width: "100%", borderRadius: 24, padding: 24, alignItems: "center" }, { backgroundColor: colors.cardBg }]}>
+            <Text style={{ fontSize: 20, fontWeight: "800", marginBottom: 8, color: colors.textColor }}>
+              Cor do Perfil
+            </Text>
+            <Text style={{ fontSize: 14, textAlign: "center", marginBottom: 24, color: colors.subTextColor }}>
+              Escolha uma cor para personalizar o cabeçalho e os ícones do seu perfil.
+            </Text>
+            <View style={{ flexDirection: "row", flexWrap: "wrap", justifyContent: "center", gap: 16, marginBottom: 24 }}>
+              {PROFILE_COLOR_OPTIONS.map((option) => (
+                <TouchableOpacity
+                  key={option.id}
+                  style={StyleSheet.flatten([
+                    styles.colorItem, 
+                    { backgroundColor: option.value }
+                  ])}
+                  onPress={() => { setProfileColor(option.value); setShowColorPicker(false); }}
+                  activeOpacity={0.8}
+                >
+                  {activeColor === option.value && <IconCheck color="#ffffff" size={24} />}
+                </TouchableOpacity>
+              ))}
+            </View>
+            <TouchableOpacity
+              style={{ width: "100%", paddingVertical: 14, borderRadius: 14, borderWidth: 1.5, borderColor: colors.dividerColor, alignItems: "center" }}
+              onPress={() => setShowColorPicker(false)}
+            >
+              <Text style={{ fontWeight: "700", fontSize: 15, color: colors.textColor }}>Fechar</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      </Modal>
     </View>
   );
 }
