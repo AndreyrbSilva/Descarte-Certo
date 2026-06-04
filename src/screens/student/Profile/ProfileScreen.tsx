@@ -1,10 +1,11 @@
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import {
   View, Text, TouchableOpacity,
-  Animated, Image, Modal, ActivityIndicator,
+  Animated, Image, Modal, ActivityIndicator, StyleSheet,
 } from "react-native";
 import { ScrollView } from "react-native-gesture-handler";
 import { useNavigation } from "@react-navigation/native";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { useProfileColors } from "../../../theme/useProfileColors";
 import { styles } from "./profileStyles";
@@ -12,12 +13,14 @@ import { FocusAwareStatusBar } from "../../../components/layout/FocusAwareStatus
 import {
   IconTrophy, IconTrend, IconRecycle, IconLogout, IconCamera,
   IconStar, IconCrown, IconMedal, IconFlame, IconTarget,
-  IconShield, IconDiamond, IconRainbow, IconLightning, IconShieldCheck, IconCheck,
+  IconShield, IconDiamond, IconRainbow, IconLightning, IconShieldCheck, IconCheck, IconPalette,
 } from "../../../components/icons";
 import { getTypeColor } from "../../../theme/useTrophyColors";
 import { AnimatedHeroHeader } from "../../../components/layout/AnimatedHeroHeader";
+import { useProfileThemeStore, PROFILE_COLOR_OPTIONS } from "../../../store/useProfileThemeStore";
 
 import { useProfileData, FILTERS, formatDate } from "./hooks/useProfileData";
+import { updateProfileColor } from "../../../services/profileService";
 
 const GREEN = "#22c55e";
 const ORANGE = "#f97316";
@@ -99,23 +102,39 @@ function useListAnim(filterKey: string) {
 
 export function ProfileScreen() {
   const navigation = useNavigation<any>();
+  const insets = useSafeAreaInsets();
   const colors = useProfileColors();
   const data = useProfileData();
   const borderColor = colors.dividerColor;
+
+  const { activeColor, setProfileColor } = useProfileThemeStore();
+  const themeGradient = PROFILE_COLOR_OPTIONS.find(o => o.value === activeColor)?.colors || ["#16a34a", "#22c55e", "#4ade80"];
+  const [showColorPicker, setShowColorPicker] = useState(false);
 
   const chipAnims = useChipAnims(data.timeFilter, colors.chipBg, colors.dividerColor);
   const listAnim = useListAnim(data.timeFilter);
 
   return (
     <View style={[styles.root, { backgroundColor: colors.bg }]}>
-      <FocusAwareStatusBar barStyle="light-content" backgroundColor={GREEN} />
+      <FocusAwareStatusBar barStyle="light-content" backgroundColor={activeColor} />
 
       <ScrollView
         contentContainerStyle={[styles.scroll, { paddingBottom: 120 }]}
         showsVerticalScrollIndicator={false}
       >
 
-        <AnimatedHeroHeader style={[styles.header, { opacity: data.headerAnim }]}>
+        <AnimatedHeroHeader 
+          style={[styles.header, { opacity: data.headerAnim }]}
+          baseColor={activeColor}
+          colors={themeGradient}
+        >
+          <TouchableOpacity 
+            style={{ position: 'absolute', top: Math.max(insets.top + 10, 20), right: 20, zIndex: 10 }} 
+            onPress={() => setShowColorPicker(true)}
+            activeOpacity={0.7}
+          >
+            <IconPalette color="#ffffff" size={24} />
+          </TouchableOpacity>
           <TouchableOpacity onPress={data.handlePickPhoto} activeOpacity={0.85} disabled={data.uploadingPhoto} style={{ alignSelf: 'center' }}>
               <View
                 style={{
@@ -136,7 +155,7 @@ export function ProfileScreen() {
                   )}
                 </View>
               </View>
-              <View style={styles.cameraIcon}>
+              <View style={[styles.cameraIcon, { backgroundColor: activeColor }]}>
                 <IconCamera color="#fff" size={14} />
               </View>
             </TouchableOpacity>
@@ -260,8 +279,8 @@ export function ProfileScreen() {
           <View style={styles.filterRow}>
             {FILTERS.map((f) => {
               const anim = chipAnims[f.key];
-              const bgColor = anim.interpolate({ inputRange: [0, 1], outputRange: [colors.chipBg, GREEN] });
-              const bColor = anim.interpolate({ inputRange: [0, 1], outputRange: [colors.dividerColor, GREEN] });
+              const bgColor = anim.interpolate({ inputRange: [0, 1], outputRange: [colors.chipBg, activeColor] });
+              const bColor = anim.interpolate({ inputRange: [0, 1], outputRange: [colors.dividerColor, activeColor] });
               const textColor = anim.interpolate({ inputRange: [0, 1], outputRange: [colors.subTextColor, "#ffffff"] });
 
               return (
@@ -303,7 +322,7 @@ export function ProfileScreen() {
                         {formatDate(scan.createdAt)}
                       </Text>
                     </View>
-                    <Text style={[styles.scanPoints, { color: GREEN }]}>+{scan.points}</Text>
+                    <Text style={[styles.scanPoints, { color: activeColor }]}>+{scan.points}</Text>
                   </View>
                   {i < data.visibleScans.length - 1 && (
                     <View style={[styles.divider, { backgroundColor: colors.dividerColor }]} />
@@ -313,7 +332,7 @@ export function ProfileScreen() {
 
               {data.hasMore && (
                 <TouchableOpacity onPress={data.handleExpand} activeOpacity={0.7} style={styles.expandBtn}>
-                  <Animated.Text style={[styles.expandBtnText, { color: GREEN, opacity: data.expandAnim }]}>
+                  <Animated.Text style={[styles.expandBtnText, { color: activeColor, opacity: data.expandAnim }]}>
                     {data.expanded ? "Mostrar menos" : `Mostrar tudo (${data.filteredScans.length})`}
                   </Animated.Text>
                 </TouchableOpacity>
@@ -347,6 +366,48 @@ export function ProfileScreen() {
               onPress={() => data.setShowLogout(false)}
             >
               <Text style={{ fontWeight: "700", fontSize: 15, color: colors.textColor }}>Cancelar</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      </Modal>
+
+      <Modal visible={showColorPicker} transparent animationType="fade" onRequestClose={() => setShowColorPicker(false)}>
+        <View style={{ flex: 1, backgroundColor: "rgba(0,0,0,0.5)", alignItems: "center", justifyContent: "center", padding: 24 }}>
+          <View style={[{ width: "100%", borderRadius: 24, padding: 24, alignItems: "center" }, { backgroundColor: colors.cardBg }]}>
+            <Text style={{ fontSize: 20, fontWeight: "800", marginBottom: 8, color: colors.textColor }}>
+              Cor do Perfil
+            </Text>
+            <Text style={{ fontSize: 14, textAlign: "center", marginBottom: 24, color: colors.subTextColor }}>
+              Escolha uma cor para personalizar o cabeçalho e os ícones do seu perfil.
+            </Text>
+            <View style={{ flexDirection: "row", flexWrap: "wrap", justifyContent: "center", gap: 16, marginBottom: 24 }}>
+              {PROFILE_COLOR_OPTIONS.map((option) => (
+                <TouchableOpacity
+                  key={option.id}
+                  style={StyleSheet.flatten([
+                    styles.colorItem, 
+                    { backgroundColor: option.value }
+                  ])}
+                  onPress={async () => { 
+                    setProfileColor(option.value); 
+                    setShowColorPicker(false);
+                    try {
+                      await updateProfileColor(option.value);
+                    } catch (error) {
+                      console.log("Erro ao salvar cor no servidor:", error);
+                    }
+                  }}
+                  activeOpacity={0.8}
+                >
+                  {activeColor === option.value && <IconCheck color="#ffffff" size={24} />}
+                </TouchableOpacity>
+              ))}
+            </View>
+            <TouchableOpacity
+              style={{ width: "100%", paddingVertical: 14, borderRadius: 14, borderWidth: 1.5, borderColor: colors.dividerColor, alignItems: "center" }}
+              onPress={() => setShowColorPicker(false)}
+            >
+              <Text style={{ fontWeight: "700", fontSize: 15, color: colors.textColor }}>Fechar</Text>
             </TouchableOpacity>
           </View>
         </View>

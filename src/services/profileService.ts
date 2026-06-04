@@ -45,6 +45,16 @@ export async function uploadAvatar(localUri: string): Promise<string> {
   return data.publicUrl;
 }
 
+export async function updateProfileColor(color: string) {
+  const { data } = await api.patch("/auth/color", { color });
+  
+  const updatedUser = { ...useAuthStore.getState().user, profileColor: data.profileColor };
+  useAuthStore.getState().setUser(updatedUser as any);
+  await SecureStore.setItemAsync("user", JSON.stringify(updatedUser));
+  
+  return data.profileColor;
+}
+
 export async function fetchPublicProfile(userId: string) {
   const res = await api.get(`/profile/${userId}`);
   return {

@@ -4,16 +4,16 @@ export default {
   expo: {
     name: "DescarteCerto",
     slug: "descarte-certo",
-    version: "1.3.0",
+    version: "1.4.0",
     orientation: "portrait",
     updates: {
       fallbackToCacheTimeout: 0,
     },
-    icon: "./assets/logo.png",
+    icon: "./assets/iconDC/playstore.png",
     userInterfaceStyle: "automatic",
     newArchEnabled: true,
     splash: {
-      image: "./assets/logo.png",
+      image: "./assets/iconDC/playstore.png",
       resizeMode: "contain",
       backgroundColor: "#064e3b",
     },
@@ -23,14 +23,14 @@ export default {
     android: {
       package: "com.dreeam.descartecerto",
       adaptiveIcon: {
-        foregroundImage: "./assets/logo.png",
+        foregroundImage: "./assets/iconDC/playstore.png",
         backgroundColor: "#064e3b",
       },
       edgeToEdgeEnabled: false,
       predictiveBackGestureEnabled: false,
     },
     web: {
-      favicon: "./assets/logo.png",
+      favicon: "./assets/iconDC/playstore.png",
     },
     plugins: [
       "expo-secure-store",
@@ -49,7 +49,7 @@ export default {
       [
         "expo-notifications",
         {
-          icon: "./assets/logo.png",
+          icon: "./assets/iconDC/playstore.png",
           color: "#064e3b",
           defaultChannel: "default",
         },

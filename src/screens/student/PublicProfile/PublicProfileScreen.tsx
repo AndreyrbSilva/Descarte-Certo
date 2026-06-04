@@ -14,6 +14,7 @@ import {
 import { ProfileTrophyIcon } from "../Profile/ProfileScreen";
 import { getTypeColor } from "../../../theme/useTrophyColors";
 import { AnimatedHeroHeader } from "../../../components/layout/AnimatedHeroHeader";
+import { PROFILE_COLOR_OPTIONS } from "../../../store/useProfileThemeStore";
 
 import { usePublicProfileData, FILTERS, formatDate } from "./hooks/usePublicProfileData";
 
@@ -89,15 +90,22 @@ export function PublicProfileScreen() {
   const listAnim  = useListAnim(d.timeFilter);
   const flameColors = getStreakColors(d.streak);
 
+  const activeColor = d.profileUser?.profileColor || GREEN;
+  const themeGradient = PROFILE_COLOR_OPTIONS.find(o => o.value === activeColor)?.colors || ["#16a34a", "#22c55e", "#4ade80"];
+
   return (
     <View style={[styles.root, { backgroundColor: colors.bg }]}>
-      <FocusAwareStatusBar barStyle="light-content" backgroundColor={GREEN} />
+      <FocusAwareStatusBar barStyle="light-content" backgroundColor={activeColor} />
 
       <ScrollView
         contentContainerStyle={[styles.scroll, { paddingBottom: 90 }]}
         showsVerticalScrollIndicator={false}
       >
-        <AnimatedHeroHeader style={[styles.header, { opacity: d.headerAnim }]}>
+        <AnimatedHeroHeader 
+          style={[styles.header, { opacity: d.headerAnim }]}
+          baseColor={activeColor}
+          colors={themeGradient}
+        >
           {/* botão voltar */}
             <TouchableOpacity
               onPress={() => d.navigation.goBack()}
@@ -243,8 +251,8 @@ export function PublicProfileScreen() {
           <View style={styles.filterRow}>
             {FILTERS.map((f) => {
               const anim = chipAnims[f.key];
-              const bgColor = anim.interpolate({ inputRange: [0, 1], outputRange: [colors.chipBg, GREEN] });
-              const borderColor = anim.interpolate({ inputRange: [0, 1], outputRange: [colors.dividerColor, GREEN] });
+              const bgColor = anim.interpolate({ inputRange: [0, 1], outputRange: [colors.chipBg, activeColor] });
+              const borderColor = anim.interpolate({ inputRange: [0, 1], outputRange: [colors.dividerColor, activeColor] });
               const textColor = anim.interpolate({ inputRange: [0, 1], outputRange: [colors.subTextColor, "#ffffff"] });
 
               return (
@@ -279,7 +287,7 @@ export function PublicProfileScreen() {
                         {formatDate(scan.createdAt)}
                       </Text>
                     </View>
-                    <Text style={[styles.scanPoints, { color: GREEN }]}>+{scan.points}</Text>
+                    <Text style={[styles.scanPoints, { color: activeColor }]}>+{scan.points}</Text>
                   </View>
                   {i < d.visibleScans.length - 1 && (
                     <View style={[styles.divider, { backgroundColor: colors.dividerColor }]} />
@@ -289,7 +297,7 @@ export function PublicProfileScreen() {
 
               {d.hasMore && (
                 <TouchableOpacity onPress={d.handleExpand} activeOpacity={0.7} style={styles.expandBtn}>
-                  <Animated.Text style={[styles.expandBtnText, { color: GREEN, opacity: d.expandAnim }]}>
+                  <Animated.Text style={[styles.expandBtnText, { color: activeColor, opacity: d.expandAnim }]}>
                     {d.expanded ? "Mostrar menos" : `Mostrar tudo (${d.filteredScans.length})`}
                   </Animated.Text>
                 </TouchableOpacity>

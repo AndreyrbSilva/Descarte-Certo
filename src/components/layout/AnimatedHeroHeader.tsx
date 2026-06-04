@@ -9,15 +9,17 @@ const { width } = Dimensions.get("window");
 type Props = ViewProps & {
   children: ReactNode;
   hasCurve?: boolean;
+  colors?: string[];
+  baseColor?: string;
 };
 
 // Um SVG de curva para usar na base (opcional)
-function CurveBottom() {
+function CurveBottom({ color = "#22c55e" }: { color?: string }) {
   return (
     <View style={styles.curveWrapper}>
       <Svg width={width} height={40} viewBox={`0 0 ${width} 40`} preserveAspectRatio="none">
         <Path d={`M0,0 Q${width / 2},40 ${width},0 L${width},40 L0,40 Z`} fill="transparent" />
-        <Path d={`M0,0 Q${width / 2},40 ${width},0 L0,0 Z`} fill="#22c55e" />
+        <Path d={`M0,0 Q${width / 2},40 ${width},0 L0,0 Z`} fill={color} />
       </Svg>
     </View>
   );
@@ -84,12 +86,17 @@ function FloatingPattern() {
   );
 }
 
-export function AnimatedHeroHeader({ children, style, hasCurve = false, ...rest }: Props) {
+export function AnimatedHeroHeader({ 
+  children, style, hasCurve = false, 
+  colors = ["#16a34a", "#22c55e", "#4ade80"],
+  baseColor = "#22c55e",
+  ...rest 
+}: Props) {
   return (
     <Animated.View style={[styles.container, style]} {...rest}>
       {/* Background gradiente */}
       <LinearGradient
-        colors={["#16a34a", "#22c55e", "#4ade80"]} // Tons de verde modernos
+        colors={colors}
         start={{ x: 0, y: 0 }}
         end={{ x: 1, y: 1 }}
         style={StyleSheet.absoluteFillObject}
@@ -99,7 +106,7 @@ export function AnimatedHeroHeader({ children, style, hasCurve = false, ...rest 
       <FloatingPattern />
       
       {/* Curva inferior */}
-      {hasCurve && <CurveBottom />}
+      {hasCurve && <CurveBottom color={baseColor} />}
 
       {/* Conteúdo principal */}
       {children}

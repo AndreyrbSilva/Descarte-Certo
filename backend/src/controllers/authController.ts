@@ -42,6 +42,10 @@ const avatarSchema = z.object({
   avatarUrl: z.string().url("URL inválida."),
 });
 
+const colorSchema = z.object({
+  color: z.string().regex(/^#[0-9a-fA-F]{6}$/, "Cor inválida."),
+});
+
 // ─── auth base ───────────────────────────────────────────────────────────────
 
 export async function register(req: FastifyRequest, reply: FastifyReply) {
@@ -106,6 +110,7 @@ export async function login(req: FastifyRequest, reply: FastifyReply) {
       turma:            user.turma,
       role:             user.role,
       avatarUrl:        user.avatarUrl,
+      profileColor:     user.profileColor,
       emailVerified:    user.emailVerified,
       twoFactorEnabled: user.twoFactorEnabled,
     },
@@ -146,6 +151,22 @@ export async function updateAvatar(req: FastifyRequest, reply: FastifyReply) {
   return reply.send({ avatarUrl: user.avatarUrl });
 }
 
+export async function updateProfileColor(req: FastifyRequest, reply: FastifyReply) {
+  const userId = (req as any).userId;
+
+  const parsed = colorSchema.safeParse(req.body);
+  if (!parsed.success) {
+    return reply.status(400).send({ error: parsed.error.issues[0]?.message ?? "Dados inválidos." });
+  }
+
+  const user = await prisma.user.update({
+    where: { id: userId },
+    data:  { profileColor: parsed.data.color },
+  });
+
+  return reply.send({ profileColor: user.profileColor });
+}
+
 // GET /auth/me — retorna dados atuais do usuário
 export async function getMe(req: FastifyRequest, reply: FastifyReply) {
   const userId = await getUserFromToken(req, reply);
@@ -155,7 +176,7 @@ export async function getMe(req: FastifyRequest, reply: FastifyReply) {
     where:  { id: userId },
     select: {
       id: true, name: true, email: true, turma: true, role: true,
-      avatarUrl: true, emailVerified: true, twoFactorEnabled: true,
+      avatarUrl: true, profileColor: true, emailVerified: true, twoFactorEnabled: true,
     },
   });
 
