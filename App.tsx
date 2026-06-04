@@ -9,6 +9,7 @@ import { AppNavigator }  from "./src/navigation/index";
 import {
   setupNotificationChannel,
   registerForPushNotifications,
+  registerPushTokenOnBackend,
   setForegroundHandler,
 } from "./src/services/notificationService";
 import { useNotificationStore } from "./src/store/useNotificationStore";
@@ -30,6 +31,8 @@ export default function App() {
     registerForPushNotifications().then((token) => {
       if (token) {
         useNotificationStore.getState().setExpoPushToken(token);
+        // Also register on backend for remote push notifications
+        registerPushTokenOnBackend(token);
       }
     });
 

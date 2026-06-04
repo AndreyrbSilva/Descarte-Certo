@@ -116,3 +116,16 @@ export function secondsTrigger(seconds: number): Notifications.NotificationTrigg
     repeats: false,
   };
 }
+
+// ── Backend push token registration ──────────────────────
+import { api } from "./api";
+
+/** Send the Expo push token to the backend so it can send remote notifications */
+export async function registerPushTokenOnBackend(token: string): Promise<void> {
+  try {
+    await api.post("/notifications/register", { token });
+    console.log("[Notifications] Push token registered on backend.");
+  } catch (err) {
+    console.warn("[Notifications] Failed to register push token on backend:", err);
+  }
+}

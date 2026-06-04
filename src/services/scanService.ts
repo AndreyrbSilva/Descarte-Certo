@@ -26,6 +26,8 @@ export interface ScanResult {
   scanId: string;
   streak: number;
   newAchievements: NewAchievement[];
+  turmaRankPosition?: number | null;
+  mission?: { progress: number; target: number; completed: boolean } | null;
   imageUri?: string;
 }
 
@@ -71,6 +73,8 @@ export async function submitScan(imageUri: string, base64Str?: string): Promise<
     scanId: response.data.scan.id,
     streak: response.data.streak,
     newAchievements: (response.data.newAchievements ?? []) as NewAchievement[],
+    turmaRankPosition: response.data.turmaRankPosition ?? null,
+    mission: response.data.mission ?? null,
     imageUri,
   };
 }

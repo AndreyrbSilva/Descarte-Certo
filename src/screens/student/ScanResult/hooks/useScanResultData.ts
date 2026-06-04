@@ -173,6 +173,9 @@ export function useScanResultData() {
           streak:          result.streak ?? 0,
           totalPoints:     result.totalPoints ?? 0,
           newAchievements: result.newAchievements ?? [],
+          newRankPosition: result.turmaRankPosition ?? undefined,
+          missionProgress: result.mission?.progress ?? undefined,
+          missionTarget:   result.mission?.target ?? undefined,
         });
       }
     });
