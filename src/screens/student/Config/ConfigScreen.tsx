@@ -15,13 +15,17 @@ import {
   IconResetPass, IconShield, IconSecureLock,
 } from "../../../components/icons";
 
-import { useConfigData }  from "./hooks/useConfigData";
-import { ThemeToggle }    from "./components/ThemeToggle";
-import { ConfigItem }     from "./components/ConfigItem";
-import { CodeModal }      from "./modals/CodeModal";
-import { InputModal }     from "./modals/InputModal";
-import { QRModal }        from "./modals/QRModal";
-import { LogoutModal }    from "./modals/LogoutModal";
+import { useConfigData }         from "./hooks/useConfigData";
+import { ThemeToggle }            from "./components/ThemeToggle";
+import { NotificationToggle }     from "./components/NotificationToggle";
+import { ConfigItem }             from "./components/ConfigItem";
+import { CodeModal }              from "./modals/CodeModal";
+import { InputModal }             from "./modals/InputModal";
+import { QRModal }                from "./modals/QRModal";
+import { LogoutModal }            from "./modals/LogoutModal";
+import { useNotificationStore }   from "../../../store/useNotificationStore";
+import { NOTIFICATION_CATEGORIES_META } from "../../../types/notifications";
+import type { NotificationCategory }    from "../../../types/notifications";
 
 export function ConfigScreen() {
   const { isDark: globalIsDark, setTheme } = useTheme();
@@ -36,8 +40,14 @@ export function ConfigScreen() {
 
   const data = useConfigData(colors);
 
+  const { preferences, setPreference } = useNotificationStore();
+
   function handleToggleTheme() {
     setTheme(!globalIsDark ? "dark" : "light");
+  }
+
+  function handleToggleNotification(category: NotificationCategory, value: boolean) {
+    setPreference(category, value);
   }
 
   return (
@@ -135,6 +145,27 @@ export function ConfigScreen() {
             onPress={data.twoFactorEnabled ? () => data.setModal("2fa-disable") : data.handleSetup2FA}
             aColors={aColors}
           />
+        </Animated.View>
+
+        {/* SEÇÃO NOTIFICAÇÕES */}
+        <Animated.Text style={[styles.sectionLabel, { color: aColors.sectionLabel }]}>Notificações</Animated.Text>
+        <Animated.View style={[styles.section, { backgroundColor: aColors.cardBg }]}>
+          {NOTIFICATION_CATEGORIES_META.map((cat, index) => (
+            <View key={cat.key}>
+              {index > 0 && (
+                <Animated.View style={[styles.divider, { backgroundColor: aColors.dividerColor }]} />
+              )}
+              <NotificationToggle
+                category={cat.key}
+                label={cat.label}
+                sub={cat.description}
+                icon={cat.icon}
+                enabled={preferences[cat.key]}
+                onToggle={handleToggleNotification}
+                aColors={aColors}
+              />
+            </View>
+          ))}
         </Animated.View>
 
         {/* LOGOUT */}
