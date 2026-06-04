@@ -60,13 +60,13 @@ import React from "react";
 import { IconFlame, IconTarget, IconRanking, IconMedal, IconTrend, IconMailCheck, IconCelebrate } from "../components/icons";
 
 export const NOTIFICATION_CATEGORIES_META: NotificationCategoryMeta[] = [
-  { key: "streak",        label: "Streak",         description: "Lembretes para manter seu streak diário",      icon: <IconFlame outer="#22c55e" innerStart="#16a34a" innerEnd="#15803d" size={20} /> },
-  { key: "missions",      label: "Missões",        description: "Missão diária e progresso de missões",         icon: <IconTarget color="#22c55e" size={20} /> },
-  { key: "ranking",       label: "Ranking",        description: "Mudanças na sua posição no ranking",           icon: <IconRanking color="#22c55e" size={20} /> },
+  { key: "streak",        label: "Streak",         description: "Lembretes para manter seu streak diário",      icon: <IconFlame outer="#f97316" innerStart="#fb923c" innerEnd="#ea580c" size={20} /> },
+  { key: "missions",      label: "Missões",        description: "Missão diária e progresso de missões",         icon: <IconTarget color="#eab308" size={20} /> },
+  { key: "ranking",       label: "Ranking",        description: "Mudanças na sua posição no ranking",           icon: <IconRanking color="#3b82f6" size={20} /> },
   { key: "achievements",  label: "Conquistas",     description: "Novas conquistas desbloqueadas",               icon: <IconMedal type="gold" size={20} /> },
-  { key: "weekly",        label: "Resumo semanal", description: "Resumo da sua semana toda segunda-feira",      icon: <IconTrend color="#22c55e" size={20} /> },
-  { key: "reengagement",  label: "Lembretes",      description: "Avisos quando faz tempo que você não aparece", icon: <IconMailCheck color="#22c55e" size={20} /> },
-  { key: "milestones",    label: "Marcos",         description: "Marcos de pontuação alcançados",               icon: <IconCelebrate color="#22c55e" size={20} /> },
+  { key: "weekly",        label: "Resumo semanal", description: "Resumo da sua semana toda segunda-feira",      icon: <IconTrend color="#8b5cf6" size={20} /> },
+  { key: "reengagement",  label: "Lembretes",      description: "Avisos quando faz tempo que você não aparece", icon: <IconMailCheck color="#64748b" size={20} /> },
+  { key: "milestones",    label: "Marcos",         description: "Marcos de pontuação alcançados",               icon: <IconCelebrate color="#ec4899" size={20} /> },
 ];
 
 /** Content template for a notification */
