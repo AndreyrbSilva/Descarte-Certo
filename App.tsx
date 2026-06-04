@@ -13,6 +13,7 @@ import {
   setForegroundHandler,
 } from "./src/services/notificationService";
 import { useNotificationStore } from "./src/store/useNotificationStore";
+import { useProfileThemeStore } from "./src/store/useProfileThemeStore";
 
 // Configure foreground notification display (must be called outside component)
 setForegroundHandler();
@@ -23,6 +24,7 @@ export default function App() {
   useEffect(() => {
     // Hydrate notification preferences from SecureStore
     useNotificationStore.getState().hydrate();
+    useProfileThemeStore.getState().hydrate();
 
     // Set up Android notification channel
     setupNotificationChannel();

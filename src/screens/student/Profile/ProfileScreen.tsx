@@ -13,13 +13,16 @@ import {
   IconTrophy, IconTrend, IconRecycle, IconLogout, IconCamera,
   IconStar, IconCrown, IconMedal, IconFlame, IconTarget,
   IconShield, IconDiamond, IconRainbow, IconLightning, IconShieldCheck, IconCheck,
+  IconPalette,
 } from "../../../components/icons";
 import { getTypeColor } from "../../../theme/useTrophyColors";
 import { AnimatedHeroHeader } from "../../../components/layout/AnimatedHeroHeader";
+import { useProfileThemeStore, PROFILE_COLOR_OPTIONS } from "../../../store/useProfileThemeStore";
+import { ProfileColorModal } from "./components/ProfileColorModal";
 
 import { useProfileData, FILTERS, formatDate } from "./hooks/useProfileData";
 
-const GREEN = "#22c55e";
+const DEFAULT_GREEN = "#22c55e";
 const ORANGE = "#f97316";
 const BLUE = "#3b82f6";
 
@@ -30,7 +33,7 @@ const CATEGORY_LABEL: Record<string, string> = {
 
 const CATEGORY_COLOR: Record<string, string> = {
   plastico: "#ef4444", papel: "#3b82f6",
-  metal: "#eab308", organico: "#92400e", vidro: GREEN,
+  metal: "#eab308", organico: "#92400e", vidro: DEFAULT_GREEN,
 };
 
 export function ProfileTrophyIcon({ icon, color, size }: { icon: string; color: string; size: number }) {
@@ -103,19 +106,34 @@ export function ProfileScreen() {
   const data = useProfileData();
   const borderColor = colors.dividerColor;
 
+  const { activeColor } = useProfileThemeStore();
+  const themeGradient = PROFILE_COLOR_OPTIONS.find(o => o.value === activeColor)?.colors || ["#16a34a", "#22c55e", "#4ade80"];
+  const [showColorModal, setShowColorModal] = React.useState(false);
+
   const chipAnims = useChipAnims(data.timeFilter, colors.chipBg, colors.dividerColor);
   const listAnim = useListAnim(data.timeFilter);
 
   return (
     <View style={[styles.root, { backgroundColor: colors.bg }]}>
-      <FocusAwareStatusBar barStyle="light-content" backgroundColor={GREEN} />
+      <FocusAwareStatusBar barStyle="light-content" backgroundColor={activeColor} />
 
       <ScrollView
         contentContainerStyle={[styles.scroll, { paddingBottom: 120 }]}
         showsVerticalScrollIndicator={false}
       >
 
-        <AnimatedHeroHeader style={[styles.header, { opacity: data.headerAnim }]}>
+        <AnimatedHeroHeader 
+          style={[styles.header, { opacity: data.headerAnim }]}
+          baseColor={activeColor}
+          colors={themeGradient}
+        >
+          <TouchableOpacity 
+            style={{ position: 'absolute', top: 20, right: 20, zIndex: 10 }} 
+            onPress={() => setShowColorModal(true)}
+            activeOpacity={0.7}
+          >
+            <IconPalette color="#ffffff" size={24} />
+          </TouchableOpacity>
           <TouchableOpacity onPress={data.handlePickPhoto} activeOpacity={0.85} disabled={data.uploadingPhoto} style={{ alignSelf: 'center' }}>
               <View
                 style={{
@@ -136,7 +154,7 @@ export function ProfileScreen() {
                   )}
                 </View>
               </View>
-              <View style={styles.cameraIcon}>
+              <View style={[styles.cameraIcon, { backgroundColor: activeColor }]}>
                 <IconCamera color="#fff" size={14} />
               </View>
             </TouchableOpacity>
@@ -245,8 +263,8 @@ export function ProfileScreen() {
             onPress={() => navigation.navigate("Trophies")}
             activeOpacity={0.7}
           >
-            <Text style={{ color: GREEN, fontSize: 13, fontWeight: "700" }}>Ver todos </Text>
-            <Text style={{ color: GREEN, fontSize: 12 }}>›</Text>
+            <Text style={{ color: activeColor, fontSize: 13, fontWeight: "700" }}>Ver todos </Text>
+            <Text style={{ color: activeColor, fontSize: 12 }}>›</Text>
           </TouchableOpacity>
         </Animated.View>
 
@@ -260,8 +278,8 @@ export function ProfileScreen() {
           <View style={styles.filterRow}>
             {FILTERS.map((f) => {
               const anim = chipAnims[f.key];
-              const bgColor = anim.interpolate({ inputRange: [0, 1], outputRange: [colors.chipBg, GREEN] });
-              const bColor = anim.interpolate({ inputRange: [0, 1], outputRange: [colors.dividerColor, GREEN] });
+              const bgColor = anim.interpolate({ inputRange: [0, 1], outputRange: [colors.chipBg, activeColor] });
+              const bColor = anim.interpolate({ inputRange: [0, 1], outputRange: [colors.dividerColor, activeColor] });
               const textColor = anim.interpolate({ inputRange: [0, 1], outputRange: [colors.subTextColor, "#ffffff"] });
 
               return (
@@ -303,7 +321,7 @@ export function ProfileScreen() {
                         {formatDate(scan.createdAt)}
                       </Text>
                     </View>
-                    <Text style={[styles.scanPoints, { color: GREEN }]}>+{scan.points}</Text>
+                    <Text style={[styles.scanPoints, { color: activeColor }]}>+{scan.points}</Text>
                   </View>
                   {i < data.visibleScans.length - 1 && (
                     <View style={[styles.divider, { backgroundColor: colors.dividerColor }]} />
@@ -313,7 +331,7 @@ export function ProfileScreen() {
 
               {data.hasMore && (
                 <TouchableOpacity onPress={data.handleExpand} activeOpacity={0.7} style={styles.expandBtn}>
-                  <Animated.Text style={[styles.expandBtnText, { color: GREEN, opacity: data.expandAnim }]}>
+                  <Animated.Text style={[styles.expandBtnText, { color: activeColor, opacity: data.expandAnim }]}>
                     {data.expanded ? "Mostrar menos" : `Mostrar tudo (${data.filteredScans.length})`}
                   </Animated.Text>
                 </TouchableOpacity>
@@ -351,6 +369,8 @@ export function ProfileScreen() {
           </View>
         </View>
       </Modal>
+
+      <ProfileColorModal visible={showColorModal} onClose={() => setShowColorModal(false)} />
     </View>
   );
 }
